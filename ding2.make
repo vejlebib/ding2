@@ -420,11 +420,6 @@ projects[panelizer][version] = "3.1"
 projects[entityqueue][subdir] = "contrib"
 projects[entityqueue][version] = "1.1"
 
-projects[vejlebib_features_overrides][type] = "module"
-projects[vejlebib_features_overrides][download][type] = "git"
-projects[vejlebib_features_overrides][download][url] = "git@github.com:vejlebib/vejlebib_features_overrides.git"
-projects[vejlebib_features_overrides][download][branch] = "master"
-
 projects[vejlebib_mobilepay][type] = "module"
 projects[vejlebib_mobilepay][download][type] = "git"
 projects[vejlebib_mobilepay][download][url] = "git@github.com:vejlebib/vejlebib_mobilepay.git"
