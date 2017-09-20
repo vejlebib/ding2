@@ -14,5 +14,4 @@ projects[drupal][patch][] = "https://www.drupal.org/files/issues/programatically
 projects[ding2][type] = "profile"
 projects[ding2][download][type] = "git"
 projects[ding2][download][url] = "https://github.com/vejlebib/ding2.git"
-projects[ding2][download][branch] = "vejlebib"
-
+projects[ding2][download][tag] = "7.x-5.0.0-vejlebib"
