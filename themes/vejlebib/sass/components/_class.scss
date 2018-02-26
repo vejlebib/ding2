@@ -122,8 +122,22 @@ a.topbar-link-user {
   background-color: $color-secondary;
 }
 
+@mixin slick-arrow-color {
+  .slick-arrow  {
+    &.slick-prev,
+    &.slick-next {
+      &::after {
+        background-color: $color-secondary;
+      }
+      &.slick-disabled:hover::after {
+        background-color: $grey-dark;
+      }
+    }
+  }
+}
+
 // Ding carousel.
-.ding-carousel .slick-slider {
+.ding-carousel  .slick-slider {
   // The max-height restraint causes arrow buttons to flow over the info text
   // in the bottom on serendipity carousels.
   max-height: none;
@@ -134,17 +148,15 @@ a.topbar-link-user {
     padding-bottom: 70px;
   }
 
-  .slick-arrow {
-    &.slick-prev,
-    &.slick-next, {
-      &::after {
-        background-color: $color-secondary;
-      }
-      &.slick-disabled:hover::after {
-        background-color: $grey-dark;
-      }
-    }
-  }
+  // Style slick arrows inside ding-carousel.
+  @include slick-arrow-color;
+}
+
+.slick-slider {
+  // Style slick arrows outside ding-carousel. We need this general rule and
+  // the more specific under ding-carousel, to completely override the base
+  // theme.
+  @include slick-arrow-color;
 }
 
 .carousel-tabs .carousel-list-tabs .carousel-item a::after {
