@@ -2,6 +2,10 @@
  * Styling of Ding eresource.
  */
 
-.node-ding-eresource.node-teaser .buttons a {
+.node-ding-eresource.node .buttons  a {
+  background-color: $color-secondary;
+}
+
+.node-ding-eresource.node .inner .buttons a {
   background-color: $color-secondary;
 }
