@@ -1,0 +1,4 @@
+name = Ding statistics
+description = Statistics for ding2
+package = Ding!
+core = 7.x

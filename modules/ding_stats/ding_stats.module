@@ -1,0 +1,138 @@
+<?php
+
+/**
+ * @file
+ * Ding stats module file.
+ */
+
+function ding_stats_callback() {
+  drupal_add_http_header('Cache-Control', 'no-cache, no-store, must-revalidate');
+  drupal_add_http_header('Pragma', 'no-cache');
+  drupal_add_http_header('Expires', '0');
+
+  $return = new stdClass();
+
+  // Events are collected in sessions controlled by an id set in cookie. The
+  // id is re-generated here on the server when expired and set in the client
+  // with the expire setting passed from the html preprocess (possibly now
+  // cached in varnish).
+  $return->dingStatsId = FALSE;
+  // Tell the client if it should set a new cookie.
+  if (empty($_COOKIE['dingStatsId'])) {
+    $sid = $return->dingStatsId = drupal_random_key();
+  }
+  else {
+    $sid = $return->dingStatsId = $_COOKIE['dingStatsId'];
+  }
+
+  $data = $_POST['data'];
+  $event_type = $data['event_type'];
+  // Event type is not a field in the db so remove it now.
+  unset($data['event_type']);
+
+  if ($event_type == 'search') {
+    $data['search_key'] = trim(drupal_strtolower($data['search_key']));
+    // Find any existing identical event. E.g. the same search key in the same
+    // session.
+    $query = db_select('ding_stats_event', 'base')
+      ->fields('base')
+      ->condition('base.sid', $sid);
+    $query->join('ding_stats_search_event', 'search', 'base.id = search.id');
+    $query->fields('search')->condition('search.search_key', $data['search_key']);
+    $existing = $query->execute()->fetchAssoc();
+
+    if ($existing) {
+      // First update event count on base table. Then update the search event
+      // specific values if any of them has changed.
+      try {
+        db_update('ding_stats_event')
+          ->expression('count', 'count + 1')
+          ->condition('id', $existing['id'])
+          ->execute();
+
+        // Special handling for paging_max.
+        if ($data['paging'] > $existing['paging_max']) {
+          $data['paging_max'] = $data['paging'];
+        }
+        unset($data['paging']);
+
+        $updated = array_filter($data, function($value, $key) use ($existing) {
+          return $existing[$key] !== $value;
+        }, ARRAY_FILTER_USE_BOTH);
+
+        if (!empty($updated)) {
+          db_update('ding_stats_search_event')
+            ->fields($updated)
+            ->condition('id', $existing['id'])
+            ->execute();
+        }
+      }
+      catch (Exception $e) { /* Fail silently. */ }
+    }
+    else {
+      $transaction = db_transaction();
+
+      try {
+        $id = db_insert('ding_stats_event')
+          ->fields([
+            'sid' => $sid,
+            'timestamp' => REQUEST_TIME,
+            'count' => 1,
+          ])
+          ->execute();
+
+        $data['paging_max'] = $data['paging'];
+        unset($data['paging']);
+        $data['id'] = $id;
+        $data['search_type'] = 0;
+
+        db_insert('ding_stats_search_event')
+          ->fields($data)
+          ->execute();
+      }
+      catch (Exception $e) {
+        $transaction->rollback();
+      }
+    }
+  }
+
+  drupal_json_output($return);
+}
+
+/**
+ * Implements hook_preprocess_html().
+ */
+function ding_stats_preprocess_html() {
+  // Loading our JS on every page and returning early on client for event type
+  // 'none' should provide best performance.
+  libraries_load('js.cookie');
+  drupal_add_js(drupal_get_path('module', 'ding_stats') . '/js/ding_stats.js', array(
+    'scope' => 'footer'
+  ));
+
+  $settings['event_type'] = 'none';
+
+  // This should be the most clean and reliable way to determine if we're on a
+  // search page and at the same time get the needed data.
+  if (strpos(current_path(), 'search/ting') === 0) {
+    if ($search_result = ting_search_current_results()) {
+      $settings['event_type'] = 'search';
+
+      // Get the search key. Important to use the fullTextQuery method to get
+      // the actual string entered by the user in the UI.
+      // @See \Ting\Search\TingSearchRequest.
+      $settings['search_key'] = $search_result->getSearchRequest()->getFullTextQuery();
+
+      // Set options supported by search event type.
+      // Note: convert to int to avoid the values getting converted to 'true' or
+      // 'false' in JSON. We also need int values when saving to db.
+      $settings['facet_used'] = (int) !empty($_GET['facets']);
+      $settings['profile_used'] = (int) !empty($_GET['profile']);
+      $settings['sort_changed'] = (int) !empty($_GET['sort']);
+      $settings['size_changed'] = (int) !empty($_GET['size']);
+      $settings['paging'] = (int) !empty($_GET['page']) ? $_GET['page'] : 0;
+    }
+  }
+
+  drupal_add_js(['dingStats' => $settings], 'setting');
+}
