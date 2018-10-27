@@ -1,0 +1,120 @@
+<?php
+
+/**
+ * @file
+ * Ding stats install file.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function ding_stats_schema() {
+  $schema['ding_stats_event'] = [
+    'description' => 'Base event table: Stores general information about events.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique event ID.',
+      ],
+      'sid' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Unique browser session ID associated with the event.',
+      ],
+      'timestamp' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Timestamp of the event.',
+      ],
+      'count' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 1,
+        'description' => 'Count of the event in the session.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'timestamp' => ['timestamp'],
+      'sid' => ['sid']
+    ],
+  ];
+
+  $schema['ding_stats_search_event'] = [
+    'description' => 'Stores specific information about search events.',
+    'fields' => [
+      'id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique event ID referencing base event.',
+      ],
+      'search_key' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The key/search string of the event.',
+      ],
+      'search_type' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The type of the search as determined by the system.'
+      ],
+      'facet_used' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'size' => 'tiny',
+        'default' => 0,
+      ],
+      'profile_used' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'size' => 'tiny',
+        'default' => 0,
+      ],
+      'sort_changed' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'size' => 'tiny',
+        'default' => 0,
+      ],
+      'size_changed' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'size' => 'tiny',
+        'default' => 0,
+      ],
+      'paging_max' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+    ],
+    'primary key' => ['id'],
+    'foreign keys' => [
+      'base' => [
+        'table' => 'ding_stats_event',
+        'columns' => ['id' => 'id'],
+      ]
+    ],
+    'indexes' => [
+      'search_key' => ['search_key'],
+      'search_type' => ['search_type']
+    ]
+  ];
+
+  return $schema;
+}
