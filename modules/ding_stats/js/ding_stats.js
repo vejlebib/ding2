@@ -4,13 +4,8 @@
 
 (function($) {
 
+  // Post event data to the backend.
   var settings = Drupal.settings.dingStats;
-
-  // Return early if the backend didn't find any event.
-  if (settings['event_type'] === 'none') {
-    return;
-  }
-
   var data = { data: settings };
   $.post(Drupal.settings.basePath + 'ding_stats.php', data, function(result) {
     console.log(result);
