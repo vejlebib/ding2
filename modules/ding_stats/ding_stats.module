@@ -50,11 +50,16 @@ function ding_stats_callback() {
           ->condition('id', $existing['id'])
           ->execute();
 
-        // Special handling for paging_max.
-        if ($data['paging'] > $existing['paging_max']) {
-          $data['paging_max'] = $data['paging'];
+        // Special handling for page and size_max.
+        if ($data['search_page'] > $existing['page_max']) {
+          $data['page_max'] = $data['search_page'];
         }
-        unset($data['paging']);
+        unset($data['search_page']);
+        if ($data['search_size'] > $existing['size_max']) {
+          $data['size_max'] = $data['search_size'];
+        }
+        unset($data['search_size']);
+
 
         $updated = array_filter($data, function($value, $key) use ($existing) {
           return $existing[$key] !== $value;
@@ -81,8 +86,11 @@ function ding_stats_callback() {
           ])
           ->execute();
 
-        $data['paging_max'] = $data['paging'];
-        unset($data['paging']);
+        $data['page_max'] = $data['search_page'];
+        unset($data['search_page']);
+        $data['size_max'] = $data['search_size'];
+        unset($data['search_size']);
+
         $data['id'] = $id;
         $data['search_type'] = 0;
 
@@ -95,44 +103,202 @@ function ding_stats_callback() {
       }
     }
   }
+  elseif ($event_type == 'ct') {
+    $search_key = trim(drupal_strtolower($data['search_key']));
+    unset($data['search_key']);
+    // We're only interested in click-through events associasted with a search
+    // events in the same session, so look for one  If not in the same session
+    // it could be a bookmark or a later refresh/revisit and these are not of
+    // any interest in the goal of this module.
+    $query = db_select('ding_stats_event', 'base')
+      ->fields('base')
+      ->condition('base.sid', $sid);
+    $query->join('ding_stats_search_event', 'search', 'base.id = search.id');
+    $query->fields('search')->condition('search.search_key', $search_key);
+    $existing_search = $query->execute()->fetchAssoc();
+
+
+    if ($existing_search) {
+      $search_id = $existing_search['id'];
+
+      // Consider a click-through event unique if it's the same datawell pid,
+      // associated with the same search event and in the same session. (this
+      // might just be a refresh). So we only update the count of the event and
+      // selected fields if they're updated.
+      $query = db_select('ding_stats_event', 'base')
+        ->fields('base')
+        ->condition('base.sid', $sid);
+      $query->join('ding_stats_ct_event', 'ct', 'base.id = ct.id');
+      $query->fields('ct')
+        ->condition('ct.search_id', $search_id)
+        ->condition('ct.pid', $data['pid']);
+      $existing_ct = $query->execute()->fetchAssoc();
+
+      if ($existing_ct) {
+        // First update event count on base table. Then update the event type
+        // specific values if any of them has changed.
+        try {
+          db_update('ding_stats_event')
+            ->expression('count', 'count + 1')
+            ->condition('id', $existing_ct['id'])
+            ->execute();
+
+          // Record the best rank the click-through event has achieved. It might
+          // change throughout the session if the users changes sort and clicks
+          // on the same material in another position. As an alterative the rank
+          // of the click-through could be considered when findin existing, but
+          // it's of little interest. so just keep it simple and record the best
+          // rank.
+          if ($data['rank'] >= $existing['rank']) {
+            $existing['rank'] = $data['rank'];
+          }
+
+          $updated = array_filter($data, function($value, $key) use ($existing_ct) {
+            return $existing_ct[$key] !== $value;
+          }, ARRAY_FILTER_USE_BOTH);
+
+          if (!empty($updated)) {
+            db_update('ding_stats_ct_event')
+              ->fields($updated)
+              ->condition('id', $existing_ct['id'])
+              ->execute();
+          }
+        }
+        catch (Exception $e) { /* Fail silently. */ }
+      }
+      else {
+        $transaction = db_transaction();
+
+        try {
+          $id = db_insert('ding_stats_event')
+            ->fields([
+              'sid' => $sid,
+              'timestamp' => REQUEST_TIME,
+              'count' => 1,
+            ])
+            ->execute();
+
+          $data['id'] = $id;
+          $data['search_id'] = $search_id;
+
+          db_insert('ding_stats_ct_event')
+            ->fields($data)
+            ->execute();
+        }
+        catch (Exception $e) {
+          $transaction->rollback();
+        }
+      }
+    }
+  }
 
   drupal_json_output($return);
+}
+
+/**
+ * Implements hook_init().
+ *
+ * Set up the event_type for later use in request.
+ */
+function ding_stats_init() {
+  $current_path = current_path();
+  $event_type = NULL;
+
+  if (strpos($current_path, 'search/ting') === 0) {
+    $event_type = 'search';
+  }
+  elseif (strpos($current_path, 'ting/object') === 0 || strpos($current_path, 'ting/collection') === 0) {
+    if (count(explode('/', $current_path)) == 3) {
+      $event_type = 'ct'; // click-through.
+    }
+  }
+
+  ding_stats_event_type($event_type);
+}
+
+/**
+ * Set or get the current event type for the request.
+ */
+function ding_stats_event_type($event_type = NULL) {
+  $event_type_static = &drupal_static('ding_stats_event_type');
+  if ($event_type !== NULL) {
+    $event_type_static = $event_type;
+  }
+  return $event_type_static;
 }
 
 /**
  * Implements hook_preprocess_html().
  */
 function ding_stats_preprocess_html() {
-  $event_type = FALSE;
-  $current_path = current_path();
+  if (!$event_type = ding_stats_event_type()) {
+    return;
+  }
+
+  $event_data = [];
 
   // Search event.
-  if (strpos($current_path, 'search/ting') === 0) {
+  if ($event_type == 'search') {
     if ($search_result = ting_search_current_results()) {
-      $event_type = 'search';
-
       // Get the search key. Important to use the fullTextQuery method to get
       // the actual string entered by the user in the UI.
       // @See \Ting\Search\TingSearchRequest.
-      $settings['search_key'] = $search_result->getSearchRequest()->getFullTextQuery();
+      $event_data['search_key'] = $search_result
+        ->getSearchRequest()
+        ->getFullTextQuery();
 
       // Set options supported by search event type.
       // Note: convert to int to avoid the values getting converted to 'true' or
       // 'false' in JSON. We also need int values when saving to db.
-      $settings['facet_used'] = (int) !empty($_GET['facets']);
-      $settings['profile_used'] = (int) !empty($_GET['profile']);
-      $settings['sort_changed'] = (int) !empty($_GET['sort']);
-      $settings['size_changed'] = (int) !empty($_GET['size']);
-      $settings['paging'] = (int) !empty($_GET['page']) ? $_GET['page'] : 0;
+      $event_data['facet_used'] = (int) !empty($_GET['facets']);
+      $event_data['profile_used'] = (int) !empty($_GET['profile']);
+      $event_data['sort_changed'] = (int) !empty($_GET['sort']);
+      $event_data['size_changed'] = (int) !empty($_GET['size']);
+      $event_data['search_size'] = $search_result->getNumCollections();
+      $event_data['search_page'] = (int) !empty($_GET['page']) ? $_GET['page'] : 0;
     }
   }
+  elseif ($event_type == 'ct') {
+    // Need to know whether we're dealing with an object or collection to get
+    // to the opensearch object abstraction.
+    $object = NULL;
+    $entity = menu_get_item()['map'][2];
+    if ($entity instanceof TingCollection) {
+      $object = $entity->getTingObjectCollection()->getPrimaryObject();
+    }
+    elseif ($entity instanceof TingEntity) {
+      $object = $entity->getTingObject();
+    }
 
-  if ($event_type) {
-    libraries_load('js.cookie');
-    drupal_add_js(drupal_get_path('module', 'ding_stats') . '/js/ding_stats.js', array(
-      'scope' => 'footer'
-    ));
-    $settings['event_type'] = $event_type;
-    drupal_add_js(['dingStats' => $settings], 'setting');
+    $event_data['pid'] = $object->getId();
+    $event_data['material_type'] = $object->getType();
+    $event_data['search_key'] = isset($_GET['search_key']) ? $_GET['search_key'] : '';
+    $event_data['rank'] = isset($_GET['rank']) ? (int) $_GET['rank'] : 0;
+  }
+
+  libraries_load('js.cookie');
+  drupal_add_js(drupal_get_path('module', 'ding_stats') . '/js/ding_stats.js', array(
+    'scope' => 'footer'
+  ));
+  $event_data['event_type'] = $event_type;
+  drupal_add_js(['dingStats' => ['eventData' => $event_data]], 'setting');
+}
+
+/**
+ * Implements hook_drupal_goto_alter()
+ */
+function ding_stats_drupal_goto_alter(&$path, &$options, &$http_response_code) {
+  if (!$event_type = ding_stats_event_type()) {
+    return;
+  }
+
+  // When viewing collections ting module will do a redirect of it contains only
+  // one object. We need to ensure our parameters are transfered in this case.
+  if ($event_type == 'ct') {
+    foreach (['search_key', 'page', 'rank'] as $parameter) {
+      if (isset($_GET[$parameter])) {
+        $options['query'][$parameter] = $_GET[$parameter];
+      }
+    }
   }
 }
