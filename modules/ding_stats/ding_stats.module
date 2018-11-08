@@ -371,14 +371,13 @@ function ding_stats_preprocess_html() {
   // external proxy and posted back to the server on page loads.
   $event_data = [];
 
-  if ($event_type == 'search') { // Search event.
-    if ($search_result = ting_search_current_results()) {
+  // Search event.
+  if ($event_type == 'search') {
+    if ($search_result = drupal_static('ting_search_results', FALSE)) {
       // Get the search key. Important to use the fullTextQuery method to get
       // the actual string entered by the user in the UI.
       // @See \Ting\Search\TingSearchRequest.
-      $event_data['search_key'] = $search_result
-        ->getSearchRequest()
-        ->getFullTextQuery();
+      $event_data['search_key'] = $search_result->search_key;
 
       // Set options supported by search event type.
       // Note: convert to int to avoid the values getting converted to 'true' or
@@ -387,7 +386,7 @@ function ding_stats_preprocess_html() {
       $event_data['profile_used'] = (int) !empty($_GET['profile']);
       $event_data['sort_changed'] = (int) !empty($_GET['sort']);
       $event_data['size_changed'] = (int) !empty($_GET['size']);
-      $event_data['search_size'] = $search_result->getNumCollections();
+      $event_data['search_size'] = $search_result->numTotalCollections;
       $event_data['search_page'] = (int) !empty($_GET['page']) ? $_GET['page'] : 0;
     }
   }
@@ -397,7 +396,7 @@ function ding_stats_preprocess_html() {
     $object = NULL;
     $entity = menu_get_item()['map'][2];
     if ($entity instanceof TingCollection) {
-      $object = $entity->getTingObjectCollection()->getPrimaryObject();
+       $object = $entity->getPrimary_object();
       // Instead of using the type of the primary object, flag that this is a
       // collection. This serves two purposes: 1. It's valuable information 2.
       // we use it to signal to the client that it needs to apply linking query
@@ -405,7 +404,7 @@ function ding_stats_preprocess_html() {
       $event_data['material_type'] = 'collection';
     }
     elseif ($entity instanceof TingEntity) {
-      $object = $entity->getTingObject();
+      $object = $entity;
       $event_data['material_type'] = $object->getType();
     }
 
@@ -424,6 +423,10 @@ function ding_stats_preprocess_html() {
   // Pass non-eventdata settings to the client.
   $settings = ['sessionKeepAlive' => variable_get('ding_stats_session_keep_alive', 3600)];
   drupal_add_js(['dingStats' => ['settings' => $settings]], 'setting');
+
+  // Need to load this in vejlebib because some code tries to load slick on
+  // every page preventing the last part of our script from running.
+  libraries_load('slick');
 }
 
 /**
