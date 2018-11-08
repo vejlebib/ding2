@@ -5,6 +5,13 @@
  * Ding stats module file.
  */
 
+/**
+ * Implements hook_views_api().
+ */
+function ding_stats_views_api($module = NULL, $api = NULL) {
+  return array("api" => "3.0");
+}
+
 function ding_stats_callback() {
   drupal_add_http_header('Cache-Control', 'no-cache, no-store, must-revalidate');
   drupal_add_http_header('Pragma', 'no-cache');
