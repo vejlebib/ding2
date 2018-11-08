@@ -62,12 +62,6 @@ function ding_stats_schema() {
         'default' => '',
         'description' => 'The key/search string of the event.',
       ],
-      'search_type' => [
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'description' => 'The type of the search as determined by the system.'
-      ],
       'facet_used' => [
         'type' => 'int',
         'unsigned' => TRUE,
@@ -118,8 +112,7 @@ function ding_stats_schema() {
     ],
     'indexes' => [
       'search_key' => ['search_key'],
-      'search_type' => ['search_type']
-    ]
+    ],
   ];
 
   $schema['ding_stats_ct_event'] = [
@@ -135,7 +128,6 @@ function ding_stats_schema() {
         'type' => 'varchar',
         'length' => 128,
         'not null' => TRUE,
-        'default' => '',
         'description' => 'Data well ID for the material associated with the click-through event.',
       ],
       'rank' => [
@@ -173,7 +165,56 @@ function ding_stats_schema() {
     'indexes' => [
       'pid' => ['pid'],
       'search_id' => ['search_id'],
-    ]
+    ],
+  ];
+
+  $schema['ding_stats_cta_event'] = [
+    'description' => 'Stores specific information about click-through action events.',
+    'fields' => [
+      'id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique event ID referencing base event.',
+      ],
+      'action_type' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'description' => 'The type of action. E.g. a reservation or bookmark.'
+      ],
+      'ct_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'ID referencing associated click-through event.',
+      ],
+      'search_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'ID referencing associated search event of the click-through action.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'foreign keys' => [
+      'base' => [
+        'table' => 'ding_stats_event',
+        'columns' => ['id' => 'id'],
+      ],
+      'ct' => [
+        'table' => 'ding_stats_ct_event',
+        'columns' => ['id' => 'ct_id'],
+      ],
+      'search' => [
+        'table' => 'ding_stats_search_event',
+        'columns' => ['id' => 'search_id'],
+      ],
+    ],
+    'indexes' => [
+      'ct_id' => ['ct_id'],
+      'search_id' => ['search_id'],
+    ],
   ];
 
   return $schema;
