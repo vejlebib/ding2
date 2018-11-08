@@ -32,167 +32,199 @@ function ding_stats_callback() {
 
   if ($event_type == 'search') {
     $data['search_key'] = trim(drupal_strtolower($data['search_key']));
-    // Find any existing identical event. E.g. the same search key in the same
-    // session.
-    $query = db_select('ding_stats_event', 'base')
-      ->fields('base')
-      ->condition('base.sid', $sid);
-    $query->join('ding_stats_search_event', 'search', 'base.id = search.id');
-    $query->fields('search')->condition('search.search_key', $data['search_key']);
-    $existing = $query->execute()->fetchAssoc();
+    // Look for identical search event in session.
+    $existing = ding_stats_load_identical_session_event($sid, 'search', $data);
 
     if ($existing) {
-      // First update event count on base table. Then update the search event
-      // specific values if any of them has changed.
-      try {
-        db_update('ding_stats_event')
-          ->expression('count', 'count + 1')
-          ->condition('id', $existing['id'])
-          ->execute();
+      ding_stats_update_event_count($existing['id']);
 
-        // Special handling for page and size_max.
-        if ($data['search_page'] > $existing['page_max']) {
-          $data['page_max'] = $data['search_page'];
-        }
-        unset($data['search_page']);
-        if ($data['search_size'] > $existing['size_max']) {
-          $data['size_max'] = $data['search_size'];
-        }
-        unset($data['search_size']);
-
-
-        $updated = array_filter($data, function($value, $key) use ($existing) {
-          return $existing[$key] !== $value;
-        }, ARRAY_FILTER_USE_BOTH);
-
-        if (!empty($updated)) {
-          db_update('ding_stats_search_event')
-            ->fields($updated)
-            ->condition('id', $existing['id'])
-            ->execute();
-        }
+      // Special handling for page and size_max.
+      if ($data['search_page'] > $existing['page_max']) {
+        $data['page_max'] = $data['search_page'];
       }
-      catch (Exception $e) { /* Fail silently. */ }
+      unset($data['search_page']);
+      if ($data['search_size'] > $existing['size_max']) {
+        $data['size_max'] = $data['search_size'];
+      }
+      unset($data['search_size']);
+
+      ding_stats_update_event($existing, $data);
     }
     else {
-      $transaction = db_transaction();
+      // Prepare data array for insert event.
+      $data['page_max'] = $data['search_page'];
+      unset($data['search_page']);
+      $data['size_max'] = $data['search_size'];
+      unset($data['search_size']);
+      $data['search_type'] = 0;
 
-      try {
-        $id = db_insert('ding_stats_event')
-          ->fields([
-            'sid' => $sid,
-            'timestamp' => REQUEST_TIME,
-            'count' => 1,
-          ])
-          ->execute();
-
-        $data['page_max'] = $data['search_page'];
-        unset($data['search_page']);
-        $data['size_max'] = $data['search_size'];
-        unset($data['search_size']);
-
-        $data['id'] = $id;
-        $data['search_type'] = 0;
-
-        db_insert('ding_stats_search_event')
-          ->fields($data)
-          ->execute();
-      }
-      catch (Exception $e) {
-        $transaction->rollback();
-      }
+      ding_stats_insert_event($sid, $data, 'search');
     }
   }
   elseif ($event_type == 'ct') {
-    $search_key = trim(drupal_strtolower($data['search_key']));
-    unset($data['search_key']);
+    $data['search_key'] = trim(drupal_strtolower($data['search_key']));
     // We're only interested in click-through events associasted with a search
     // events in the same session, so look for one  If not in the same session
     // it could be a bookmark or a later refresh/revisit and these are not of
     // any interest in the goal of this module.
-    $query = db_select('ding_stats_event', 'base')
-      ->fields('base')
-      ->condition('base.sid', $sid);
-    $query->join('ding_stats_search_event', 'search', 'base.id = search.id');
-    $query->fields('search')->condition('search.search_key', $search_key);
-    $existing_search = $query->execute()->fetchAssoc();
+    $existing_search = ding_stats_load_identical_session_event($sid, 'search', $data);
 
+    unset($data['search_key']);
 
     if ($existing_search) {
-      $search_id = $existing_search['id'];
+      $data['search_id'] = $existing_search['id'];
 
-      // Consider a click-through event unique if it's the same datawell pid,
-      // associated with the same search event and in the same session. (this
-      // might just be a refresh). So we only update the count of the event and
-      // selected fields if they're updated.
-      $query = db_select('ding_stats_event', 'base')
-        ->fields('base')
-        ->condition('base.sid', $sid);
-      $query->join('ding_stats_ct_event', 'ct', 'base.id = ct.id');
-      $query->fields('ct')
-        ->condition('ct.search_id', $search_id)
-        ->condition('ct.pid', $data['pid']);
-      $existing_ct = $query->execute()->fetchAssoc();
+      // Look for identical click-through event.
+      $existing_ct = ding_stats_load_identical_session_event($sid, 'ct', $data);
 
       if ($existing_ct) {
-        // First update event count on base table. Then update the event type
-        // specific values if any of them has changed.
-        try {
-          db_update('ding_stats_event')
-            ->expression('count', 'count + 1')
-            ->condition('id', $existing_ct['id'])
-            ->execute();
+        ding_stats_update_event_count($existing_ct['id']);
 
-          // Record the best rank the click-through event has achieved. It might
-          // change throughout the session if the users changes sort and clicks
-          // on the same material in another position. As an alterative the rank
-          // of the click-through could be considered when findin existing, but
-          // it's of little interest. so just keep it simple and record the best
-          // rank.
-          if ($data['rank'] >= $existing['rank']) {
-            $existing['rank'] = $data['rank'];
-          }
-
-          $updated = array_filter($data, function($value, $key) use ($existing_ct) {
-            return $existing_ct[$key] !== $value;
-          }, ARRAY_FILTER_USE_BOTH);
-
-          if (!empty($updated)) {
-            db_update('ding_stats_ct_event')
-              ->fields($updated)
-              ->condition('id', $existing_ct['id'])
-              ->execute();
-          }
+        // Record the best rank the click-through event has achieved. It might
+        // change throughout the session if the users changes sort and clicks
+        // on the same material in another position. As an alterative the rank
+        // of the click-through could be considered when findin existing, but
+        // it's of little interest. so just keep it simple and record the best
+        // rank.
+        if ($data['rank'] >= $existing['rank']) {
+          $existing_ct['rank'] = $data['rank'];
         }
-        catch (Exception $e) { /* Fail silently. */ }
+
+        ding_stats_update_event($existing_ct, $data);
       }
       else {
-        $transaction = db_transaction();
-
-        try {
-          $id = db_insert('ding_stats_event')
-            ->fields([
-              'sid' => $sid,
-              'timestamp' => REQUEST_TIME,
-              'count' => 1,
-            ])
-            ->execute();
-
-          $data['id'] = $id;
-          $data['search_id'] = $search_id;
-
-          db_insert('ding_stats_ct_event')
-            ->fields($data)
-            ->execute();
-        }
-        catch (Exception $e) {
-          $transaction->rollback();
-        }
+        ding_stats_insert_event($sid, $data, 'ct');
       }
     }
   }
 
   drupal_json_output($return);
+}
+
+/**
+ * Search the database for identical event based on input data.
+ *
+ * This is a specialized function that knows how to uniquely identify the
+ * different event types based on session id and type specific event data.
+ *
+ * @param  string $sid
+ *   Session ID.
+ * @param  string $event_type
+ *   Event type.
+ * @param  array $data
+ *   Event type specific data used in the search.
+ *
+ * @return array|bool
+ *   Event array of FALSE if nothing was found.
+ */
+function ding_stats_load_identical_session_event($sid, $event_type, $data) {
+  $query = db_select('ding_stats_event', 'base')
+    ->fields('base')
+    ->condition('base.sid', $sid);
+
+  if ($event_type == 'search') {
+    $query->join('ding_stats_search_event', 'search', 'base.id = search.id');
+    $query->fields('search')->condition('search.search_key', $data['search_key']);
+  }
+  elseif ($event_type == 'ct') {
+    $query->join('ding_stats_ct_event', 'ct', 'base.id = ct.id');
+    $query->fields('ct')
+      ->condition('ct.search_id', $data['search_id'])
+      ->condition('ct.pid', $data['pid']);
+  }
+
+  return $query->execute()->fetchAssoc();
+}
+
+/**
+ * Update event count.
+ *
+ * @param int $event_id
+ *
+ * @return int
+ */
+function ding_stats_update_event_count($event_id) {
+  return db_update('ding_stats_event')
+    ->expression('count', 'count + 1')
+    ->condition('id', $event_id)
+    ->execute();
+}
+
+/**
+ * Updates existing event with input data.
+ *
+ * @param  array $existing
+ *   An array containing the current data of the event in the db. Must contain
+ *   the event id in the 'id' key.
+ * @param  array $data
+ *   An array containing
+ * @param  string $event_type
+ *   The type of event to update.
+ *
+ * @return bool
+ *   Whether the update was successful or not.
+ */
+function ding_stats_update_event($existing, $data, $event_type) {
+  $updated = array_filter($data, function($value, $key) use ($existing) {
+    return $existing[$key] !== $value;
+  }, ARRAY_FILTER_USE_BOTH);
+
+  if (!empty($updated)) {
+    if ($event_type == 'search') {
+      $query = db_update('ding_stats_search_event');
+    }
+    elseif ($event_type == 'ct') {
+      $query = db_update('ding_stats_ct_event');
+    }
+
+    return $query->fields($updated)
+      ->condition('id', $existing['id'])
+      ->execute();
+  }
+  // Return TRUE even though no update was performed there was no error and the
+  // event is up-to-date.
+  return TRUE;
+}
+
+/**
+ * Insert a new event into the database.
+ *
+ * @param  string $sid
+ *   Session ID for event.
+ * @param  array $data
+ *   Data for the event to insert.
+ * @param  string $event_type
+ *   Type of event to insert.
+ *
+ * @return bool
+ */
+function ding_stats_insert_event($sid, $data, $event_type) {
+  $transaction = db_transaction();
+
+  try {
+    $id = db_insert('ding_stats_event')
+      ->fields([
+        'sid' => $sid,
+        'timestamp' => REQUEST_TIME,
+        'count' => 1,
+      ])
+      ->execute();
+
+    $data['id'] = $id;
+
+    if ($event_type == 'search') {
+      $query = db_insert('ding_stats_search_event');
+    }
+    elseif ($event_type == 'ct') {
+      $query = db_insert('ding_stats_ct_event');
+    }
+
+    return $query->fields($data)->execute();
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    return FALSE;
+  }
 }
 
 /**
