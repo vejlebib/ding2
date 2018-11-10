@@ -49,7 +49,6 @@ function ding_stats_schema() {
     ],
     'primary key' => ['id'],
     'indexes' => [
-      'timestamp' => ['timestamp'],
       'sid' => ['sid']
     ],
   ];
@@ -250,6 +249,10 @@ function ding_stats_schema() {
         'not null' => TRUE,
         'description' => 'Timestamp of the event.',
       ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'timestamp' => ['timestamp'],
     ],
   ];
 

@@ -100,20 +100,6 @@ function ding_stats_views_data() {
       'handler' => 'views_handler_argument_string',
     ],
   ];
-  $data['ding_stats_event']['timestamp'] = [
-    'title' => t('Timestamp'),
-    'help' => t('The the event was recorded.'),
-    'field' => [
-      'handler' => 'views_handler_field_date',
-      'click sortable' => TRUE,
-    ],
-    'sort' => [
-      'handler' => 'views_handler_sort_date',
-    ],
-    'filter' => [
-      'handler' => 'views_handler_filter_date',
-    ],
-  ];
   $data['ding_stats_event']['count'] = [
     'title' => t('Event count'),
     'help' => t('The number of times the event has been recorded in the session.'),
@@ -126,6 +112,34 @@ function ding_stats_views_data() {
     ],
     'sort' => [
       'handler' => 'views_handler_sort',
+    ],
+  ];
+  $data['ding_stats_event']['event_start'] = [
+    'title' => t('Event start time'),
+    'help' => t('The time of the first request of the event.'),
+    'field' => [
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ],
+    'sort' => [
+      'handler' => 'views_handler_sort_date',
+    ],
+    'filter' => [
+      'handler' => 'views_handler_filter_date',
+    ],
+  ];
+  $data['ding_stats_event']['event_end'] = [
+    'title' => t('Event end time'),
+    'help' => t('The time of the last request of the event.'),
+    'field' => [
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ],
+    'sort' => [
+      'handler' => 'views_handler_sort_date',
+    ],
+    'filter' => [
+      'handler' => 'views_handler_filter_date',
     ],
   ];
 
