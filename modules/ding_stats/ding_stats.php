@@ -14,7 +14,7 @@ require_once DRUPAL_ROOT . '/includes/common.inc';
 require_once DRUPAL_ROOT . '/includes/module.inc';
 require_once DRUPAL_ROOT . '/includes/unicode.inc';
 
-drupal_bootstrap(DRUPAL_BOOTSTRAP_DATABASE);
+drupal_bootstrap(DRUPAL_BOOTSTRAP_VARIABLES);
 
 drupal_load('module', 'ding_stats');
 ding_stats_callback();

@@ -13,6 +13,21 @@ function ding_stats_views_api($module = NULL, $api = NULL) {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function ding_stats_menu() {
+  $items['admin/config/ding/ding-stats'] = [
+    'title' => 'Ding stats',
+    'description' => 'Settings for Ding stats.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['ding_stats_admin_settings_form'],
+    'access arguments' => ['administer site configuration'],
+    'file' => 'ding_stats.admin.inc',
+  ];
+  return $items;
+}
+
+/**
  * The js callback that records events posted from the client.
  *
  * TODO:
@@ -27,6 +42,19 @@ function ding_stats_callback() {
   drupal_add_http_header('Expires', '0');
 
   $return = new stdClass();
+  $data = $_POST['data'];
+  $event_type = $data['event_type'];
+
+  // Check if client's IP is excluded from recording.
+  if (in_array(ip_address(), variable_get('ding_stats_excluded_ips', []))) {
+    // Log the excluded event.
+    $record['event_type'] = $event_type;
+    $record['client_ip'] = ip_address();
+    $record['timestamp'] = REQUEST_TIME;
+    db_insert('ding_stats_excluded_log')
+      ->fields($record)
+      ->execute();
+  }
 
   // Events are collected in sessions controlled by an id set in cookie. The
   // id is re-generated here on the server when expired and set in the client
@@ -41,8 +69,6 @@ function ding_stats_callback() {
     $sid = $return->dingStatsId = $_COOKIE['dingStatsId'];
   }
 
-  $data = $_POST['data'];
-  $event_type = $data['event_type'];
   // Event type is not a field in the db so remove it now.
   unset($data['event_type']);
 
@@ -324,6 +350,10 @@ function ding_stats_preprocess_html() {
     return;
   }
 
+  // For events that are posted on page load the strategy is to setup as much
+  // event data as possible on the server (access to more informaton and will
+  // only have to done once). This event data is then, possibly, cached in an
+  // external proxy and posted back to the server on page loads.
   $event_data = [];
 
   if ($event_type == 'search') { // Search event.

@@ -9,6 +9,7 @@
  * Implements hook_schema().
  */
 function ding_stats_schema() {
+  // Base event table.
   $schema['ding_stats_event'] = [
     'description' => 'Base event table: Stores general information about events.',
     'fields' => [
@@ -24,19 +25,26 @@ function ding_stats_schema() {
         'default' => '',
         'description' => 'Unique browser session ID associated with the event.',
       ],
-      'timestamp' => [
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'Timestamp of the event.',
-      ],
       'count' => [
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 1,
         'description' => 'Count of the event in the session.',
+      ],
+      'event_start' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Timestamp of the first request of the event.',
+      ],
+      'event_end' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Timestamp of the last request of the event.',
       ],
     ],
     'primary key' => ['id'],
@@ -214,6 +222,34 @@ function ding_stats_schema() {
     'indexes' => [
       'ct_id' => ['ct_id'],
       'search_id' => ['search_id'],
+    ],
+  ];
+
+  $schema['ding_stats_excluded_log'] = [
+    'description' => 'A simple log of excluded events.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique ID for the log entry',
+      ],
+      'event_type' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'description' => 'The type event that was excluded.'
+      ],
+      'client_ip' => [
+        'type' => 'varchar',
+        'length' => 45,
+        'description' => 'Client IP that triggered event. NULL if the event was not excluded based on IP.',
+      ],
+      'timestamp' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Timestamp of the event.',
+      ],
     ],
   ];
 
