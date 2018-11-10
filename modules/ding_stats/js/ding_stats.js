@@ -6,10 +6,10 @@
 
   var postEventData = function(eventData) {
     $.post(Drupal.settings.basePath + 'ding_stats.php', { data: eventData }, function(result) {
-      console.log(result);
       // Update cookie if the server generated a new session id for us.
       if (result.dingStatsId) {
-        var expire =  new Date(new Date().getTime() + 15 * 60 * 1000);
+        lifetime = Drupal.settings.dingStats.settings.sessionKeepAlive;
+        var expire =  new Date(new Date().getTime() + lifetime * 1000);
         Cookies.set('dingStatsId', result.dingStatsId, {
           expires: expire
         });

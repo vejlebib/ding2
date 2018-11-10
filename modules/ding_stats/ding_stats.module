@@ -420,6 +420,10 @@ function ding_stats_preprocess_html() {
   ));
   $event_data['event_type'] = $event_type;
   drupal_add_js(['dingStats' => ['eventData' => $event_data]], 'setting');
+
+  // Pass non-eventdata settings to the client.
+  $settings = ['sessionKeepAlive' => variable_get('ding_stats_session_keep_alive', 3600)];
+  drupal_add_js(['dingStats' => ['settings' => $settings]], 'setting');
 }
 
 /**
