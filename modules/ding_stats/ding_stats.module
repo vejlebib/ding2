@@ -37,6 +37,9 @@ function ding_stats_menu() {
  *   more complex queries.
  * - Consider securing AJAX request: https://stackoverflow.com/a/23533573 and
  *   https://perishablepress.com/protect-post-requests.
+ * - Investigate why variable_get isn't working in current bootstrap level,
+ *   resulting in IP exclusion not working. May need to consider the option of
+ *   loading them manually from db.
  */
 function ding_stats_callback() {
   drupal_add_http_header('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -47,6 +50,9 @@ function ding_stats_callback() {
   $data = $_POST['data'];
   $event_type = $data['event_type'];
 
+  $return->ip_address = ip_address();
+  $return->excluded = variable_get('ding_stats_excluded_ips', []);
+
   // Check if client's IP is excluded from recording.
   if (in_array(ip_address(), variable_get('ding_stats_excluded_ips', []))) {
     // Log the excluded event.
@@ -56,6 +62,11 @@ function ding_stats_callback() {
     db_insert('ding_stats_excluded_log')
       ->fields($record)
       ->execute();
+
+    // Returns empty response to client and ends the request. The client will
+    // not set at new cookie then.
+    drupal_json_output($return);
+    return;
   }
 
   // Events are collected in sessions controlled by an id set in cookie. The
