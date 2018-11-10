@@ -35,6 +35,8 @@ function ding_stats_menu() {
  *   save at all in these cases).
  * - Some of the event loading could be handled with more effective, but also
  *   more complex queries.
+ * - Consider securing AJAX request: https://stackoverflow.com/a/23533573 and
+ *   https://perishablepress.com/protect-post-requests.
  */
 function ding_stats_callback() {
   drupal_add_http_header('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -87,7 +89,7 @@ function ding_stats_callback() {
     $existing = ding_stats_load_identical_session_event($sid, 'search', $data);
 
     if ($existing) {
-      ding_stats_update_event_count($existing['id']);
+      ding_stats_update_base_event($existing['id']);
 
       // Special handling for page and size_max.
       if ($data['search_page'] > $existing['page_max']) {
@@ -125,7 +127,7 @@ function ding_stats_callback() {
       $existing_ct = ding_stats_load_identical_session_event($sid, 'ct', $data);
 
       if ($existing_ct) {
-        ding_stats_update_event_count($existing_ct['id']);
+        ding_stats_update_base_event($existing_ct['id']);
 
         // Record the best rank the click-through event has achieved during the
         // session.
@@ -160,7 +162,7 @@ function ding_stats_callback() {
       $existing_cta = ding_stats_load_identical_session_event($sid, 'cta', $cta_data);
 
       if ($existing_cta) {
-        ding_stats_update_event_count($existing_cta['id']);
+        ding_stats_update_base_event($existing_cta['id']);
         ding_stats_update_event($existing_cta, $cta_data, 'cta');
       }
       else {
@@ -214,15 +216,16 @@ function ding_stats_load_identical_session_event($sid, $event_type, $data) {
 }
 
 /**
- * Update event count.
+ * Updates base event count and event_end timestamp.
  *
  * @param int $event_id
  *
  * @return int
  */
-function ding_stats_update_event_count($event_id) {
+function ding_stats_update_base_event($event_id) {
   return db_update('ding_stats_event')
     ->expression('count', 'count + 1')
+    ->fields(['event_end' => REQUEST_TIME])
     ->condition('id', $event_id)
     ->execute();
 }
@@ -285,8 +288,9 @@ function ding_stats_insert_event($sid, $data, $event_type) {
     $id = db_insert('ding_stats_event')
       ->fields([
         'sid' => $sid,
-        'timestamp' => REQUEST_TIME,
         'count' => 1,
+        'event_start' => REQUEST_TIME,
+        'event_end' => REQUEST_TIME,
       ])
       ->execute();
 
