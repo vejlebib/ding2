@@ -50,9 +50,6 @@ function ding_stats_callback() {
   $data = $_POST['data'];
   $event_type = $data['event_type'];
 
-  $return->ip_address = ip_address();
-  $return->excluded = variable_get('ding_stats_excluded_ips', []);
-
   // Check if client's IP is excluded from recording.
   if (in_array(ip_address(), variable_get('ding_stats_excluded_ips', []))) {
     // Log the excluded event.
