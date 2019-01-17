@@ -1,0 +1,443 @@
+<?php
+
+/**
+ * @file
+ * Ding stats module file.
+ */
+
+/**
+ * Implements hook_views_api().
+ */
+function ding_stats_views_api($module = NULL, $api = NULL) {
+  return array("api" => "3.0");
+}
+
+/**
+ * Implements hook_menu().
+ */
+function ding_stats_menu() {
+  $items['admin/config/ding/ding-stats'] = [
+    'title' => 'Ding stats',
+    'description' => 'Settings for Ding stats.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['ding_stats_admin_settings_form'],
+    'access arguments' => ['administer site configuration'],
+    'file' => 'ding_stats.admin.inc',
+  ];
+  return $items;
+}
+
+/**
+ * The js callback that records events posted from the client.
+ *
+ * TODO:
+ * - Handle default values if something is missing in the post data (or don't
+ *   save at all in these cases).
+ * - Some of the event loading could be handled with more effective, but also
+ *   more complex queries.
+ * - Consider securing AJAX request: https://stackoverflow.com/a/23533573 and
+ *   https://perishablepress.com/protect-post-requests.
+ * - Investigate why variable_get isn't working in current bootstrap level,
+ *   resulting in IP exclusion not working. May need to consider the option of
+ *   loading them manually from db.
+ */
+function ding_stats_callback() {
+  drupal_add_http_header('Cache-Control', 'no-cache, no-store, must-revalidate');
+  drupal_add_http_header('Pragma', 'no-cache');
+  drupal_add_http_header('Expires', '0');
+
+  $return = new stdClass();
+  $data = $_POST['data'];
+  $event_type = $data['event_type'];
+
+  // Check if client's IP is excluded from recording.
+  if (in_array(ip_address(), variable_get('ding_stats_excluded_ips', []))) {
+    // Log the excluded event.
+    $record['event_type'] = $event_type;
+    $record['client_ip'] = ip_address();
+    $record['timestamp'] = REQUEST_TIME;
+    db_insert('ding_stats_excluded_log')
+      ->fields($record)
+      ->execute();
+
+    // Returns empty response to client and ends the request. The client will
+    // not set at new cookie then.
+    drupal_json_output($return);
+    return;
+  }
+
+  // Events are collected in sessions controlled by an id set in cookie. The
+  // id is re-generated here on the server when expired and set in the client
+  // with the expire setting passed from the html preprocess (possibly now
+  // cached in varnish).
+  $return->dingStatsId = FALSE;
+  // Tell the client if it should set a new cookie.
+  if (empty($_COOKIE['dingStatsId'])) {
+    $sid = $return->dingStatsId = drupal_random_key();
+  }
+  else {
+    $sid = $return->dingStatsId = $_COOKIE['dingStatsId'];
+  }
+
+  // Event type is not a field in the db so remove it now.
+  unset($data['event_type']);
+
+  // All events will use this, so normalize it here once.
+  if (isset($data['search_key'])) {
+    $data['search_key'] = trim(drupal_strtolower($data['search_key']));
+  }
+
+  // The same pattern for all event types:
+  // 1. Look existing identical event in the session.
+  // 2. If found: update event count and event specific data.
+  // 3. Else if not found: Insert new event based on the posted data (if certain
+  //    criterias are met).
+  if ($event_type == 'search') {
+    // Look for identical search event in session.
+    $existing = ding_stats_load_identical_session_event($sid, 'search', $data);
+
+    if ($existing) {
+      ding_stats_update_base_event($existing['id']);
+
+      // Special handling for page and size_max.
+      if ($data['search_page'] > $existing['page_max']) {
+        $data['page_max'] = $data['search_page'];
+      }
+      unset($data['search_page']);
+      if ($data['search_size'] > $existing['size_max']) {
+        $data['size_max'] = $data['search_size'];
+      }
+      unset($data['search_size']);
+
+      ding_stats_update_event($existing, $data, 'search');
+    }
+    else {
+      // Prepare data array for insert event.
+      $data['page_max'] = $data['search_page'];
+      unset($data['search_page']);
+      $data['size_max'] = $data['search_size'];
+      unset($data['search_size']);
+
+      ding_stats_insert_event($sid, $data, 'search');
+    }
+  }
+  elseif ($event_type == 'ct') {
+    // We're only interested in click-through events associasted with a search
+    // events in the same session.
+    $existing_search = ding_stats_load_identical_session_event($sid, 'search', $data);
+
+    unset($data['search_key']);
+
+    if ($existing_search) {
+      $data['search_id'] = $existing_search['id'];
+
+      // Look for identical click-through event.
+      $existing_ct = ding_stats_load_identical_session_event($sid, 'ct', $data);
+
+      if ($existing_ct) {
+        ding_stats_update_base_event($existing_ct['id']);
+
+        // Record the best rank the click-through event has achieved during the
+        // session.
+        if ($data['rank'] >= $existing['rank']) {
+          $existing_ct['rank'] = $data['rank'];
+        }
+
+        ding_stats_update_event($existing_ct, $data, 'ct');
+      }
+      else {
+        ding_stats_insert_event($sid, $data, 'ct');
+      }
+    }
+  }
+  elseif ($event_type == 'cta' && in_array($data['action_type'], ['reservation', 'bookmark'])) {
+    // Only record the action if there's an existing chain of search => click-
+    // through in the session mathing the posted data.
+    $existing_ct = FALSE;
+    $existing_search = ding_stats_load_identical_session_event($sid, 'search', $data);
+    if ($existing_search) {
+      $data['search_id'] = $existing_search['id'];
+      $existing_ct = ding_stats_load_identical_session_event($sid, 'ct', $data);
+    }
+
+    if ($existing_ct) {
+      $cta_data = [
+        'action_type' => $data['action_type'],
+        'ct_id' => $existing_ct['id'],
+        'search_id' => $existing_search['id'],
+      ];
+
+      $existing_cta = ding_stats_load_identical_session_event($sid, 'cta', $cta_data);
+
+      if ($existing_cta) {
+        ding_stats_update_base_event($existing_cta['id']);
+        ding_stats_update_event($existing_cta, $cta_data, 'cta');
+      }
+      else {
+        ding_stats_insert_event($sid, $cta_data, 'cta');
+      }
+    }
+  }
+
+  drupal_json_output($return);
+}
+
+/**
+ * Search the database for identical event based on input data.
+ *
+ * This is a specialized function that knows how to uniquely identify the
+ * different event types based on session id and type specific event data.
+ *
+ * @param  string $sid
+ *   Session ID.
+ * @param  string $event_type
+ *   Event type.
+ * @param  array $data
+ *   Event type specific data used in the search.
+ *
+ * @return array|bool
+ *   Event array of FALSE if nothing was found.
+ */
+function ding_stats_load_identical_session_event($sid, $event_type, $data) {
+  $query = db_select('ding_stats_event', 'base')
+    ->fields('base')
+    ->condition('base.sid', $sid);
+
+  if ($event_type == 'search') {
+    $query->join('ding_stats_search_event', 'search', 'base.id = search.id');
+    $query->fields('search')->condition('search.search_key', $data['search_key']);
+  }
+  elseif ($event_type == 'ct') {
+    $query->join('ding_stats_ct_event', 'ct', 'base.id = ct.id');
+    $query->fields('ct')
+      ->condition('ct.search_id', $data['search_id'])
+      ->condition('ct.pid', $data['pid']);
+  }
+  elseif ($event_type == 'cta') {
+    $query->join('ding_stats_cta_event', 'cta', 'base.id = cta.id');
+    $query->fields('cta')
+      ->condition('cta.ct_id', $data['ct_id'])
+      ->condition('cta.action_type', $data['action_type']);
+  }
+
+  return $query->execute()->fetchAssoc();
+}
+
+/**
+ * Updates base event count and event_end timestamp.
+ *
+ * @param int $event_id
+ *
+ * @return int
+ */
+function ding_stats_update_base_event($event_id) {
+  return db_update('ding_stats_event')
+    ->expression('count', 'count + 1')
+    ->fields(['event_end' => REQUEST_TIME])
+    ->condition('id', $event_id)
+    ->execute();
+}
+
+/**
+ * Updates existing event with input data.
+ *
+ * @param  array $existing
+ *   An array containing the current data of the event in the db. Must contain
+ *   the event id in the 'id' key.
+ * @param  array $data
+ *   An array containing
+ * @param  string $event_type
+ *   The type of event to update.
+ *
+ * @return bool
+ *   Whether the update was successful or not.
+ */
+function ding_stats_update_event($existing, $data, $event_type) {
+  $updated = array_filter($data, function($value, $key) use ($existing) {
+    return $existing[$key] !== $value;
+  }, ARRAY_FILTER_USE_BOTH);
+
+  if (!empty($updated)) {
+    if ($event_type == 'search') {
+      $query = db_update('ding_stats_search_event');
+    }
+    elseif ($event_type == 'ct') {
+      $query = db_update('ding_stats_ct_event');
+    }
+    elseif ($event_type == 'cta') {
+      $query = db_update('ding_stats_cta_event');
+    }
+
+    return $query->fields($updated)
+      ->condition('id', $existing['id'])
+      ->execute();
+  }
+  // Return TRUE even though no update was performed there was no error and the
+  // event is up-to-date.
+  return TRUE;
+}
+
+/**
+ * Insert a new event into the database.
+ *
+ * @param  string $sid
+ *   Session ID for event.
+ * @param  array $data
+ *   Data for the event to insert.
+ * @param  string $event_type
+ *   Type of event to insert.
+ *
+ * @return bool
+ */
+function ding_stats_insert_event($sid, $data, $event_type) {
+  $transaction = db_transaction();
+
+  try {
+    $id = db_insert('ding_stats_event')
+      ->fields([
+        'sid' => $sid,
+        'count' => 1,
+        'event_start' => REQUEST_TIME,
+        'event_end' => REQUEST_TIME,
+      ])
+      ->execute();
+
+    $data['id'] = $id;
+
+    if ($event_type == 'search') {
+      $query = db_insert('ding_stats_search_event');
+    }
+    elseif ($event_type == 'ct') {
+      $query = db_insert('ding_stats_ct_event');
+    }
+    elseif ($event_type == 'cta') {
+      $query = db_insert('ding_stats_cta_event');
+    }
+
+    return $query->fields($data)->execute();
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    return FALSE;
+  }
+}
+
+/**
+ * Implements hook_init().
+ *
+ * Set up the event_type for later use in request.
+ */
+function ding_stats_init() {
+  $current_path = current_path();
+  $event_type = NULL;
+
+  if (strpos($current_path, 'search/ting') === 0) {
+    $event_type = 'search';
+  }
+  elseif (strpos($current_path, 'ting/object') === 0 || strpos($current_path, 'ting/collection') === 0) {
+    if (count(explode('/', $current_path)) == 3) {
+      $event_type = 'ct'; // click-through.
+    }
+  }
+
+  ding_stats_event_type($event_type);
+}
+
+/**
+ * Set or get the current event type for the request.
+ */
+function ding_stats_event_type($event_type = NULL) {
+  $event_type_static = &drupal_static('ding_stats_event_type');
+  if ($event_type !== NULL) {
+    $event_type_static = $event_type;
+  }
+  return $event_type_static;
+}
+
+/**
+ * Implements hook_preprocess_html().
+ */
+function ding_stats_preprocess_html() {
+  if (!$event_type = ding_stats_event_type()) {
+    return;
+  }
+
+  // For events that are posted on page load the strategy is to setup as much
+  // event data as possible on the server (access to more informaton and will
+  // only have to done once). This event data is then, possibly, cached in an
+  // external proxy and posted back to the server on page loads.
+  $event_data = [];
+
+  if ($event_type == 'search') { // Search event.
+    if ($search_result = ting_search_current_results()) {
+      // Get the search key. Important to use the fullTextQuery method to get
+      // the actual string entered by the user in the UI.
+      // @See \Ting\Search\TingSearchRequest.
+      $event_data['search_key'] = $search_result
+        ->getSearchRequest()
+        ->getFullTextQuery();
+
+      // Set options supported by search event type.
+      // Note: convert to int to avoid the values getting converted to 'true' or
+      // 'false' in JSON. We also need int values when saving to db.
+      $event_data['facet_used'] = (int) !empty($_GET['facets']);
+      $event_data['profile_used'] = (int) !empty($_GET['profile']);
+      $event_data['sort_changed'] = (int) !empty($_GET['sort']);
+      $event_data['size_changed'] = (int) !empty($_GET['size']);
+      $event_data['search_size'] = $search_result->getNumCollections();
+      $event_data['search_page'] = (int) !empty($_GET['page']) ? $_GET['page'] : 0;
+    }
+  }
+  elseif ($event_type == 'ct') { // Click-through event.
+    // Need to know whether we're dealing with an object or collection to get
+    // to the opensearch object abstraction.
+    $object = NULL;
+    $entity = menu_get_item()['map'][2];
+    if ($entity instanceof TingCollection) {
+      $object = $entity->getTingObjectCollection()->getPrimaryObject();
+      // Instead of using the type of the primary object, flag that this is a
+      // collection. This serves two purposes: 1. It's valuable information 2.
+      // we use it to signal to the client that it needs to apply linking query
+      // paramateres on ting object links for this particular ct-event.
+      $event_data['material_type'] = 'collection';
+    }
+    elseif ($entity instanceof TingEntity) {
+      $object = $entity->getTingObject();
+      $event_data['material_type'] = $object->getType();
+    }
+
+    $event_data['pid'] = $object->getId();
+    $event_data['search_key'] = isset($_GET['search_key']) ? $_GET['search_key'] : '';
+    $event_data['rank'] = isset($_GET['rank']) ? (int) $_GET['rank'] : 0;
+  }
+
+  libraries_load('js.cookie');
+  drupal_add_js(drupal_get_path('module', 'ding_stats') . '/js/ding_stats.js', array(
+    'scope' => 'footer'
+  ));
+  $event_data['event_type'] = $event_type;
+  drupal_add_js(['dingStats' => ['eventData' => $event_data]], 'setting');
+
+  // Pass non-eventdata settings to the client.
+  $settings = ['sessionKeepAlive' => variable_get('ding_stats_session_keep_alive', 3600)];
+  drupal_add_js(['dingStats' => ['settings' => $settings]], 'setting');
+}
+
+/**
+ * Implements hook_drupal_goto_alter()
+ */
+function ding_stats_drupal_goto_alter(&$path, &$options, &$http_response_code) {
+  if (!$event_type = ding_stats_event_type()) {
+    return;
+  }
+
+  // When viewing collections ting module will do a redirect of it contains only
+  // one object. We need to ensure our parameters are transfered in this case.
+  if ($event_type == 'ct') {
+    foreach (['search_key', 'page', 'rank'] as $parameter) {
+      if (isset($_GET[$parameter])) {
+        $options['query'][$parameter] = $_GET[$parameter];
+      }
+    }
+  }
+}
