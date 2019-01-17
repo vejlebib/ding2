@@ -99,7 +99,8 @@ function ding_availability_field_formatter_view($entity_type, $entity, $field, $
 
     // Extract records' source.
     if ($field['type'] != 'ting_collection_types') {
-      $ac_source = $entity->reply->record['ac:source'][''][0];
+      /* @var \TingEntity $entity */
+      $ac_source = $entity->getAc_source();
     }
 
     switch ($display['type']) {
@@ -195,7 +196,7 @@ function ding_availability_field_formatter_view($entity_type, $entity, $field, $
         $typed_entities = array();
 
         // Sort entities into type -> ids.
-        foreach ($entity->entities as $ent) {
+        foreach ($entity->getEntities() as $ent) {
           $typed_entities[$ent->type][] = $ent;
         }
 
@@ -208,11 +209,12 @@ function ding_availability_field_formatter_view($entity_type, $entity, $field, $
 
         // Loop over the different material types.
         foreach ($typed_entities as $type => $entities) {
+          /* @var \TingEntity[] $entities */
           // Generate an unique id.
           $id = drupal_html_id('availability-' . $entities[0]->id . '-' . $type);
 
           // Extract records' source.
-          $ac_source = $entities[0]->reply->record['ac:source'][''][0];
+          $ac_source = $entities[0]->getAc_source();
 
           // Get link to first element in the collection of the current type.
           // If more than one exists link to the collection.
@@ -223,8 +225,11 @@ function ding_availability_field_formatter_view($entity_type, $entity, $field, $
             $url = entity_uri('ting_collection', $entities[0]);
           }
 
-          // Mark as available if it is an online resource.
-          if (in_array(drupal_strtolower($type), $online_types) || $entities[0]->getOnline_url(FALSE)) {
+          // Mark as available if it is an online resource. As some types are
+          // not always predefined online type we need to check if the entity
+          // has an online URL. Please not tht that this in most cases will
+          // trigger a search request with get all relations.
+          if (in_array(drupal_strtolower($type), $online_types) || $entities[0]->isOnline()) {
             if (!isset($output['#types']['online'])) {
               // Add label "online" to output.
               $output['#types']['online'] = array(
@@ -281,7 +286,6 @@ function ding_availability_field_formatter_view($entity_type, $entity, $field, $
           // availability data), map the HTML id to the list of entity ids.
           // This is for the current material type group (book, cd, etc.).
           if (in_array(drupal_strtolower($ac_source), $reservable_sources) && !in_array(drupal_strtolower($type), $online_types)) {
-            $id_mapping[$id] = array();
             foreach ($entities as $object_entity) {
               $id_mapping[$id][] = $object_entity->localId;
             }

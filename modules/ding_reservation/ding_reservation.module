@@ -107,7 +107,7 @@ function ding_reservation_ding_entity_menu(&$items, $type, $path, $index) {
 /**
  * Implements hook_ding_entity_buttons().
  */
-function ding_reservation_ding_entity_buttons($type, $entity, $widget = 'default') {
+function ding_reservation_ding_entity_buttons($type, $entity, $view_mode, $widget = 'default') {
   $button = '';
 
   if ($type == 'ding_entity' && $entity->is('reservable')) {
@@ -402,7 +402,7 @@ function ding_reservation_reserve_form_submit($form, &$form_state) {
       // Clear reservation session cache.
       ding_reservation_cache_clear();
     }
-    catch (DingProviderUserException $e) {
+    catch (DingProviderEnduserException $e) {
       drupal_set_message($e->getMessageT(array('@title' => $reservable->getTitle())), 'error');
     }
     catch (DingProviderAuthException $e) {
@@ -490,12 +490,13 @@ function ding_reservation_reservations_form($form, &$form_state, $reservations, 
   }
 
   foreach ($reservations as $reservation) {
+    /** @var \TingEntity $entity */
     $entity = $reservation->entity;
-    if (!is_object($entity) || $entity->reply == FALSE) {
+    if (!is_object($entity) || NULL === $entity->getTingObject()) {
       $entity = ding_provider_get_pseudo_entity($reservation->ding_entity_id);
       // Don't link the title as the data well do not known this title. It may
       // be a inter library loan.
-      $title = $entity->getTitle() ? $entity->getTitle() : $reservation->display_name;
+      $title = (!empty($entity) && $entity->getTitle()) ? $entity->getTitle() : $reservation->display_name;
     }
     else {
       // Create title that links to the object.
@@ -770,7 +771,20 @@ function ding_reservation_reservations_delete_submit($form, &$form_state) {
     $reservations = array_filter($form_state['values']['reservations']);
   }
   foreach ($reservations as $entity_id) {
-    ding_provider_invoke('reservation', 'delete', $user, $entity_id);
+    try {
+      ding_provider_invoke('reservation', 'delete', $user, $entity_id);
+      drupal_set_message(t('Your reservations have been deleted.'));
+    }
+    catch (DingProviderReservationUserError $e) {
+      drupal_set_message(format_plural(
+        count($reservations),
+        t('One of your reservations could not be deleted.'),
+        t('Some of your reservations could not be deleted.')
+      ) . "\n");
+      if ($error_message = $e->getMessage()) {
+        drupal_set_message(t($error_message));
+      }
+    }
 
     // Clear reservation session cache.
     ding_reservation_cache_clear();
@@ -924,8 +938,22 @@ function ding_reservation_delete_reservations_form_ajax_submit($reservation_ids,
     $reservations = array_map('rawurldecode', explode(',', $reservation_ids));
   }
 
+  $html = FALSE;
   foreach ($reservations as $reservation_id) {
-    ding_provider_invoke('reservation', 'delete', $user, $reservation_id);
+    try {
+      ding_provider_invoke('reservation', 'delete', $user, $reservation_id);
+      $html = theme('status_messages') . t('Your reservations have been deleted.');
+    }
+    catch (DingProviderReservationUserError $e) {
+      $html = theme('status_messages') . format_plural(
+        count($reservations),
+        t('One of your reservations could not be deleted.'),
+        t('Some of your reservations could not be deleted.')
+      ) . "\n";
+      if ($error_message = $e->getMessage()) {
+        $html .= theme('status_messages') . t($error_message);
+      }
+    }
 
     // Clear reservation session cache.
     ding_reservation_cache_clear();
@@ -936,7 +964,6 @@ function ding_reservation_delete_reservations_form_ajax_submit($reservation_ids,
     '#commands' => array(),
   );
 
-  $html = theme('status_messages') . t('Your reservations have been deleted.');
   $response['#commands'][] = ajax_command_ding_popup('ding_reservation', t('Delete reservations'), $html, array('refresh' => TRUE));
 
   return $response;
@@ -1025,7 +1052,7 @@ function ding_reservation_default_options_branch($name, $default, $options) {
     '#title' => t('Select branch'),
     '#options' => $options,
     '#required' => TRUE,
-    '#default_value' => !empty($default) ? $default : '',
+    '#default_value' => !empty($default) ? $default : NULL,
   );
 
   if (empty($default)) {
@@ -1052,13 +1079,6 @@ function ding_reservation_default_options_branch($name, $default, $options) {
  */
 function ding_reservation_interest_period_selector($name, $default, $options) {
   $form = array();
-
-  // Used to enable translation of options.
-  if (is_array($options)) {
-    foreach ($options as $k => $v) {
-      $options[$k] = t(check_plain($v));
-    }
-  }
 
   $form[$name] = array(
     '#type' => 'select',
@@ -1094,9 +1114,9 @@ function ding_reservation_cache_clear() {
  */
 function ding_reservation_ding_session_cache_defaults() {
   return array(
-    'titel' => 'Ding reservation',
+    'title' => 'Ding reservation',
     'enabled' => TRUE,
-    'expire' => 3600,
+    'expire' => 60,
   );
 }
 

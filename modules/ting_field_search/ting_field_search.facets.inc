@@ -2,9 +2,7 @@
 
 /**
  * @file
- *
- * Contains hooks and function that modifies the Ding facetbrowser based on the
- * active profile.
+ * Modifies the Ding facetbrowser based on the active profile.
  */
 
 /**
@@ -23,20 +21,18 @@ function _ting_field_search_alter_facets() {
  */
 function ting_field_search_form_ding_facetbrowser_form_alter(&$form, &$form_state) {
   if ($profile = _ting_field_search_alter_facets()) {
-    // Get the facets returned from the datawell.
-    $search_result = drupal_static('ting_search_results');
-    if (empty($search_result->facets)) {
+    // Get the facets returned from the search provider.
+    $search_result = ting_search_current_results();
+    if (empty($search_result) || empty($search_result->getFacets())) {
       return;
     }
-    $facets = $search_result->facets;
 
     // Build a base URI for all the facet terms including any existing facet
     // parameters added manually. We would like to use 'facets[]' as key for
-    // all the facets, but Drupal functions output 'facets[0], facets[1], ..'
+    // all the facets, but Drupal functions output 'facets[0], facets[1], ..'.
     global $base_url;
     $base_term_uri = $base_url . '/' . request_path();
     $facet_parameters = array();
-    $parameters = array();
     $parameters = drupal_get_query_parameters(NULL, array('q', 'page'));
     // We'll just pass the parameters array through the helper to ensure all
     // parameters are added to the query.
@@ -59,16 +55,15 @@ function ting_field_search_form_ding_facetbrowser_form_alter(&$form, &$form_stat
     $facet_count = $profile->config['facets']['facet_count'];
     // Keep a record of the facets we've added.
     $profile_facets = array();
+    $facets = $search_result->getFacets();
     foreach ($profile->facets as $profile_facet) {
       $name = $profile_facet['name'];
       $profile_facets[$name] = $profile_facet;
       $facet = isset($facets[$name]) ? $facets[$name] : FALSE;
 
       // No need to do anything if the profile facet wasn't returned.
-      if ($facet && count($facet->terms)) {
+      if ($facet && count($facet->getTerms())) {
         // Get the element name - i.e. the part of the facet name after the '.'
-        $element_name = explode('.', $name);
-        $element_name = end($element_name);
         $facet_class = ($count > $facet_count) ? 'js-hidden' : 'js-visible';
 
         $form[$name] = array(
@@ -80,18 +75,19 @@ function ting_field_search_form_ding_facetbrowser_form_alter(&$form, &$form_stat
           '#attributes'  => array(
             'id' => str_replace('.', '-', $name),
             'data' => array($name),
-            'count' => count($facet->terms),
+            'count' => count($facet->getTerms()),
             'class' => array($facet_class),
           ),
         );
 
-        ding_facetbrowser_sort_terms($facet->terms, $profile_facet['sorting']);
+        $terms = $facet->getTerms();
+        ding_facetbrowser_sort_terms($terms, $profile_facet['sorting']);
 
         $selected = array();
         $not_selected = array();
         $default_values = array();
 
-        foreach ($facet->terms as $term_name => $term_count) {
+        foreach ($terms as $term_name => $term) {
           $facets_string = $name . ':' . $term_name;
           $is_selected = FALSE;
 
@@ -110,8 +106,8 @@ function ting_field_search_form_ding_facetbrowser_form_alter(&$form, &$form_stat
             'query' => $term_parameters,
             'attributes' => array('title' => $term_name),
           );
-          $term_title = ding_facetbrowser_format_term_name($term_name, $term_count);
-          $term_title .= '<span class="count">(' . $term_count . ')</span>';
+          $term_title = ding_facetbrowser_format_term_name($term_name, $term->getCount());
+          $term_title .= '<span class="count">(' . $term->getCount() . ')</span>';
           if ($is_selected) {
             $selected[$term_name] = l($term_title, $base_term_uri, $options);
           }
@@ -120,7 +116,7 @@ function ting_field_search_form_ding_facetbrowser_form_alter(&$form, &$form_stat
           }
         }
 
-        $form[$name][$element_name] = array(
+        $form[$name][$facet->getName()] = array(
           '#type' => 'checkboxes',
           '#options' => $selected + $not_selected,
           '#default_value' => $default_values,

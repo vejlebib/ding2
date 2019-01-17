@@ -33,9 +33,8 @@
 
       // Set timeout to make shure element is still above while it animates out.
       setTimeout(function(){
-        element_to_hover.removeClass('is-hovered');
+        $('.ting-object > .is-hovered').removeClass('is-hovered');
         hovered.addClass('is-hovered');
-
       }, 300);
     });
     element_to_hover.mouseleave(function() {
@@ -85,7 +84,7 @@
   }
   Drupal.behaviors.ding_ting_teaser_image_width = {
     attach: function(context, settings) {
-      adapt_images($('.ting-object.view-mode-teaser img'));
+      adapt_images($('.ting-object.view-mode-teaser img, .ting-object.view-mode-teaser-no-overlay img'));
     }
   };
 

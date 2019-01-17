@@ -34,38 +34,23 @@ function ding_eresource_image_default_styles() {
 
   // Exported image style: ding_eresource_list.
   $styles['ding_eresource_list'] = array(
-    'name' => 'ding_eresource_list',
     'label' => 'Ding eresource list',
     'effects' => array(
-      5 => array(
-        'label' => 'Manual Crop: Reuse cropped style',
-        'help' => 'Reuse a crop selection from another Manual Crop enabled image style.',
-        'effect callback' => 'manualcrop_reuse_effect',
-        'form callback' => 'manualcrop_reuse_form',
-        'summary theme' => 'manualcrop_reuse_summary',
-        'module' => 'manualcrop',
+      7 => array(
         'name' => 'manualcrop_reuse',
         'data' => array(
-          'reuse_crop_style' => 'crop_unconstrained',
+          'reuse_crop_style' => 'crop_4_3',
           'apply_all_effects' => 0,
         ),
         'weight' => 0,
       ),
-      4 => array(
-        'label' => 'Scale',
-        'help' => 'Scaling will maintain the aspect-ratio of the original image. If only a single dimension is specified, the other dimension will be calculated.',
-        'effect callback' => 'image_scale_effect',
-        'dimensions callback' => 'image_scale_dimensions',
-        'form callback' => 'image_scale_form',
-        'summary theme' => 'image_scale_summary',
-        'module' => 'image',
-        'name' => 'image_scale',
+      8 => array(
+        'name' => 'image_scale_and_crop',
         'data' => array(
-          'width' => 260,
-          'height' => '',
-          'upscale' => 1,
+          'width' => 150,
+          'height' => 112,
         ),
-        'weight' => 1,
+        'weight' => 3,
       ),
     ),
   );
@@ -87,5 +72,6 @@ function ding_eresource_node_info() {
       'help' => '',
     ),
   );
+  drupal_alter('node_info', $items);
   return $items;
 }

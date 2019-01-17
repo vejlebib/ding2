@@ -16,6 +16,14 @@ function ding_ddbasic_entity_info_alter(&$entity_info) {
     'label' => t('Alternative layout full'),
     'custom settings' => TRUE,
   );
+  $entity_info['user']['view modes']['search_result'] = array(
+    'label' => t('Search result'),
+    'custom settings' => TRUE,
+  );
+  $entity_info['profile2']['view modes']['search_result'] = array(
+    'label' => t('Search result'),
+    'custom settings' => TRUE,
+  );
   $entity_info['node']['view modes']['teaser_no_overlay'] = array(
     'label' => t('Teaser no overlay'),
     'custom settings' => TRUE,
@@ -157,8 +165,44 @@ function ding_ddbasic_form_alter(&$form, &$form_state, $form_id) {
           ),
           '#size' => '1',
         ) + (isset($form['color']['palette']['text_on_secondary']) ? $form['color']['palette']['text_on_secondary'] : array());
+
+        array_unshift($form['#validate'], 'ding_ddbasic_theme_settings_validate');
       }
       break;
+
+    case 'menu_edit_item':
+      if ($form_state['build_info']['args'][0] == 'add') {
+        $form['expanded']['#default_value'] = 1;
+      }
+      break;
+  }
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ *
+ * Add and autofill the expanded checkbox to the node form.
+ */
+function ding_ddbasic_form_node_form_alter(&$form, $form_state) {
+  if (isset($form['menu']['link'])) {
+    $form['menu']['link']['expanded'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Show as expanded'),
+      '#description' => t('If selected and this menu link has children, the menu will always appear expanded.'),
+      '#default_value' => !empty($form['#node']->menu['mlid']) ? $form['#node']->menu['expanded'] : 1,
+    );
+  }
+}
+
+/**
+ * Custom validator for the system_theme_settings form.
+ *
+ * We force the color scheme to be custom, so the elements we've changed to
+ * select types will work.
+ */
+function ding_ddbasic_theme_settings_validate($form, &$form_state) {
+  if ($form_state['values']['scheme'] === 'default') {
+    form_set_value($form['color']['scheme'], '', $form_state);
   }
 }
 

@@ -41,6 +41,7 @@
       .field-name-field-alma-sms,
       .field-name-field-fbs-phone,
       .field-name-field-fbs-mail,
+      .field-name-field-fbs-interest-period,
       .field-name-field-fbs-preferred-branch {
         @include span-columns(6);
         clear: left;
@@ -63,13 +64,18 @@
       .field-name-field-alma-interest-period,
       .field-name-field-alma-mobile-phone,
       .field-name-field-fbs-phone-notification,
-      .field-name-field-fbs-mail-notification {
+      .field-name-field-fbs-mail-notification,
+      .field-name-field-fbs-interest-period {
         @include span-columns(6);
         margin-right: 0;
 
         @include media($mobile) {
           width: 100%;
         }
+      }
+
+      .field-name-field-fbs-interest-period {
+        clear: both;
       }
 
       .field-name-field-fbs-phone-notification,

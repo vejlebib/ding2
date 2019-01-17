@@ -174,22 +174,25 @@ function ding_loan_loans_form($form, &$form_state, $account, $loans = array()) {
 
       // Try to get entity for the loan to make a better title and provide info
       // about the associated material.
+      /** @var \TingEntity $entity */
       $entity = $loan->entity;
+      if (!is_object($entity) || NULL === $entity->getTingObject()) {
+        // Patron have this item in loans list, but the search provider can't
+        // find this record for current agencyId, so we load it separately.
+        $ting_object = ting_search_object_load($loan->ding_entity_id);
 
-      if (!is_object($entity) || empty($entity->reply)) {
-        // Patron have this item in loans list, but opensearch can't find this
-        // record for current agencyId, so we load it separately.
-        // Here we are loading TingClientObject.
-        $ting_object = ting_get_object($loan->ding_entity_id);
-
-        // But we need TingEntity instance, so here we are populating this.
-        $ting_entity = new TingEntity();
-        $ting_entity->ding_entity_id = $entity->ding_entity_id;
-        $ting_entity->reply = $ting_object;
-        $entity = $ting_entity;
+        if (!empty($ting_object)) {
+          // But we need TingEntity instance, so here we are populating this.
+          $ting_entity = new TingEntity();
+          $ting_entity->ding_entity_id = $entity->ding_entity_id;
+          $ting_entity->setTingObject($ting_object);
+        }
       }
 
-      if (is_object($entity) && !empty($entity->reply)) {
+      // Initialize variables so that they don't carry over if this entity can't
+      // be searched.
+      $creators = $mat_type = $cover = NULL;
+      if (is_object($entity) && NULL !== $entity->getTingObject()) {
         $raw_title = $entity->getTitle();
 
         // Add title link.
@@ -254,9 +257,62 @@ function ding_loan_loans_form($form, &$form_state, $account, $loans = array()) {
         );
       }
 
-      // If not renewable set message.
       if (empty($loan->renewable)) {
         $disabled_count++;
+      }
+
+      // Try to provide some meaningful feedback based on the renewal status
+      // returned form the provider.
+      // It's preferred to show if a material was renewed. This is by far the
+      // most useful feedback and should override everything else.
+      if ($loan->renewal_status == DingProviderLoan::STATUS_RENEWED) {
+        $item['#material_message'] = array(
+          'message' => t('This material was renewed. New return date: !due_date', array(
+            '!due_date' => format_date(strtotime(check_plain($loan->expiry)), 'ding_material_lists_date'),
+          )),
+          'class' => 'messages information',
+        );
+      }
+      // Same as above, but the provider has the option to set a special renewal
+      // requested status, which can be used for loans with a more complex
+      // renewal process. For example, in FBS provider, this is used for renewal
+      // of inter-library loans.
+      elseif ($loan->renewal_status == DingProviderLoan::STATUS_RENEWAL_REQUESTED) {
+        $item['#material_message'] = array(
+          'message' => t('An inter-library loan renewal was requested'),
+          'class' => 'messages information',
+        );
+      }
+      // If we don't have information about whether the material was renewed and
+      // the material was borrowed today, this should be a more useful feedback
+      // instead of (potentially) showing a warning that the material can't be
+      // renewed.
+      elseif (date('Y-m-d') == date('Y-m-d', strtotime($loan->loan_date))) {
+        $item['#material_message'] = array(
+          'message' => t('This material was borrowed today'),
+          'class' => 'messages information',
+        );
+      }
+      elseif ($loan->renewal_status == DingProviderLoan::STATUS_RENEWAL_NUM_EXCEEDED) {
+        $item['#material_message'] = array(
+          'message' => t('The material can not be renewed because maximum number of renewals reached'),
+          'class' => 'messages warning',
+        );
+      }
+      elseif ($loan->renewal_status == DingProviderLoan::STATUS_RENEWAL_RESERVED) {
+        $item['#material_message'] = array(
+          'message' => t('The material is reserved by another loaner and can not be renewed'),
+          'class' => 'messages warning',
+        );
+      }
+      // We can get here in a couple of cases:
+      // 1. The loan is renewable, wasn't renewed in this session and wasn't
+      // borrowed today. Everything is fine; we don't have to show any message.
+      // 2. The loan isn't renewable and the provider doesn't support renewal
+      // or the renewal_status is STATUS_NOT_RENEWED.
+      // We check for case 2 and fallback to the general warning message about
+      // loan is not renewable if that's the case.
+      elseif (empty($loan->renewable)) {
         $item['#material_message'] = array(
           'message' => t('This material can not be renewed'),
           'class' => 'messages warning',
@@ -303,10 +359,17 @@ function ding_loan_loans_form($form, &$form_state, $account, $loans = array()) {
   );
 
   $form['actions_container']['actions_top']['renew_all'] = array(
-    '#type' => 'markup',
-    '#prefix' => '<div class="renew-all action-all action-button js-renew-all">',
-    '#markup' => '<a href="#">' . t('Renew all') . '</a>',
-    '#suffix' => '</div>',
+    '#type' => 'html_tag',
+    '#tag' => 'div',
+    '#value' => '<a href="#">' . t('Renew all') . '</a>',
+    '#attributes' => [
+      'class' => [
+        'renew-all',
+        'action-all',
+        'action-button',
+        'js-renew-all',
+      ],
+    ],
   );
 
   return $form;
@@ -334,12 +397,19 @@ function ding_loan_loans_form_submit($form, &$form_state) {
 
   $clear_cache = FALSE;
 
+  $renewed_ids = array();
+  if (module_exists('ding_session_cache')) {
+    $renewed_ids = ding_session_cache_get('ding_loan', 'renewed_ids', array());
+  }
+
   $result = ding_provider_invoke('loan', 'renew', $form_state['values']['account'], $ids);
   foreach ($result as $id => $status) {
     $item = $form_state['values']['items'][$id];
     // Try to get entity for the item.
+    /** @var \TingEntity $entity */
     $entity = $item->entity;
-    if (!is_object($entity) || $entity->reply == FALSE) {
+
+    if (!is_object($entity) || NULL === $entity->getTingObject()) {
       // Build pseudo entity based on provider information.
       $entity = ding_provider_get_pseudo_entity($item->ding_entity_id);
       $title = $entity->getTitle() ?: $item->display_name;
@@ -362,6 +432,10 @@ function ding_loan_loans_form_submit($form, &$form_state) {
       case DingProviderLoan::STATUS_RENEWAL_REQUESTED:
         drupal_set_message(t('"@title renewed"', array('@title' => $title)));
         $clear_cache = TRUE;
+
+        // This loan was succefully renewed. Remember this for the rest of the
+        // session.
+        $renewed_ids[] = $id;
         break;
 
       case DingProviderLoan::STATUS_NOT_RENEWED:
@@ -378,9 +452,11 @@ function ding_loan_loans_form_submit($form, &$form_state) {
     }
   }
 
-  // Clear session cache.
+  // If any loans was succesfully renewed; clear session cache and remember
+  // these loans throughout the session.
   if ($clear_cache && module_exists('ding_session_cache')) {
     ding_session_cache_clear('ding_loan', 'list');
+    ding_session_cache_set('ding_loan', 'renewed_ids', $renewed_ids);
   }
 }
 

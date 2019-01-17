@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Handles user authentication with the alma provider.
@@ -8,19 +9,17 @@
  * Implements hook_user_authenticate().
  */
 function alma_user_authenticate($uid, $pass) {
-  $return = array(
-    'success' => FALSE,
-  );
-
   try {
     $res = alma_client_invoke('get_patron_info', $uid, $pass, TRUE);
-    if ($res) {
-      $return['success'] = TRUE;
+    if (!$res) {
+      throw new DingProviderUserAuthFailure();
     }
   }
   catch (Exception $e) {
-    return $return;
+    throw new DingProviderUserAuthFailure();
   }
+
+  $return = array();
 
   // Set creds.
   $return['creds'] = array(
@@ -65,11 +64,9 @@ function alma_user_authenticate($uid, $pass) {
     $return['user']['category'] = $res['category'];
   }
 
-  $return['user']['blocked'] = FALSE;
   if (!empty($res['blocks'])) {
-    // Send block codes back with the user.
-    $return['user']['blocks'] = $res['blocks'];
-    $return['user']['blocked'] = TRUE;
+    // Just use the default warning.
+    $return['user']['blocks'] = ['default'];
   }
 
   return $return;
@@ -130,7 +127,7 @@ function alma_user_update_pincode($account, $new_pincode) {
  *
  * This hook is only called from ding_dibs after a payment have been accepted.
  *
- * @param stdClass $account
+ * @param object $account
  *   Drupal user account object.
  */
 function alma_user_clear_cache($account) {
@@ -160,6 +157,18 @@ function alma_user_create($cpr, $pin_code, $name, $mail, $branch_id) {
   }
   catch (AlmaClientUserAlreadyExistsError $exception) {
     // Throw new exception that is not provider dependent.
-    throw new DingProviderAuthUserExistsError('User account already exists');
+    throw new DingProviderUserExistsError('User account already exists');
   }
+}
+
+/**
+ * Get the provider id.
+ */
+function alma_user_get_provider_id($account) {
+  $creds = ding_user_get_creds();
+  if (isset($creds['name'])) {
+    return $creds['name'];
+  }
+
+  return NULL;
 }

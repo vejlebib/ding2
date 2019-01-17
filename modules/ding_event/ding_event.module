@@ -197,6 +197,33 @@ function ding_event_views_pre_execute(&$view) {
     $view->build_info['query']->groupBy('node.nid');
     $view->build_info['count_query']->groupBy('node.nid');
   }
+
+  // Handle the "show_all" type of events, so they filter by end date instead of
+  // start date.
+  if ($view->name == 'ding_event' && in_array($view->current_display, array('ding_event_list', 'ding_event_list_frontpage'))) {
+    // Add the field_ding_event_list_filter field, so it can be used in the
+    // filter.
+    $view->build_info['query']->leftJoin(
+      'field_data_field_ding_event_list_filter',
+      'fdelf',
+      'fdelf.entity_id = node.nid AND fdelf.entity_type = :entity_type',
+      array(':entity_type' => 'node')
+    );
+
+    // We need to place the conditions inside the start date filter, which is
+    // referenced here. The reference is very specific, and changing the order
+    // of the view filters might break this functionality.
+    $date_condition = &$view->build_info['query']->conditions()[0]['field']->conditions()[0]['field']->conditions()[3];
+
+    // If the value is empty we assume the exposed combined search filter has
+    // content, this pushes the condition we want 1 further "down" in the array.
+    if (empty($date_condition['value'])) {
+      $date_condition = &$view->build_info['query']->conditions()[0]['field']->conditions()[0]['field']->conditions()[4];
+    }
+    $date_condition['field'] .= ' OR (fdelf.field_ding_event_list_filter_value = :filter'
+                              . ' AND ' . str_replace('.field_ding_event_date_value,', '.field_ding_event_date_value2,', $date_condition['field']) . ')';
+    $date_condition['value'][':filter'] = 'show_all';
+  }
 }
 
 /**
@@ -309,18 +336,18 @@ function ding_event_metatag_metatags_view_alter(&$output, $instance, $options) {
   if ($instance == 'panels:ding_event_node_view') {
     $node = menu_get_object();
     $node_view = node_view($node);
-    $metatag = '';
+    $metatag = array();
 
     // Metatag elements.
-    $lead_out = $node->title;
-    $location_out = '';
-    $date_out = '';
-    $price_out = ', ' . t('free', array(), array('context' => 'Price'));
+    $metatag['lead_out'] = $node->title;
+    $metatag['location_out'] = '';
+    $metatag['date_out'] = '';
+    $metatag['price_out'] = t('free', array(), array('context' => 'Price'));
 
     // Lead.
     $lead = field_get_items('node', $node, 'field_ding_event_lead');
     if (!empty($lead)) {
-      $lead_out = $lead[0]['value'];
+      $metatag['lead_out'] = $lead[0]['value'];
     }
 
     // Location.
@@ -328,23 +355,23 @@ function ding_event_metatag_metatags_view_alter(&$output, $instance, $options) {
     $location = field_get_items('node', $node, 'field_ding_event_location');
     if (isset($library_gid) && empty($location[0]['name_line'])) {
       $library_node = node_load($library_gid[0]['target_id']);
-      $location_out = ', ' . $library_node->title;
+      $metatag['location_out'] = $library_node->title;
     }
 
     if (!empty($location[0]['name_line'])) {
-      $location_out = ', ' . $location[0]['name_line'];
+      $metatag['location_out'] = $location[0]['name_line'];
     }
 
     // Date.
     $date = field_get_items('node', $node, 'field_ding_event_date');
-    $date_out = ', ' . format_date(strtotime($date[0]['value']), 'ding_date_and_time');
+    $metatag['date_out'] = $date ? format_date(strtotime($date[0]['value']), 'ding_date_and_time') : '';
 
     // Price.
     $price = field_get_items('node', $node, 'field_ding_event_price', 'value');
     if (!empty($price)) {
-      $price_out = ', ' . $price[0]['value'] . ' ' . variable_get('ding_event_currency_type', 'Kr');
+      $metatag['price_out'] = $price[0]['value'] . ' ' . variable_get('ding_event_currency_type', 'Kr');
     }
 
-    $output['description']['#attached']['drupal_add_html_head'][0][0]['#value'] = $lead_out . $location_out . $date_out . $price_out;
+    $output['description']['#attached']['drupal_add_html_head'][0][0]['#value'] = implode(', ', array_filter($metatag));
   }
 }

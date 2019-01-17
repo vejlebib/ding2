@@ -5,11 +5,99 @@
  * Theme and preprocess files.
  */
 
+use DingList\DingList;
+
 /**
  * Ding list message theme.
  */
 function theme_ding_list_message($variables) {
   return '<div class="ding-list-message">' . $variables['message'] . '</div>';
+}
+
+/**
+ * Preprocesses variables for ding_list_element.
+ */
+function template_preprocess_ding_list_element(&$variables) {
+  $element = $variables['element'];
+  $variables['classes_array'][] = 'ding-list-element--type-' . drupal_html_class($element->getType());
+  $variables['classes_array'][] = 'ding-list-element--display-' . drupal_html_class($variables['display']);
+  $variables['classes_array'][] = 'clearfix';
+  $variables['attributes_array']['data-element-id'] = $element->getId();
+
+  switch ($element->getType()) {
+    case 'ting_object':
+      $view_mode_matrix = array(
+        'view list' => 'ting_reference_preview',
+      );
+      $ting_object = ting_object_load(ding_list_convert_cql($element->getValue()));
+      if ($ting_object) {
+        $variables['content']['ting_object'] = ting_object_view(
+          $ting_object,
+          isset($view_mode_matrix[$variables['display']]) ? $view_mode_matrix[$variables['display']] : 'default'
+        );
+      }
+      else {
+        $variables['content']['value'] = array(
+          '#theme' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => t('This material has been deleted from the library'),
+          '#attributes' => array(
+            'class' => array('ding-list-element__title'),
+          ),
+        );
+        drupal_set_message(t('Unable to retrieve some of the items on this list. The list may appear incomplete.'), 'warning', FALSE);
+        watchdog(
+          'ding_list',
+          'Unable to load ting_object %object in list %list',
+          array('%object' => $element->getValue(), '%list' => $element->getListId()),
+          WATCHDOG_ERROR
+        );
+      }
+      break;
+
+    case 'ding_list':
+      $list = ding_list_get_list($element->getValue());
+      if ($list) {
+        $variables['content']['link'] = array(
+          '#theme' => 'link',
+          '#text' => check_plain($list->getTitle()),
+          '#path' => 'list/' . $element->getValue(),
+          '#options' => array(
+            'attributes' => array('class' => array('ding-list-element__title')),
+            'html' => TRUE,
+          ),
+        );
+      }
+      else {
+        $variables['content']['value'] = array(
+          '#theme' => 'html_tag',
+          '#tag' => 'div',
+          '#value' => t('List no longer avaiable'),
+          '#attributes' => array(
+            'class' => array('ding-list-element__title'),
+          ),
+        );
+        drupal_set_message(t("A list you're following are no longer available."));
+      }
+      break;
+
+    case 'search_query':
+    case 'follow_author':
+      $parsed = drupal_parse_url($element->getValue());
+      $variables['content']['link'] = array(
+        '#theme' => 'link',
+        '#text' => check_plain($element->getData('title', $element->getValue())),
+        '#path' => 'search/ting/' . $parsed['path'],
+        '#options' => array(
+          'query' => $parsed['query'],
+          'attributes' => array('class' => array('ding-list-element__title')),
+          'html' => TRUE,
+        ),
+      );
+      break;
+  }
+
+  $variables['remove'] = drupal_get_form('ding_list_remove_element_form__' . $element->getId(), $element);
 }
 
 /**
@@ -22,7 +110,7 @@ function theme_ding_list_create_info($variables) {
 
   $items = array();
   $items[] = t("You've create the list !list.", array(
-    '!list' => l($list->title, 'list/' . $list->id),
+    '!list' => l($list->getTitle(), 'list/' . $list->getId()),
   ));
   $items[] = t('Use the "More" button on materials, to add them to the list.');
   $items[] = t('You can search after materials !search, that you can add to the list.', array(
@@ -52,8 +140,113 @@ function theme_ding_list_permission_description($variables) {
  * Default preprocess.
  */
 function template_preprocess_ding_list_list(&$variables) {
-  if ($variables['sortable'] !== FALSE) {
-    $variables['classes_array'][] = 'sort-enabled';
+  $list = $variables['list'];
+
+  $variables['classes_array'][] = 'ding-list-list--' . drupal_html_class($list->getType());
+  $variables['content'] = array();
+
+  $variables['title_attributes_array']['class'][] = 'ding-list-list__title';
+  $variables['title'] = check_plain($list->getTitle());
+  if (!$list->isOwner()) {
+    $variables['title'] = t('@list_title, By @list_author', array(
+      '@list_title' => $variables['title'],
+      '@list_author' => $list->getOwnerName(),
+    ));
+  }
+
+  switch ($variables['display']) {
+    case 'public list':
+      $variables['title'] = l($variables['title'], 'list/' . $list->getId());
+      $variables['content']['carousel'] = array(
+        '#type' => 'ding_carousel',
+        '#items' => array(),
+        '#path' => 'ding-list/carousel/ajax/' . $list->getId(),
+        '#offset' => 0,
+        // Add a single placeholder to fetch more content later if there
+        // is more content.
+        '#placeholders' => count($list->getElements()) > DING_LIST_CAROUSEL_CHUNK_SIZE ? DING_LIST_CAROUSEL_CHUNK_SIZE + 1 : count($list->getElements()),
+      );
+      break;
+
+    default:
+      if ($list->hasData('visibility') && $list->getData('visibility') === 'public') {
+        $followers_count = $list->getFollowersCount();
+
+        if ($followers_count > 0) {
+          $variables['content']['followers'] = array(
+            '#prefix' => '<div class="ding-list-list__followers">',
+            '#suffix' => '</div>',
+            '#markup' => format_plural($followers_count, '1 user following this list', '@count users following this list'),
+          );
+        }
+      }
+
+      if (!empty($list->getNote())) {
+        $variables['content']['note'] = array(
+          '#prefix' => '<div class="ding-list-list__note">',
+          '#suffix' => '</div>',
+          '#markup' => $list->getNote(),
+        );
+      }
+
+      $variables['content']['elements'] = array(
+        '#theme' => 'table',
+        '#attributes' => array(
+          'id' => drupal_html_id('ding-list-list-elements'),
+          'class' => array('ding-list-list__elements'),
+          'data-list-id' => $list->getId(),
+        ),
+        '#rows' => array(),
+        '#attached' => array(
+          'js' => array(
+            drupal_get_path('module', 'ding_list') . '/js/ding_list_tabledrag.js',
+          ),
+          'css' => array(
+            drupal_get_path('module', 'ding_list') . '/css/ding-list-tabledrag.css',
+          ),
+        ),
+      );
+      drupal_add_tabledrag(
+        $variables['content']['elements']['#attributes']['id'],
+        'order',
+        'sibling',
+        'ding-list-list__element-delta'
+      );
+
+      $total = $list->getElementCount();
+      if ($total > 0) {
+        $elements_per_page = DingList::PRELOADED_ELEMENTS;
+        $current_page = pager_default_initialize($total, $elements_per_page);
+
+        $drag_delta = 0;
+        foreach ($list->getElements($current_page * $elements_per_page, $elements_per_page) as $element) {
+          $variables['content']['elements']['#rows'][$element->getId()] = array(
+            'data' => array(
+              array(
+                'data' => array(
+                  '#theme' => 'ding_list_element',
+                  '#display' => $variables['display'],
+                  '#element' => $element,
+                ),
+              ),
+              array(
+                'data' => $drag_delta++,
+                'class' => array('ding-list-list__element-delta'),
+              ),
+            ),
+            'class' => array('draggable'),
+            'data-element-id' => $element->getId(),
+          );
+        }
+
+        $variables['content']['pager'] = array(
+          '#theme' => 'pager',
+        );
+      }
+      else {
+        $variables['content']['elements']['#markup'] = t('No elements in this list.');
+      }
+      break;
   }
 }
 
@@ -69,14 +262,14 @@ function template_preprocess_ding_list_add_button(&$variables) {
     '#theme' => 'links',
     '#links' => array(),
     '#attributes' => array(
-      'class' => array('buttons'),
+      'class' => array(
+        'buttons',
+      ),
     ),
     '#attached' => array(
       'library' => array(array('system', 'drupal.ajax')),
     ),
   );
-
-  $variables['single_link'] = FALSE;
 
   if ($variables['options'] === FALSE) {
     $options = ding_list_get_add_to_list_data($variables['type'], $variables['value'], $variables['value_title']);
@@ -85,32 +278,12 @@ function template_preprocess_ding_list_add_button(&$variables) {
     $options = $variables['options'];
   }
 
-  if ($variables['type'] == 'ting_object') {
-    $new_list = array(
-      'custom' => array(
-        'title' => '<div class="list-title">' . t('New list') . '</div><div class="add-to-list-button button">' . t('Add to new list') . '</div>',
-        'href' => 'list/create',
-        'attributes' => array(
-          'class' => array(),
-        ),
-        'query' => array('at' => $variables['type'], 'av' => $variables['value']),
-        'html' => TRUE,
-      ),
-    );
-
-    if (!user_is_logged_in()) {
-      $new_list['custom']['attributes']['class'][] = 'use-ajax';
-      $new_list['custom']['href'] = 'ding-list/login-create';
-    }
-
-    $options[] = $new_list;
-  }
   foreach ($options as $option) {
-    if ($option['type'] == 'search_query') {
-      $option['title'] = t('Add to searches I follow');
-    }
-
     if (!isset($option['custom'])) {
+      if ($option['type'] == 'search_query') {
+        $option['title'] = t('Add to searches I follow');
+      }
+
       $l = array(
         'title' => $option['title'],
         'href' => 'dinglist/attach/' . $option['type'] . '/' . $option['list_id'] . '/' . $option['value'],
@@ -129,125 +302,14 @@ function template_preprocess_ding_list_add_button(&$variables) {
     }
 
     $variables['buttons']['#links'][] = $l;
-    if (isset($option['#single_link'])) {
-      $variables['single_link'] = TRUE;
-    }
-  }
-}
-
-/**
- * Ding list followers preprocessor.
- */
-function template_preprocess_ding_list_followers(&$variables) {
-  $list = $variables['list'];
-  $variables['count'] = ding_list_get_list_followers_count($list);
-
-  $variables['note'] = ding_base_get_value('ding_type', $list, 'field_notes');
-  if ($variables['note'] === FALSE) {
-    $list_information = ding_list_list_operations();
-    $list_type = ding_base_get_value('ding_type', $list, 'field_list_type');
-    if (isset($list_information[$list_type])) {
-      $list_information = $list_information[$list_type];
-      if (isset($list_information['_data']['description'])) {
-        $variables['note'] = $list_information['_data']['description'];
-      }
-    }
   }
 
-  $variables['no_objects'] = empty($list->field_list_objects);
-}
-
-/**
- * Ding list label/value theme.
- */
-function theme_ding_list_label_value($variables) {
-  $label = '';
-  if ($variables['label']) {
-    $label = '<div class="label">' . $variables['label'] . '</div>';
+  if (count($variables['buttons']['#links']) === 1) {
+    $variables['classes_array'][] = 'ding-list-add-button--single-action';
   }
-  $out = '<div class="field">' . $label . '<div class="text">' . $variables['value'] . '</div></div>';
-
-  return $out;
-}
-
-/**
- * Ding list followers theme.
- */
-function theme_ding_list_followers($variables) {
-  $out = '<div class="field ding-followers"><div class="label">' . t('Number of followers') . '</div><div class="text">' . format_plural($variables['count'], '1', '@count') . '</div></div>';
-
-  return $out;
-}
-
-/**
- * Ding list info theme.
- */
-function theme_ding_list_info($variables) {
-  $out = '';
-
-  if (!empty($variables['list']->field_notes)) {
-    $out .= '<div class="ding-list-note">' . $variables['list']->field_notes['und'][0]['value'] . '</div>';
+  else {
+    $variables['classes_array'][] = 'ding-list-add-button--multiple-actions';
   }
 
-  if (empty($variables['list']->field_list_objects)) {
-    $out .= '<div class="ding-list-no-elements">' . t('No elements in this list.') . '</div>';
-  }
-
-  return $out;
-}
-
-/**
- * Ding list lists theme.
- */
-function theme_ding_list_lists($variables) {
-  global $user;
-  $out = '';
-
-  foreach ($variables['groups'] as $group_name => $group) {
-    $out .= "<a name='" . $group_name . "'></a>";
-    $rows = array();
-    $group_name_class = drupal_html_class($group_name);
-
-    foreach ($group['lists'] as $lists) {
-      foreach ($lists as $list) {
-        // Remove the #list reference, so the item_list theme doesn't confuse
-        // it with an attribute.
-        unset($list['#list']);
-        $rows[] = $list;
-      }
-    }
-
-    if (!empty($rows)) {
-      $render = array(
-        '#theme' => 'item_list',
-        '#title' => $group['title'],
-        '#items' => $rows,
-        '#type' => 'ul',
-        '#attributes' => array('class' => array('list-links', $group_name_class)),
-      );
-      $out .= drupal_render($render);
-    }
-  }
-
-  // Footer links.
-  if ($variables['uid'] == $user->uid) {
-    $render = array(
-      '#theme' => 'item_list',
-      '#items' => array(),
-      '#title' => "",
-      '#type' => 'ul',
-      '#attributes' => array('class' => array('bottom-links')),
-    );
-
-    if (ding_message_get_message_count()) {
-      $render['#items'][] = l(t("Mark all notifications as read"), "ding_message/purge_user_messages", array('attributes' => array('class' => array('button'))));
-    }
-
-    $render['#items'][] = l(t("Create new list"), "list/create", array('attributes' => array('class' => array('button'))));
-    $render['#items'][] = l(t('View all public lists'), 'public-lists', array('attributes' => array('class' => array('button'))));
-
-    $out .= drupal_render($render);
-  }
-
-  return '<div class="ding-user-lists">' . $out . '</div>';
+  return $variables;
 }

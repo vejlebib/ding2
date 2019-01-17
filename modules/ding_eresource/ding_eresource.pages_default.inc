@@ -69,7 +69,7 @@ function ding_eresource_default_page_manager_handlers() {
     'body_classes_to_add' => '',
   );
   $display = new panels_display();
-  $display->layout = 'ding2_site_template';
+  $display->layout = '25_50_25';
   $display->layout_settings = array();
   $display->panel_settings = array(
     'style_settings' => array(
@@ -105,39 +105,8 @@ function ding_eresource_default_page_manager_handlers() {
   $display->content = array();
   $display->panels = array();
     $pane = new stdClass();
-    $pane->pid = 'new-203b68b0-35f7-4be2-bac3-b300a7e5f01c';
-    $pane->panel = 'content';
-    $pane->type = 'taxonomy_menu';
-    $pane->subtype = 'taxonomy_menu';
-    $pane->shown = FALSE;
-    $pane->access = array();
-    $pane->configuration = array(
-      'slug' => 'e-materialer',
-      'default_link_text' => 'All categories',
-      'dropdown' => 0,
-      'vocabulary' => 'e_resource_category',
-      'base' => '',
-      'context' => array(
-        0 => 'relationship_entity_from_field:field_ding_eresource_category-node-taxonomy_term_1',
-        1 => 'empty',
-      ),
-      'override_title' => 1,
-      'override_title_text' => '',
-    );
-    $pane->cache = array();
-    $pane->style = array(
-      'settings' => NULL,
-    );
-    $pane->css = array();
-    $pane->extras = array();
-    $pane->position = 0;
-    $pane->locks = array();
-    $pane->uuid = '203b68b0-35f7-4be2-bac3-b300a7e5f01c';
-    $display->content['new-203b68b0-35f7-4be2-bac3-b300a7e5f01c'] = $pane;
-    $display->panels['content'][0] = 'new-203b68b0-35f7-4be2-bac3-b300a7e5f01c';
-    $pane = new stdClass();
     $pane->pid = 'new-9585f181-cf01-4270-a7fd-b981246d6e2c';
-    $pane->panel = 'content';
+    $pane->panel = 'attachment_1_1';
     $pane->type = 'node_content';
     $pane->subtype = 'node_content';
     $pane->shown = TRUE;
@@ -163,35 +132,36 @@ function ding_eresource_default_page_manager_handlers() {
     );
     $pane->css = array();
     $pane->extras = array();
-    $pane->position = 1;
+    $pane->position = 0;
     $pane->locks = '';
     $pane->uuid = '9585f181-cf01-4270-a7fd-b981246d6e2c';
     $display->content['new-9585f181-cf01-4270-a7fd-b981246d6e2c'] = $pane;
-    $display->panels['content'][1] = 'new-9585f181-cf01-4270-a7fd-b981246d6e2c';
+    $display->panels['attachment_1_1'][0] = 'new-9585f181-cf01-4270-a7fd-b981246d6e2c';
     $pane = new stdClass();
-    $pane->pid = 'new-fb3893c4-f99a-47a1-989f-46b5483382fd';
-    $pane->panel = 'content';
-    $pane->type = 'campaign';
-    $pane->subtype = 'campaign';
+    $pane->pid = 'new-3612f537-0123-4c9d-a1cd-36f7214176a5';
+    $pane->panel = 'attachment_1_1';
+    $pane->type = 'ding_campaign_plus';
+    $pane->subtype = 'ding_campaign_plus';
     $pane->shown = TRUE;
     $pane->access = array();
     $pane->configuration = array(
-      'ding_campaign_count' => 3,
-      'ding_campaign_offset' => 0,
+      'style' => 'ribbon',
       'context' => array(
         0 => 'argument_entity_id:node_1',
-        1 => 'relationship_og_node_from_group_1',
+        1 => 'argument_entity_id:node_1',
         2 => 'empty',
-        3 => 'relationship_terms_from_node_1',
+        3 => 'relationship_entity_from_field:field_ding_eresource_category-node-taxonomy_term_1',
       ),
       'override_title' => 0,
       'override_title_text' => '',
+      'override_title_heading' => 'h2',
     );
     $pane->cache = array(
-      'method' => 'simple',
+      'method' => 'lazy',
       'settings' => array(
-        'lifetime' => '600',
-        'granularity' => 'context',
+        'load_strategy' => 'pane-visible',
+        'show_spinner' => 1,
+        'load_text' => '',
       ),
     );
     $pane->style = array(
@@ -199,11 +169,11 @@ function ding_eresource_default_page_manager_handlers() {
     );
     $pane->css = array();
     $pane->extras = array();
-    $pane->position = 2;
-    $pane->locks = '';
-    $pane->uuid = 'fb3893c4-f99a-47a1-989f-46b5483382fd';
-    $display->content['new-fb3893c4-f99a-47a1-989f-46b5483382fd'] = $pane;
-    $display->panels['content'][2] = 'new-fb3893c4-f99a-47a1-989f-46b5483382fd';
+    $pane->position = 1;
+    $pane->locks = array();
+    $pane->uuid = '3612f537-0123-4c9d-a1cd-36f7214176a5';
+    $display->content['new-3612f537-0123-4c9d-a1cd-36f7214176a5'] = $pane;
+    $display->panels['attachment_1_1'][1] = 'new-3612f537-0123-4c9d-a1cd-36f7214176a5';
   $display->hide_title = PANELS_TITLE_PANE;
   $display->title_pane = 'new-9585f181-cf01-4270-a7fd-b981246d6e2c';
   $handler->conf['display'] = $display;
@@ -281,7 +251,14 @@ function ding_eresource_default_page_manager_handlers() {
       'override_title_text' => '',
       'override_title_heading' => 'h2',
     );
-    $pane->cache = array();
+    $pane->cache = array(
+      'method' => 'lazy',
+      'settings' => array(
+        'load_strategy' => 'page-loaded',
+        'show_spinner' => 1,
+        'load_text' => '',
+      ),
+    );
     $pane->style = array(
       'settings' => NULL,
     );

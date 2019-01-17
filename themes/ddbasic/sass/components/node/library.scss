@@ -51,11 +51,22 @@
       }
     }
   }
+  .field-name-field-ding-library-title-image {
+    img {
+      float: right;
+    }
+  }
   a.opening-hours-toggle {
     position: static;
     width: getColumn(9);
     margin-top: -20px;
     margin-left: getColumn(3) + getGutter(12);
+
+    &.js-expanded {
+      + .libraries-opening-hours {
+        display: block;
+      }
+    }
 
     // Tablet
     @include media($tablet) {
