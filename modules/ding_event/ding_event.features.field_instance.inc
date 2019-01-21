@@ -89,7 +89,7 @@ function ding_event_field_default_field_instances() {
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_select',
-      'weight' => 10,
+      'weight' => 8,
     ),
   );
 
@@ -512,6 +512,7 @@ function ding_event_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-ding_event-field_ding_event_list_image'
   $field_instances['node-ding_event-field_ding_event_list_image'] = array(
     'bundle' => 'ding_event',
     'deleted' => 0,
@@ -717,7 +718,7 @@ function ding_event_field_default_field_instances() {
         ),
       ),
       'type' => 'addressfield_standard',
-      'weight' => 4,
+      'weight' => 5,
     ),
   );
 
@@ -1380,7 +1381,7 @@ function ding_event_field_default_field_instances() {
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_select',
-      'weight' => 5,
+      'weight' => 6,
     ),
   );
 
