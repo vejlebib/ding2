@@ -24,9 +24,11 @@ function ting_search_carousel_uninstall() {
  */
 function ting_search_carousel_enable() {
   // Add our view to the list of allowed panes in the IPE.
-  $selected_panes = _ding_ipe_filter_selected_panes();
-  $selected_panes['materialer:carousel'] = 'materialer:carousel';
-  variable_set('ding_ipe_filter_panes_selected', $selected_panes);
+  if (module_exists('ding_ipe_filter')) {
+    $selected_panes = _ding_ipe_filter_selected_panes();
+    $selected_panes['materialer:carousel'] = 'materialer:carousel';
+    variable_set('ding_ipe_filter_panes_selected', $selected_panes);
+  }
 }
 
 /**
