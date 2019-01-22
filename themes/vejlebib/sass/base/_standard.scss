@@ -2,6 +2,14 @@
  * Styling of standard HTML elements.
  */
 
+body {
+  // gtranslate sets position: relative; on body element resulting in absolute
+  // positioned elements witin the body context getting push down by the top
+  // margin on the body-element. Since it's added inline on the element the
+  // easiest approach is to override it here with important.
+  position: static !important;
+}
+
 h1 {
   color: $color-primary;
 }
