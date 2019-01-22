@@ -416,7 +416,7 @@ Once the fee is paid, it is not possible to cancel the payment.';
     'logo_path' => 'profiles/ding2/themes/vejlebib/images/logo.png',
     'default_favicon' => 1,
     'favicon_path' => '',
-    'ting_object_disable_overlay' => 0,
+    'ting_object_disable_overlay' => 1,
   );
   $export['theme_vejlebib_settings'] = $strongarm;
 
