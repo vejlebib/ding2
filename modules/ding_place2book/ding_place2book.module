@@ -442,61 +442,73 @@ function ding_place2book_get_event_state($event_maker_id, $event_id) {
     $p2b = ding_place2book_instance();
     $event = $p2b->getEvent($event_maker_id, $event_id);
     $meta_data = $event->meta_data;
+    $event_state = $meta_data->event_state;
     $start = strtotime($event->begin_at);
+    $end = strtotime($event->end_at);
+    $available_tickets = $meta_data->available_tickets;
+    $now = time();
 
-    if (time() < $start) {
-      // Go through the event state.
-      switch ($meta_data->event_state) {
-        case 'published':
-          // Check if waiting list is activated.
-          switch ($meta_data->waiting_list) {
-            case 'true':
-              $status = 'waiting-list';
-              break;
+    // Try to derive an event status for the event by looking at the p2b event
+    // state, start date, available tickets and ticket types sales periods.
+    // See: http://developer.place2book.com/v1/events/ for a list possible p2b
+    // event states and what they mean.
+    $status = '';
+    // Start out by rulling out some easy conditions looking at the events start
+    // and end date.
+    if ($now >= $start && $now <= $end) {
+      // The event is currently taking place and ticket sales is over.
+      $status = 'closed';
+    }
+    elseif ($now > $end) {
+      // The event has already taking place.
+      $status = 'event-over';
+    }
+    elseif ($event_state === 'published') {
+      // Now we know the event is not passive and is not over/taking place. If
+      // it's published it can now either be open, upcoming, closed or waiting
+      // list. Find out which by looking at the tickets and ticket types.
+      if ($available_tickets > 0 || strval($available_tickets) == '∞') {
+        // We have available tickets, so we need to determine sales status.
+        $prices = $p2b->getPrices($event_maker_id, $event_id);
 
-            default:
-              // Go through the sales status.
-              switch ($meta_data->sales_status) {
-                case 'open':
-                  // Check if there is any available tickets for sale.
-                  if ($meta_data->available_tickets > 0 || strval($meta_data->available_tickets) == '∞') {
-                    $status = 'open';
-                  }
-                  else {
-                    $status = 'sold-out';
-                  }
-                  break;
+        // Some events, for example those migrated from the old API, will have
+        // sales period on the event and not on the individual tickets. We will
+        // also take this period into account by adding it as a pseudo price.
+        if (isset($event->sale_open_at) && isset($event->sale_close_at)) {
+          $prices[] = (object) [
+            'sale_begin_at' => $event->sale_open_at,
+            'sale_end_at' => $event->sale_close_at,
+          ];
+        }
 
-                default:
-                  $status = 'closed';
-                  break;
-              }
-              break;
+        foreach ($prices as $price) {
+          $price_sale_begin = strtotime($price->sale_begin_at);
+          $price_sale_end = strtotime($price->sale_end_at);
+          if ($now >= $price_sale_begin && $now <= $price_sale_end) {
+            // We have found an open sales period. No need to continue iterating
+            // the ticket types.
+            $status = 'open';
+            break;
           }
-          break;
-
-        case 'pause':
-          // Go through the sales status.
-          switch ($meta_data->sales_status) {
-            case 'upcoming':
-              $status = 'upcoming';
-              break;
-
-            default:
-              $status = 'closed';
-              break;
+          elseif ($now <= $price_sale_begin) {
+            // We haven't found any open sales period yet,q but at least there's
+            // an upcoming, so set that status for now.
+            $status = 'upcoming';
           }
-          break;
-
-        default:
-          $status = 'closed';
-          break;
+        }
+        // If no upcoming or open sales period was found for the published event
+        // we consider the sales status to be closed. In these cases there might
+        // be a waiting list so we look for that before setting status closed.
+        if (empty($status)) {
+          $status = !empty($meta_data->waiting_list) ? 'waiting-list' : 'closed';
+        }
+      }
+      else {
+        $status = 'sold-out';
       }
     }
-    else {
-      $status = 'event-over';
-      $class = '';
-
+    elseif ($event_state === 'pause') {
+      $status = 'closed';
     }
 
     switch ($status) {
@@ -506,7 +518,7 @@ function ding_place2book_get_event_state($event_maker_id, $event_id) {
         break;
 
       case 'closed':
-        $data = t('The event is closed for admission');
+        $data = t('Not open for ticket sale');
         $class = 'ticket-notice';
         break;
 
@@ -531,7 +543,9 @@ function ding_place2book_get_event_state($event_maker_id, $event_id) {
         break;
     }
 
-    $output = "<span class='place2book button {$class}'>{$data}</span>";
+    if (!empty($status)) {
+      $output = "<span class='place2book button {$class}'>{$data}</span>";
+    }
   }
   catch (Exception $ex) {
     watchdog_exception('ding_place2book', $ex);
