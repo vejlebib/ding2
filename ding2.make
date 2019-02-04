@@ -13,6 +13,9 @@ projects[admin_menu][version] = "3.0-rc5"
 projects[admin_views][subdir] = "contrib"
 projects[admin_views][version] = "1.6"
 
+projects[antibot][subdir] = "contrib"
+projects[antibot][version] = "1.2"
+
 projects[apc][subdir] = "contrib"
 projects[apc][version] = "1.0-beta4"
 
@@ -155,7 +158,7 @@ projects[htmlmail][subdir] = "contrib"
 projects[htmlmail][version] = "2.65"
 
 projects[honeypot][subdir] = "contrib"
-projects[honeypot][version] = "1.21"
+projects[honeypot][version] = "1.25"
 
 projects[image_resize_filter][subdir] = "contrib"
 projects[image_resize_filter][version] = "1.14"
@@ -409,9 +412,6 @@ projects[uuid][download][type] = "git"
 projects[uuid][download][url] = "http://git.drupal.org/project/uuid.git"
 projects[uuid][download][revision] = "3f4d9fb"
 
-projects[uuid_features][subdir] = "contrib"
-projects[uuid_features][version] = "1.0-alpha4"
-
 projects[variable][subdir] = "contrib"
 projects[variable][version] = "2.5"
 
@@ -469,6 +469,8 @@ projects[workflow][version] = "2.5"
 projects[workflow][patch][] = "http://www.drupal.org/files/issues/features_import-2484297-10.patch"
 ; Prevent fatal errors on cron when using Scheduler, https://www.drupal.org/node/2499193.
 projects[workflow][patch][] = "https://www.drupal.org/files/issues/workflow-php_fatal_error_call-2499193-7-2.5.patch"
+; Add index to workflow_history to reduce query time, https://www.drupal.org/project/workflow/issues/2569801
+projects[workflow][patch][] = "https://www.drupal.org/files/issues/workflow-add_nid_index-2569801-3.patch"
 
 projects[wysiwyg][subdir] = "contrib"
 projects[wysiwyg][version] = "2.5"
