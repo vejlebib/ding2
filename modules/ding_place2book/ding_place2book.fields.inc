@@ -218,6 +218,10 @@ function ding_place2book_field_widget_form(&$form, &$form_state, $field, $instan
           '#default_value' => !empty($price) ? $price->name : $price_name,
         );
 
+        if (!empty($price->sold_tickets)) {
+          $element['place2book']['prices_wrapper']['prices'][$key]['name']['#description'] = t('NB: This ticket type has sold tickets and can not be removed.');
+        }
+
         $element['place2book']['prices_wrapper']['prices'][$key]['value'] = array(
           '#type' => 'textfield',
           '#default_value' => !empty($price) ? $price->value : '',
@@ -250,6 +254,7 @@ function ding_place2book_field_widget_form(&$form, &$form_state, $field, $instan
           '#event_maker_id' => $event_maker_id,
           '#submit' => array('ding_place2book_prices_remove_submit'),
           '#limit_validation_errors' => array(),
+          '#disabled' => !empty($price->sold_tickets),
           '#ajax' => array(
             'wrapper' => 'ding-place2book-prices-wrapper',
             'callback' => 'ding_p2b_prices_remove_ajax_handler',
@@ -412,6 +417,37 @@ function ding_place2book_field_presave($entity_type, $entity, $field, $instance,
                 'synchronize' => $settings['synchronize'],
               ),
             );
+          }
+        }
+      }
+      break;
+  }
+}
+
+/**
+ * Implements hook_field_delete().
+ */
+function ding_place2book_field_delete($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  switch ($field['type']) {
+    case 'ding_p2b':
+      if (!empty($items)) {
+        $settings = reset($items);
+        if ($settings['synchronize'] && !empty($settings['event_id'])) {
+          $event_id = $settings['event_id'];
+          $event_maker_id = $settings['event_maker_id'];
+          try {
+            $p2b = ding_place2book_instance();
+            $prices = $p2b->getPrices($event_maker_id, $event_id);
+            foreach ($prices as $price) {
+              $p2b->deletePrice($event_maker_id, $event_id, $price->id);
+            }
+            $p2b->deleteEvent($event_maker_id, $event_id);
+          }
+          catch (Exception $ex) {
+            watchdog_exception('ding_place2book', $ex, t('Error appeared on deleting node: nid - :nid, title - :title.', array(
+              ':nid' => $node->nid,
+              ':title' => $node->title,
+            )));
           }
         }
       }
