@@ -242,6 +242,28 @@ function _ding_place2book_attach_node_deletion_warning(&$form, $warning_message)
 }
 
 /**
+ * Implements hook_ding_app_content_rss_booking_url_alter().
+ */
+function ding_place2book_ding_app_content_rss_booking_url_alter(&$booking_url, $node) {
+  $field_place2book = field_get_items('node', $node, 'field_place2book');
+
+  if (empty($field_place2book) || !$field_place2book[0]['synchronize']) {
+    return;
+  }
+
+  list($event_id, $event_maker_id) = array_values($field_place2book[0]);
+
+  try {
+    $p2b = ding_place2book_instance();
+    $event = $p2b->getEvent($event_maker_id, $event_id);
+    $booking_url = $event->links->sales_location;
+  }
+  catch (Exception $ex) {
+    watchdog_exception('ding_place2book', $ex, t('Error appeared on getting data from p2b.'));
+  }
+}
+
+/**
  * Creates and initializes instance of P2b class.
  *
  * @return object

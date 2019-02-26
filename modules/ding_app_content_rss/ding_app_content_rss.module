@@ -171,7 +171,8 @@ function ding_app_content_rss_views_rss_item_elements() {
     ),
     'content-rss:booking-url' => array(
       'title' => t('Booking URL'),
-      'description' => t('Link to tickets.'),
+      'description' => t('The node id of a type which can have a booking URL'),
+      'preprocess functions' => array('ding_app_content_rss_preprocess_booking_url'),
     ),
     'content-rss:promoted' => array(
       'title' => t('Promoted to front page'),
@@ -213,4 +214,26 @@ function ding_app_content_rss_preprocess_item_resources(&$variables) {
 
   // Replace the existing values with the new array.
   $variables['elements']['0']['value'] = $value;
+}
+
+/**
+ * Preprocess for <content-rss:booking-url> element.
+ */
+function ding_app_content_rss_preprocess_booking_url(&$variables) {
+  $node = node_load($variables['elements'][0]['value']);
+  $wrapper = entity_metadata_wrapper('node', $node);
+
+  $booking_url = '';
+
+  // If the node has a booking URL manually entered in the ticket link field
+  // this should be used and override any provided by other modules.
+  if (!empty($wrapper->field_ding_event_ticket_link->value())) {
+    $booking_url = $wrapper->field_ding_event_ticket_link->url->value();
+  }
+  else {
+    drupal_alter('ding_app_content_rss_booking_url', $booking_url, $node);
+  }
+
+  // Replace the existing values with the new array.
+  $variables['elements']['0']['value'] = $booking_url;
 }
