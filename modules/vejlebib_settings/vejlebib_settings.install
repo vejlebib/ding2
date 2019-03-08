@@ -418,3 +418,11 @@ function vejlebib_settings_update_7019() {
 function vejlebib_settings_update_7044() {
   module_disable(array('toolbar'));
 }
+
+/**
+ * Delete left over ting_infomedia field.
+ */
+function vejlebib_settings_update_7045() {
+  field_delete_field('ting_infomedia');
+  field_purge_batch(10);
+}
