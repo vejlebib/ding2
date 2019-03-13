@@ -929,6 +929,8 @@ function ding_event_field_default_field_instances() {
         'label' => 'above',
         'module' => 'text',
         'settings' => array(),
+        'type' => 'number_integer',
+        'weight' => 8,
         'type' => 'text_default',
         'weight' => 3,
       ),
