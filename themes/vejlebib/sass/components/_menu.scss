@@ -2,6 +2,11 @@
  * Vejlebib menu styling.
  */
 
+/**
+ * Note: this css was for our custom menu block for secondary menu block, we
+ * used to get left menu. Mow we're using the default DDB CMS menu structure,
+ * but the styling is kept, since it could possible be used in the future.
+ */
 .pane-menu-block-menu-block-secondary {
   // Nested styling.
   ul li ul {
