@@ -5,8 +5,34 @@
 // ==========================================================================
 // Staff lists
 // ==========================================================================
-.pane-vejlebib-ding-staff-ding-staff-list-all {
+.pane-vejlebib-ding-staff-ding-staff-list-all,
+.pane-vejlebib-ding-staff-ding-staff-list-library {
   .views-exposed-form .views-exposed-widget {
     float: none;
+  }
+
+  .staff-position,
+  .staff-phone,
+  .staff-departments,
+  .staff-email {
+    color: $charcoal-opacity-dark;
+  }
+
+  .staff-list-item {
+    text-align: center;
+
+    img {
+      display: inline;
+    }
+  }
+
+  // Center the exposed filter select.
+  .view-filters form {
+    width: 400px;
+    margin: 0 auto;
+
+    label {
+      margin-bottom: 10px;
+    }
   }
 }

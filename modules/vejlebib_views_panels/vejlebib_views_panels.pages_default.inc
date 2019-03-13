@@ -265,7 +265,10 @@ function vejlebib_views_panels_default_page_manager_pages() {
   $page->admin_title = 'Ding staff';
   $page->admin_description = '';
   $page->path = 'personale';
-  $page->access = array();
+  $page->access = array(
+    'type' => 'none',
+    'settings' => NULL,
+  );
   $page->menu = array();
   $page->arguments = array();
   $page->conf = array(
@@ -353,7 +356,10 @@ function vejlebib_views_panels_default_page_manager_pages() {
   $page->admin_title = 'Vejlebib frontpage';
   $page->admin_description = '';
   $page->path = 'vejlebib_frontpage';
-  $page->access = array();
+  $page->access = array(
+    'type' => 'none',
+    'settings' => NULL,
+  );
   $page->menu = array();
   $page->arguments = array();
   $page->conf = array(

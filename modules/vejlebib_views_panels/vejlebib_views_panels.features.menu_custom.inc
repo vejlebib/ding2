@@ -21,6 +21,5 @@ function vejlebib_views_panels_menu_default_menu_custom() {
   t('A menu placed right under the search bar, intended to hold links to important information for the users of the website.');
   t('Information menu');
 
-
   return $menus;
 }
