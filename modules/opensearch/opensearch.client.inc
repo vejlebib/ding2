@@ -92,6 +92,13 @@ function opensearch_get_objects(array $ids, $local = FALSE) {
     $request->setProfile($profile);
   }
 
+  if ($local) {
+    // Ensure local ids are integer values and not strings. Else we will not
+    // hit the cache, since they will be converted to integers in our caching
+    // logic in opensearch_execute(), if they are passed as strings.
+    $ids = array_map('intval', $ids);
+  }
+
   // Opensearch getObject complains if it has to return more than 200 records,
   // with the message 'getObject can fetch up to 200 records. '. But it seems
   // it also have trouble fething over 169 records, which appears to be a bug.
@@ -105,7 +112,10 @@ function opensearch_get_objects(array $ids, $local = FALSE) {
     else {
       $request->setObjectIds($chunk);
     }
-    $objects += opensearch_execute($request);
+    $result = opensearch_execute($request);
+    if (is_array($result)) {
+      $objects += $result;
+    }
   }
 
   return $objects;
@@ -431,9 +441,7 @@ function opensearch_execute(TingClientRequest $request) {
 
     // Try to retrieve a cached response for each request. Entries which does
     // not have cached data will get the value FALSE for easy subsequent
-    // filtering. Note that the input array to the map function uses "+" and not
-    // the array_merge function as merge will reset the keys when they are
-    // numeric which is the case with local_ids.
+    // filtering.
     $object_ids = array_map(function ($object_request) {
       if ($cached_response = _opensearch_cache($object_request)) {
         // A response for a single object is an array with a single object so
@@ -443,23 +451,50 @@ function opensearch_execute(TingClientRequest $request) {
       else {
         return FALSE;
       }
-    }, $object_id_requests + $local_id_requests);
-    $cached_objects = array_filter($object_ids);
+    }, $object_id_requests);
+    $cached_object_ids = array_filter($object_ids);
 
-    // Ids that we still need to be fetched will not be appearing in the list of
-    // cached objects.
-    $uncached_ids = array_diff_key($object_ids, $cached_objects);
+    $local_ids = array_map(function ($object_request) {
+      if ($cached_response = _opensearch_cache($object_request)) {
+        // A response for a single object is an array with a single object so
+        // just return the object.
+        return array_shift($cached_response);
+      }
+      else {
+        return FALSE;
+      }
+    }, $local_id_requests);
+    $cached_local_ids = array_filter($local_ids);
+
+    // Ids that we still need to be fetched will not be appearing in the lists
+    // of cached objects.
+    $uncached_object_ids = array_diff_key($object_ids, $cached_object_ids);
+    if (!empty($uncached_object_ids)) {
+      $request->setObjectIds(array_keys($uncached_object_ids));
+    }
+    $uncached_local_ids = array_diff_key($local_ids, $cached_local_ids);
+    if (!empty($uncached_local_ids)) {
+      $request->setLocalIds(array_keys($uncached_local_ids));
+    }
+
+    // The $cached_local_ids array is now keyed by local id and we needed that
+    // to get the uncached local ids. But in the response all objects should be
+    // keyed PID, so here we convert the array of cached "local" objects to be
+    // keyed by their PID.
+    $local_object_pids = [];
+    foreach ($cached_local_ids as $object) {
+      $local_object_pids[] = $object->id;
+    }
+    $cached_local_ids = array_combine($local_object_pids, $cached_local_ids);
+
+    $cached_objects = $cached_object_ids + $cached_local_ids;
 
     // If there are no ids to fetch then there is no need to issue a request.
     // Just return the array of cached objects.
-    if (empty($uncached_ids)) {
+    if (empty($uncached_object_ids) && empty($uncached_local_ids)) {
       _opensearch_cache($request, $cached_objects);
       return $cached_objects;
     }
-
-    // Re-set uncached ids in the request so the missing will be fetched from
-    // the data-well.
-    $request->setObjectIds(array_keys($uncached_ids));
   }
 
   try {
