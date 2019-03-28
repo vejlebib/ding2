@@ -653,22 +653,18 @@ function _opensearch_predict_cache(array $collections, TingClientRequest $reques
         $object_request->setProfile($profile);
       }
 
-      // Build both requests for local id and PID.
-      $object_id_request = clone $object_request;
-      $object_id_request->setObjectId($object->id);
-      $local_id_request = clone $object_request;
-      $local_id_request->setLocalId($object->localId);
-
-      // Build the response that matches the request and put it into cache.
-      array_map(function (TingClientObjectRequest $object_request) use ($object) {
-        $params = module_invoke_all('opensearch_pre_execute', $object_request);
-        if (!empty($params)) {
-          $object_request->setParameters($params);
-        }
-        $object_response = array();
-        $object_response[$object->id] = clone $object;
-        _opensearch_cache($object_request, $object_response);
-      }, [$object_id_request, $local_id_request]);
+      // Save the object in cache as a result from single object request based
+      // on PID. Note that we can't also save it as a result from a request
+      // based on local id, since we can't be sure that this is the right object
+      // for the local id.
+      $object_request->setObjectId($object->id);
+      $params = module_invoke_all('opensearch_pre_execute', $object_request);
+      if (!empty($params)) {
+        $object_request->setParameters($params);
+      }
+      $object_response = array();
+      $object_response[$object->id] = clone $object;
+      _opensearch_cache($object_request, $object_response);
     }
   }
 }
