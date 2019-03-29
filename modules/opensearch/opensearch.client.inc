@@ -531,26 +531,59 @@ function opensearch_execute(TingClientRequest $request) {
       }
     }
 
-    // Merge any cached objecst that we found earlier with the result from the
-    // request. Note that we do this after invoking post_execute, since the
-    // $response and $res need to correspond.
+    // For object requests we have special handling when settings the cache.
     if ($request instanceof TingClientObjectRequest) {
+      foreach ($response as $pid => $object) {
+        $object_request = clone $request;
+        $object_response = [];
+        $object_response[$pid] = $object;
+
+        // We should always be able to set a cache entry for a request based
+        // on pid, since that id is unique and we know we have the right
+        // object.
+        $object_request->setLocalIds(NULL);
+        $object_request->setObjectId($pid);
+        _opensearch_cache($object_request, $object_response);
+
+        // If the objects PID is not in the list of original requested object
+        // PID's it means that the request for this object was based on a
+        // local id. In this case we are sure that the we have the correct
+        // object for the local id and we can safely set a cache entry for the
+        // local id request also.
+        if (!in_array($pid, $original_object_ids)) {
+          $object_request->setObjectIds(NULL);
+          $object_request->setLocalId($object->localId);
+          _opensearch_cache($object_request, $object_response);
+        }
+      }
+
+      // Merge any cached objecst that we found earlier with the result from the
+      // request. Note that we do this after invoking post_execute, since the
+      // $response and $res need to correspond.
       // The map uses ids as keys. Order does not matter for object requests.
       $response = array_merge($cached_objects, $response);
 
-      // Restore the original ids on the request so that our generated cache id
-      // will point to the correct response.
-      if ($original_object_ids) {
-        $request->setObjectIds($original_object_ids);
+      // If the $response merged with the cached objects give more than 1 object
+      // we will also set a cache entry for that $request for faster access.
+      if (count($response) > 1) {
+        // Restore the original ids on the request so that our generated cache
+        // id will point to the correct response.
+        if ($original_object_ids) {
+          $request->setObjectIds($original_object_ids);
+        }
+        if ($original_local_ids) {
+          $request->setLocalIds($original_local_ids);
+        }
+        _opensearch_cache($request, $response);
       }
-      if ($original_local_ids) {
-        $request->setLocalIds($original_local_ids);
-      }
+
+    }
+    else {
+      // Update the cache with the raw response object from the data well for
+      // faster processing. Also set the static cache.
+      _opensearch_cache($request, $response);
     }
 
-    // Update the cache with the raw response object from the data well for
-    // faster processing. Also set the static cache.
-    _opensearch_cache($request, $response);
 
     // To speed up the entity module, which will trigger an search for each
     // collection. Try and predict the search request an warm up the cache.
@@ -653,22 +686,18 @@ function _opensearch_predict_cache(array $collections, TingClientRequest $reques
         $object_request->setProfile($profile);
       }
 
-      // Build both requests for local id and PID.
-      $object_id_request = clone $object_request;
-      $object_id_request->setObjectId($object->id);
-      $local_id_request = clone $object_request;
-      $local_id_request->setLocalId($object->localId);
-
-      // Build the response that matches the request and put it into cache.
-      array_map(function (TingClientObjectRequest $object_request) use ($object) {
-        $params = module_invoke_all('opensearch_pre_execute', $object_request);
-        if (!empty($params)) {
-          $object_request->setParameters($params);
-        }
-        $object_response = array();
-        $object_response[$object->id] = clone $object;
-        _opensearch_cache($object_request, $object_response);
-      }, [$object_id_request, $local_id_request]);
+      // Save the object in cache as a result from single object request based
+      // on PID. Note that we can't also save it as a result from a request
+      // based on local id, since we can't be sure that this is the right object
+      // for the local id.
+      $object_request->setObjectId($object->id);
+      $params = module_invoke_all('opensearch_pre_execute', $object_request);
+      if (!empty($params)) {
+        $object_request->setParameters($params);
+      }
+      $object_response = array();
+      $object_response[$object->id] = clone $object;
+      _opensearch_cache($object_request, $object_response);
     }
   }
 }
