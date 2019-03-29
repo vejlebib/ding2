@@ -92,13 +92,6 @@ function opensearch_get_objects(array $ids, $local = FALSE) {
     $request->setProfile($profile);
   }
 
-  if ($local) {
-    // Ensure local ids are integer values and not strings. Else we will not
-    // hit the cache, since they will be converted to integers in our caching
-    // logic in opensearch_execute(), if they are passed as strings.
-    $ids = array_map('intval', $ids);
-  }
-
   // Opensearch getObject complains if it has to return more than 200 records,
   // with the message 'getObject can fetch up to 200 records. '. But it seems
   // it also have trouble fething over 169 records, which appears to be a bug.
@@ -125,15 +118,15 @@ function opensearch_get_objects(array $ids, $local = FALSE) {
  * Performs a search against the well.
  *
  * @param string $query
- *   The search query
+ *   The search query.
  * @param int $page
- *   The page number to retrieve search results for
+ *   The page number to retrieve search results for.
  * @param int $results_per_page
- *   The number of results to include per page
+ *   The number of results to include per page.
  * @param array $options
  *   Options to pass to the search. Possible options are:
  *    - facets: Array of facet names for which to return results. Default:
- *      facet.subject, facet.creator, facet.type, facet.date, facet.language
+ *      facet.subject, facet.creator, facet.type, facet.date, facet.language.
  *    - numFacets: The number of terms to include with each facet. Default: 10
  *    - sort: The key to sort the results by. Default: "" (corresponds to
  *      relevance). The possible values are defined by the sortType type
@@ -390,8 +383,14 @@ function opensearch_get_request_factory() {
  * @param \TingClientRequest $request
  *   The request.
  *
- * @return \TingClientSearchResult|bool
+ * @return \TingClientSearchResult|\TingClientObjectCollection|array|bool|null
  *   Result of the request or false if an error occurs.
+ *   If $request is a TingClientSearchRequest a TingClientSearchResult result
+ *   object is returned.
+ *   If $request is a TingClientCollectionRequest a TingClientObjectCollection
+ *   result object is returned.
+ *   If $request is a TingClientObjectRequest an array of TingClientObject
+ *   result objects is returned or NULL if nothing was found.
  */
 function opensearch_execute(TingClientRequest $request) {
   // Get additional parameters from other modules.
@@ -421,9 +420,23 @@ function opensearch_execute(TingClientRequest $request) {
   // request for all these objects combined in the cache but they might be
   // cached individually.
   $cached_objects = [];
+  $original_object_ids = [];
+  $original_local_ids = [];
   if ($request instanceof TingClientObjectRequest) {
-    // Build maps of singular requests for objects by id or local id.
     $object_ids = !empty($request->getObjectIds()) ? $request->getObjectIds() : array();
+    $local_ids = !empty($request->getLocalIds()) ? $request->getLocalIds() : array();
+
+    // Store the original object_ids and local_ids identifier arrays, so that we
+    // can reconstruct the original request later on when genrating cache key
+    // for the response.
+    if ($object_ids) {
+      $original_object_ids = $request->getObjectIds();
+    }
+    if ($local_ids) {
+      $original_local_ids = $request->getLocalIds();
+    }
+
+    // Build maps of singular requests for objects by id or local id.
     $object_ids = array_combine($object_ids, $object_ids);
     $object_id_requests = array_map(function($id) use ($request) {
       $object_request = clone $request;
@@ -431,7 +444,6 @@ function opensearch_execute(TingClientRequest $request) {
       return $object_request;
     }, $object_ids);
 
-    $local_ids = !empty($request->getLocalIds()) ? $request->getLocalIds() : array();
     $local_ids = array_combine($local_ids, $local_ids);
     $local_id_requests = array_map(function($id) use ($request) {
       $object_request = clone $request;
@@ -519,13 +531,21 @@ function opensearch_execute(TingClientRequest $request) {
       }
     }
 
-    // This have to be execute after the post_execute hook as the $res and
-    // $response may not match i size and give some strange requirements in the
-    // hooks.
+    // Merge any cached objecst that we found earlier with the result from the
+    // request. Note that we do this after invoking post_execute, since the
+    // $response and $res need to correspond.
     if ($request instanceof TingClientObjectRequest) {
-      // Merge in any cached objects. The map uses ids as keys. The order does
-      // not matter for object requests.
+      // The map uses ids as keys. Order does not matter for object requests.
       $response = array_merge($cached_objects, $response);
+
+      // Restore the original ids on the request so that our generated cache id
+      // will point to the correct response.
+      if ($original_object_ids) {
+        $request->setObjectIds($original_object_ids);
+      }
+      if ($original_local_ids) {
+        $request->setLocalIds($original_local_ids);
+      }
     }
 
     // Update the cache with the raw response object from the data well for
