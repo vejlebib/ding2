@@ -41,6 +41,17 @@ function vejlebib_features_overrides_features_override_default_overrides() {
   $overrides["page_manager_handlers.site_template_panel_context.conf|display|panels|footer|6"] = 'new-f720f7d6-6151-4704-8ed5-6f3b59a3bfc8';
 
   // Exported overrides for: page_manager_pages
+  $overrides["page_manager_pages.ding_eresources.menu|name"] = 'main-menu';
+  $overrides["page_manager_pages.ding_eresources.menu|parent"] = array(
+    'type' => 'none',
+    'title' => '',
+    'name' => 'navigation',
+    'weight' => 0,
+  );
+  $overrides["page_manager_pages.ding_eresources.menu|title"] = 'Netmedier';
+  $overrides["page_manager_pages.ding_eresources.menu|type"] = 'normal';
+  $overrides["page_manager_pages.ding_eresources.menu|weight"] = -45;
+  $overrides["page_manager_pages.ding_eresources.path"] = 'netmedier';
   $overrides["page_manager_pages.ding_staff_library.default_handlers|page_ding_staff_library_panel_context|conf|display|content|new-0911dfbe-f34c-484a-b9e3-7a6c4ffa7192"] = (object) array(
       'pid' => 'new-0911dfbe-f34c-484a-b9e3-7a6c4ffa7192',
       'panel' => 'main_content',

@@ -51,6 +51,19 @@ function vejlebib_features_overrides_default_page_manager_handlers_alter(&$data)
  * Implements hook_default_page_manager_pages_alter().
  */
 function vejlebib_features_overrides_default_page_manager_pages_alter(&$data) {
+  if (isset($data['ding_eresources'])) {
+    $data['ding_eresources']->menu['name'] = 'main-menu'; /* WAS: '' */
+    $data['ding_eresources']->menu['parent'] = array(
+      'type' => 'none',
+      'title' => '',
+      'name' => 'navigation',
+      'weight' => 0,
+    ); /* WAS: '' */
+    $data['ding_eresources']->menu['title'] = 'Netmedier'; /* WAS: '' */
+    $data['ding_eresources']->menu['type'] = 'normal'; /* WAS: '' */
+    $data['ding_eresources']->menu['weight'] = -45; /* WAS: '' */
+    $data['ding_eresources']->path = 'netmedier'; /* WAS: 'e-materialer' */
+  }
   if (isset($data['ding_staff_library'])) {
     $data['ding_staff_library']->default_handlers['page_ding_staff_library_panel_context']->conf['display']->content['new-0911dfbe-f34c-484a-b9e3-7a6c4ffa7192'] = (object) array(
           'pid' => 'new-0911dfbe-f34c-484a-b9e3-7a6c4ffa7192',
