@@ -48,18 +48,30 @@ function vejlebib_settings_field_group_info_alter(&$data) {
 function vejlebib_settings_image_default_styles() {
   $styles = array();
 
+  // Exported image style: vejlebib_ding_staff.
+  $styles['vejlebib_ding_staff'] = array(
+    'label' => 'Vejlebib ding staff',
+    'effects' => array(
+      1 => array(
+        'name' => 'manualcrop_crop_and_scale',
+        'data' => array(
+          'width' => 250,
+          'height' => 250,
+          'upscale' => 1,
+          'respectminimum' => 0,
+          'onlyscaleifcrop' => 0,
+          'style_name' => 'vejlebib_ding_staff',
+        ),
+        'weight' => 0,
+      ),
+    ),
+  );
+
   // Exported image style: vejlebib_list.
   $styles['vejlebib_list'] = array(
-    'name' => 'vejlebib_list',
     'label' => 'Vejlebib list',
     'effects' => array(
       15 => array(
-        'label' => 'Manual Crop: Custom crop',
-        'help' => 'Crop a freely user-selected area.',
-        'effect callback' => 'manualcrop_crop_effect',
-        'form callback' => 'manualcrop_crop_form',
-        'summary theme' => 'manualcrop_crop_summary',
-        'module' => 'manualcrop',
         'name' => 'manualcrop_crop',
         'data' => array(
           'width' => 150,
@@ -71,13 +83,6 @@ function vejlebib_settings_image_default_styles() {
         'weight' => 0,
       ),
       14 => array(
-        'label' => 'Skalér og beskær',
-        'help' => 'Skalering og beskæring bevarer billedets højde-bredde-forhold og beskærer derefter den største dimension. Det er nyttigt til at generere kvadratiske thumbnails uden at forvrænge billedet.',
-        'effect callback' => 'image_scale_and_crop_effect',
-        'dimensions callback' => 'image_resize_dimensions',
-        'form callback' => 'image_resize_form',
-        'summary theme' => 'image_resize_summary',
-        'module' => 'image',
         'name' => 'image_scale_and_crop',
         'data' => array(
           'width' => 150,
