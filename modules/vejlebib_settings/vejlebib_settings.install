@@ -426,3 +426,54 @@ function vejlebib_settings_update_7045() {
   field_delete_field('ting_infomedia');
   field_purge_batch(10);
 }
+
+/**
+ * Unpublish all ding_news nodes older than 01-01-2018 00:00
+ */
+function vejlebib_settings_update_7046(&$sandbox) {
+  $time_cutoff = strtotime('Monday 1. January 2018 UTC');
+
+  $query = db_select('node', 'n')
+    ->fields('n', ['nid'])
+    ->orderBy('n.nid', 'ASC')
+    ->condition('n.created', $time_cutoff, '<')
+    ->condition('n.status', 1)
+    ->condition('n.type', 'ding_news');
+
+  if (!isset($sandbox['processed'])) {
+    $sandbox['total'] = $query->countQuery()->execute()->fetchField();
+    $sandbox['processed'] = 0;
+  }
+
+  // Number of ding_news nodes to process each run.
+  $limit = 20;
+
+  // Fetch the nodes for this run.
+  $query->range(0, $limit);
+  $nids = $query->execute()->fetchCol();
+  $nodes = node_load_multiple($nids);
+
+  foreach ($nodes as $nid => $node) {
+    $node->status = 0;
+    try {
+      node_save($node);
+    }
+    catch (Exception $e) {
+      // There's really nothing we can do here. The important thing is the node
+      // gets marked as processed and we can continue with the batch job.
+    }
+    $sandbox['processed']++;
+  }
+
+  // Update bacth progress.
+  $sandbox['#finished'] = $sandbox['processed'] / $sandbox['total'];
+
+  if (empty($nodes)) {
+    $sandbox['#finished'] = TRUE;
+  }
+
+  return t('Status: !processed / !total', [
+    '!processed' => $sandbox['processed'],
+    '!total' => $sandbox['total'],
+  ]);
+}
