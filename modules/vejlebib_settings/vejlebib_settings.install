@@ -487,3 +487,10 @@ function vejlebib_settings_update_7047() {
     'unpublished_nodes_redirect',
   ]);
 }
+
+/**
+ * Enable ding_social_links module.
+ */
+function vejlebib_settings_update_7048() {
+  module_enable(['ding_social_links']);
+}

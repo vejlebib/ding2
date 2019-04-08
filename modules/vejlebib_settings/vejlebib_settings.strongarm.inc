@@ -217,6 +217,27 @@ function vejlebib_settings_strongarm() {
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
+  $strongarm->name = 'ding_social_links_facebook';
+  $strongarm->value = 'https://www.facebook.com/vejlebibliotekerne';
+  $export['ding_social_links_facebook'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'ding_social_links_instagram';
+  $strongarm->value = 'https://www.instagram.com/vejlebibliotek/?hl=da';
+  $export['ding_social_links_instagram'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'ding_social_links_twitter';
+  $strongarm->value = 'https://twitter.com/vejlebib?lang=da';
+  $export['ding_social_links_twitter'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
   $strongarm->name = 'ding_ting_frontend_group_holdings_available';
   $strongarm->value = 'open';
   $export['ding_ting_frontend_group_holdings_available'] = $strongarm;
