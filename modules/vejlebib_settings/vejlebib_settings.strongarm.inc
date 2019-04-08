@@ -441,55 +441,6 @@ function vejlebib_settings_strongarm() {
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
-  $strongarm->name = 'scheduler_publish_enable_ding_rolltab';
-  $strongarm->value = 1;
-  $export['scheduler_publish_enable_ding_rolltab'] = $strongarm;
-
-  $strongarm = new stdClass();
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'scheduler_publish_required_ding_rolltab';
-  $strongarm->value = 0;
-  $export['scheduler_publish_required_ding_rolltab'] = $strongarm;
-
-  $strongarm = new stdClass();
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'scheduler_publish_revision_ding_rolltab';
-  $strongarm->value = 0;
-  $export['scheduler_publish_revision_ding_rolltab'] = $strongarm;
-
-  $strongarm = new stdClass();
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'scheduler_publish_touch_ding_rolltab';
-  $strongarm->value = 1;
-  $export['scheduler_publish_touch_ding_rolltab'] = $strongarm;
-
-  $strongarm = new stdClass();
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'scheduler_unpublish_enable_ding_rolltab';
-  $strongarm->value = 1;
-  $export['scheduler_unpublish_enable_ding_rolltab'] = $strongarm;
-
-  $strongarm = new stdClass();
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'scheduler_unpublish_required_ding_rolltab';
-  $strongarm->value = 0;
-  $export['scheduler_unpublish_required_ding_rolltab'] = $strongarm;
-
-  $strongarm = new stdClass();
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'scheduler_unpublish_revision_ding_rolltab';
-  $strongarm->value = 0;
-  $export['scheduler_unpublish_revision_ding_rolltab'] = $strongarm;
-
-  $strongarm = new stdClass();
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
   $strongarm->name = 'terms_of_sale_da';
   $strongarm->value = 'Gebyrer bliver betalt til: Vejle Bibliotekerne, Willy Sørensens Plads 1, 7100 Vejle. E-mail: vejlebib@vejlebib.dk, CVR nr: 29189900.
 Når beløbet er indbetalt, er det ikke muligt at annullere overførslen.';
