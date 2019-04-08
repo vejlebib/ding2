@@ -10,7 +10,7 @@
 function vejlebib_settings_field_default_field_instances() {
   $field_instances = array();
 
-  // Exported field_instance: 'ting_object-ting_object-all_anvendelighed'
+  // Exported field_instance: 'ting_object-ting_object-all_anvendelighed'.
   $field_instances['ting_object-ting_object-all_anvendelighed'] = array(
     'bundle' => 'ting_object',
     'default_value' => NULL,
@@ -36,6 +36,12 @@ function vejlebib_settings_field_default_field_instances() {
         'type' => 'ting_marc_ajax_formatter',
         'weight' => 74,
       ),
+      'reference_teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'search_result' => array(
         'label' => 'above',
         'settings' => array(),
@@ -43,6 +49,12 @@ function vejlebib_settings_field_default_field_instances() {
         'weight' => 0,
       ),
       'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser_no_overlay' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
@@ -85,7 +97,7 @@ function vejlebib_settings_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'ting_object-ting_object-all_hvor'
+  // Exported field_instance: 'ting_object-ting_object-all_hvor'.
   $field_instances['ting_object-ting_object-all_hvor'] = array(
     'bundle' => 'ting_object',
     'default_value' => NULL,
@@ -111,6 +123,12 @@ function vejlebib_settings_field_default_field_instances() {
         'type' => 'ting_marc_ajax_formatter',
         'weight' => 75,
       ),
+      'reference_teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'search_result' => array(
         'label' => 'above',
         'settings' => array(),
@@ -118,6 +136,12 @@ function vejlebib_settings_field_default_field_instances() {
         'weight' => 0,
       ),
       'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser_no_overlay' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
@@ -160,7 +184,7 @@ function vejlebib_settings_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'ting_object-ting_object-all_let_tal'
+  // Exported field_instance: 'ting_object-ting_object-all_let_tal'.
   $field_instances['ting_object-ting_object-all_let_tal'] = array(
     'bundle' => 'ting_object',
     'default_value' => NULL,
@@ -186,6 +210,12 @@ function vejlebib_settings_field_default_field_instances() {
         'type' => 'ting_marc_ajax_formatter',
         'weight' => 73,
       ),
+      'reference_teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'search_result' => array(
         'label' => 'above',
         'settings' => array(),
@@ -193,6 +223,12 @@ function vejlebib_settings_field_default_field_instances() {
         'weight' => 0,
       ),
       'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser_no_overlay' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
@@ -235,7 +271,7 @@ function vejlebib_settings_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'ting_object-ting_object-all_lix_tal'
+  // Exported field_instance: 'ting_object-ting_object-all_lix_tal'.
   $field_instances['ting_object-ting_object-all_lix_tal'] = array(
     'bundle' => 'ting_object',
     'default_value' => NULL,
@@ -261,6 +297,12 @@ function vejlebib_settings_field_default_field_instances() {
         'type' => 'ting_marc_ajax_formatter',
         'weight' => 72,
       ),
+      'reference_teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'search_result' => array(
         'label' => 'above',
         'settings' => array(),
@@ -268,6 +310,12 @@ function vejlebib_settings_field_default_field_instances() {
         'weight' => 0,
       ),
       'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser_no_overlay' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
@@ -310,7 +358,7 @@ function vejlebib_settings_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'ting_object-ting_object-all_note'
+  // Exported field_instance: 'ting_object-ting_object-all_note'.
   $field_instances['ting_object-ting_object-all_note'] = array(
     'bundle' => 'ting_object',
     'default_value' => NULL,
@@ -336,6 +384,12 @@ function vejlebib_settings_field_default_field_instances() {
         'type' => 'ting_marc_ajax_formatter',
         'weight' => 76,
       ),
+      'reference_teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'search_result' => array(
         'label' => 'above',
         'settings' => array(),
@@ -343,6 +397,12 @@ function vejlebib_settings_field_default_field_instances() {
         'weight' => 0,
       ),
       'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser_no_overlay' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
@@ -385,7 +445,7 @@ function vejlebib_settings_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'ting_object-ting_object-cd_musik_529u'
+  // Exported field_instance: 'ting_object-ting_object-cd_musik_529u'.
   $field_instances['ting_object-ting_object-cd_musik_529u'] = array(
     'bundle' => 'ting_object',
     'default_value' => NULL,
@@ -411,6 +471,12 @@ function vejlebib_settings_field_default_field_instances() {
         'type' => 'ting_marc_ajax_formatter',
         'weight' => 77,
       ),
+      'reference_teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'search_result' => array(
         'label' => 'above',
         'settings' => array(),
@@ -418,6 +484,12 @@ function vejlebib_settings_field_default_field_instances() {
         'weight' => 0,
       ),
       'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser_no_overlay' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',

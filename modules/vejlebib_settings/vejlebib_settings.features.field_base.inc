@@ -10,7 +10,7 @@
 function vejlebib_settings_field_default_field_bases() {
   $field_bases = array();
 
-  // Exported field_base: 'all_anvendelighed'
+  // Exported field_base: 'all_anvendelighed'.
   $field_bases['all_anvendelighed'] = array(
     'active' => 1,
     'cardinality' => 1,
@@ -20,7 +20,6 @@ function vejlebib_settings_field_default_field_bases() {
       0 => 'ting_object',
     ),
     'field_name' => 'all_anvendelighed',
-    'foreign keys' => array(),
     'indexes' => array(),
     'locked' => 0,
     'module' => 'ting_marc',
@@ -36,7 +35,7 @@ function vejlebib_settings_field_default_field_bases() {
     'type' => 'ting_marc',
   );
 
-  // Exported field_base: 'all_hvor'
+  // Exported field_base: 'all_hvor'.
   $field_bases['all_hvor'] = array(
     'active' => 1,
     'cardinality' => 1,
@@ -46,7 +45,6 @@ function vejlebib_settings_field_default_field_bases() {
       0 => 'ting_object',
     ),
     'field_name' => 'all_hvor',
-    'foreign keys' => array(),
     'indexes' => array(),
     'locked' => 0,
     'module' => 'ting_marc',
@@ -62,7 +60,7 @@ function vejlebib_settings_field_default_field_bases() {
     'type' => 'ting_marc',
   );
 
-  // Exported field_base: 'all_let_tal'
+  // Exported field_base: 'all_let_tal'.
   $field_bases['all_let_tal'] = array(
     'active' => 1,
     'cardinality' => 1,
@@ -72,7 +70,6 @@ function vejlebib_settings_field_default_field_bases() {
       0 => 'ting_object',
     ),
     'field_name' => 'all_let_tal',
-    'foreign keys' => array(),
     'indexes' => array(),
     'locked' => 0,
     'module' => 'ting_marc',
@@ -88,7 +85,7 @@ function vejlebib_settings_field_default_field_bases() {
     'type' => 'ting_marc',
   );
 
-  // Exported field_base: 'all_lix_tal'
+  // Exported field_base: 'all_lix_tal'.
   $field_bases['all_lix_tal'] = array(
     'active' => 1,
     'cardinality' => 1,
@@ -98,7 +95,6 @@ function vejlebib_settings_field_default_field_bases() {
       0 => 'ting_object',
     ),
     'field_name' => 'all_lix_tal',
-    'foreign keys' => array(),
     'indexes' => array(),
     'locked' => 0,
     'module' => 'ting_marc',
@@ -114,7 +110,7 @@ function vejlebib_settings_field_default_field_bases() {
     'type' => 'ting_marc',
   );
 
-  // Exported field_base: 'all_note'
+  // Exported field_base: 'all_note'.
   $field_bases['all_note'] = array(
     'active' => 1,
     'cardinality' => 1,
@@ -124,7 +120,6 @@ function vejlebib_settings_field_default_field_bases() {
       0 => 'ting_object',
     ),
     'field_name' => 'all_note',
-    'foreign keys' => array(),
     'indexes' => array(),
     'locked' => 0,
     'module' => 'ting_marc',
@@ -140,7 +135,7 @@ function vejlebib_settings_field_default_field_bases() {
     'type' => 'ting_marc',
   );
 
-  // Exported field_base: 'cd_musik_529u'
+  // Exported field_base: 'cd_musik_529u'.
   $field_bases['cd_musik_529u'] = array(
     'active' => 1,
     'cardinality' => 1,
@@ -150,7 +145,6 @@ function vejlebib_settings_field_default_field_bases() {
       0 => 'ting_object',
     ),
     'field_name' => 'cd_musik_529u',
-    'foreign keys' => array(),
     'indexes' => array(),
     'locked' => 0,
     'module' => 'ting_marc',
