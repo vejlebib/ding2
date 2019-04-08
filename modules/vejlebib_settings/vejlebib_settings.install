@@ -428,7 +428,7 @@ function vejlebib_settings_update_7045() {
 }
 
 /**
- * Unpublish all ding_news nodes older than 01-01-2018 00:00
+ * Unpublish all ding_news nodes older than 01-01-2018 00:00.
  */
 function vejlebib_settings_update_7046(&$sandbox) {
   $time_cutoff = strtotime('Monday 1. January 2018 UTC');
@@ -475,5 +475,15 @@ function vejlebib_settings_update_7046(&$sandbox) {
   return t('Status: !processed / !total', [
     '!processed' => $sandbox['processed'],
     '!total' => $sandbox['total'],
+  ]);
+}
+
+/**
+ * Enable unpublished_nodes_redirect and save_redirect_on_delete modules.
+ */
+function vejlebib_settings_update_7047() {
+  module_enable([
+    'save_redirect_on_delete',
+    'unpublished_nodes_redirect',
   ]);
 }

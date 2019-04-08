@@ -934,6 +934,7 @@ function ding_permissions_secure_permissions($role) {
       'edit own image files',
       'edit own video files',
       'edit terms in 2',
+      'schedule publishing of nodes',
       'use manualcrop',
       'use media wysiwyg',
       'use text format ding_wysiwyg',

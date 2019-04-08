@@ -626,6 +626,12 @@ projects[mailchimp][version] = "2.12"
 projects[panelizer][subdir] = "contrib"
 projects[panelizer][version] = "3.4"
 
+projects[save_redirect_on_delete][subdir] = "contrib"
+projects[save_redirect_on_delete][version] = "1.0"
+
+projects[unpublished_nodes_redirect][subdir] = "contrib"
+projects[unpublished_nodes_redirect][version] = "1.0-alpha1"
+
 projects[wayf_dk_login][subdir] = "contrib"
 projects[wayf_dk_login][version] = "1.2-beta1"
 ; Add scoping support (https://www.drupal.org/node/2428847).

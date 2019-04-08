@@ -126,6 +126,20 @@ function vejlebib_settings_strongarm() {
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
+  $strongarm->name = 'ding_eresource_unpublished_redirect_path';
+  $strongarm->value = 'netmedier';
+  $export['ding_eresource_unpublished_redirect_path'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'ding_eresource_unpublished_redirect_response_code';
+  $strongarm->value = '301';
+  $export['ding_eresource_unpublished_redirect_response_code'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
   $strongarm->name = 'ding_event_currency_type';
   $strongarm->value = 'Kr';
   $export['ding_event_currency_type'] = $strongarm;
@@ -157,6 +171,48 @@ function vejlebib_settings_strongarm() {
   $strongarm->name = 'ding_event_list_items_per_page';
   $strongarm->value = '16';
   $export['ding_event_list_items_per_page'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'ding_event_unpublished_redirect_path';
+  $strongarm->value = 'arrangementer';
+  $export['ding_event_unpublished_redirect_path'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'ding_event_unpublished_redirect_response_code';
+  $strongarm->value = '301';
+  $export['ding_event_unpublished_redirect_response_code'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'ding_library_unpublished_redirect_path';
+  $strongarm->value = 'biblioteker';
+  $export['ding_library_unpublished_redirect_path'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'ding_library_unpublished_redirect_response_code';
+  $strongarm->value = '301';
+  $export['ding_library_unpublished_redirect_response_code'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'ding_news_unpublished_redirect_path';
+  $strongarm->value = 'nyheder';
+  $export['ding_news_unpublished_redirect_path'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'ding_news_unpublished_redirect_response_code';
+  $strongarm->value = '301';
+  $export['ding_news_unpublished_redirect_response_code'] = $strongarm;
 
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
@@ -332,6 +388,55 @@ function vejlebib_settings_strongarm() {
   $strongarm->name = 'pathauto_ignore_words';
   $strongarm->value = 'og,i,jeg,det,at,en,den,til,er,som,paa,de,med,han,af,for,ikke,der,var,mig,sig,men,et,har,om,vi,min,havde,ham,hun,nu,over,da,fra,ud,sin,dem,os,op,man,hans,hvor,eller,hvad,skal,selv,her,alle,vil,blev,kunne,ind,naar,vaere,dog,noget,ville,jo,deres,efter,ned,skulle,denne,end,dette,mit,ogsaa,under,have,dig,anden,hende,mine,alt,meget,sit,sine,vor,mod,disse,hvis,din,nogle,hos,blive,mange,ad,bliver,hendes,vaeret,thi,jer';
   $export['pathauto_ignore_words'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'redirect_file_delete_pattern';
+  $strongarm->value = '[site:url]';
+  $export['redirect_file_delete_pattern'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'redirect_node_delete_pattern';
+  $strongarm->value = '[site:url]';
+  $export['redirect_node_delete_pattern'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'redirect_node_ding_eresource_delete_pattern';
+  $strongarm->value = 'netmedier';
+  $export['redirect_node_ding_eresource_delete_pattern'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'redirect_node_ding_event_delete_pattern';
+  $strongarm->value = 'arrangementer';
+  $export['redirect_node_ding_event_delete_pattern'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'redirect_node_ding_library_delete_pattern';
+  $strongarm->value = 'biblioteker';
+  $export['redirect_node_ding_library_delete_pattern'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'redirect_node_ding_news_delete_pattern';
+  $strongarm->value = 'nyheder';
+  $export['redirect_node_ding_news_delete_pattern'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
+  $strongarm->name = 'redirect_taxonomy_term_delete_pattern';
+  $strongarm->value = '[site:url]';
+  $export['redirect_taxonomy_term_delete_pattern'] = $strongarm;
 
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
