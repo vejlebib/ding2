@@ -17,9 +17,24 @@ function vejlebib_features_overrides_field_default_field_instances_alter(&$data)
 }
 
 /**
+ * Implements hook_node_info_alter().
+ */
+function vejlebib_features_overrides_node_info_alter(&$data) {
+  if (isset($data['ding_eresource'])) {
+    $data['ding_eresource']['name'] = 'Netmedie'; /* WAS: 'E-resource' */
+  }
+}
+
+/**
  * Implements hook_default_page_manager_handlers_alter().
  */
 function vejlebib_features_overrides_default_page_manager_handlers_alter(&$data) {
+  if (isset($data['search_node_panel_context'])) {
+    $data['search_node_panel_context']->conf['display']->content['new-097acc39-287b-48dd-9622-ca3098cc478c']->cache['method'] = 0; /* WAS: 'lazy' */
+    unset($data['search_node_panel_context']->conf['display']->content['new-097acc39-287b-48dd-9622-ca3098cc478c']->cache['settings']['load_strategy']);
+    unset($data['search_node_panel_context']->conf['display']->content['new-097acc39-287b-48dd-9622-ca3098cc478c']->cache['settings']['load_text']);
+    unset($data['search_node_panel_context']->conf['display']->content['new-097acc39-287b-48dd-9622-ca3098cc478c']->cache['settings']['show_spinner']);
+  }
   if (isset($data['site_template_panel_context'])) {
     $data['site_template_panel_context']->conf['display']->content['new-f720f7d6-6151-4704-8ed5-6f3b59a3bfc8'] = (object) array(
           'pid' => 'new-f720f7d6-6151-4704-8ed5-6f3b59a3bfc8',
@@ -93,6 +108,16 @@ function vejlebib_features_overrides_default_page_manager_pages_alter(&$data) {
     $data['ding_staff_library']->default_handlers['page_ding_staff_library_panel_context']->conf['display']->panels['main_content'][0] = 'new-0911dfbe-f34c-484a-b9e3-7a6c4ffa7192'; /* WAS: 'new-6171a17a-4789-4aac-86de-eb9c76dee003' */
     $data['ding_staff_library']->default_handlers['page_ding_staff_library_panel_context']->conf['display']->title_pane = 'new-0911dfbe-f34c-484a-b9e3-7a6c4ffa7192'; /* WAS: 'new-6171a17a-4789-4aac-86de-eb9c76dee003' */
     unset($data['ding_staff_library']->default_handlers['page_ding_staff_library_panel_context']->conf['display']->content['new-6171a17a-4789-4aac-86de-eb9c76dee003']);
+  }
+}
+
+/**
+ * Implements hook_default_search_api_index_alter().
+ */
+function vejlebib_features_overrides_default_search_api_index_alter(&$data) {
+  if (isset($data['default_multiple_index'])) {
+    $data['default_multiple_index']->options['data_alter_callbacks']['ding_frontend_role_filter']['settings']['roles'][8] = 8; /* WAS: '' */
+    unset($data['default_multiple_index']->options['data_alter_callbacks']['ding_frontend_role_filter']['settings']['roles'][9]);
   }
 }
 
