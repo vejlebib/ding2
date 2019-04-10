@@ -15,6 +15,16 @@ function vejlebib_features_overrides_features_override_default_overrides() {
   $overrides["field_instance.node-ding_news-field_ding_news_list_image.required"] = 1;
   $overrides["field_instance.node-ding_news-field_ding_news_title_image.required"] = 1;
 
+  // Exported overrides for: flag
+  $overrides["flag.mobile_app.roles|flag|0"] = 4;
+  $overrides["flag.mobile_app.roles|flag|1"] = 6;
+  $overrides["flag.mobile_app.roles|flag|2"] = 9;
+  $overrides["flag.mobile_app.roles|flag|3"] = 10;
+  $overrides["flag.mobile_app.roles|unflag|0"] = 4;
+  $overrides["flag.mobile_app.roles|unflag|1"] = 6;
+  $overrides["flag.mobile_app.roles|unflag|2"] = 9;
+  $overrides["flag.mobile_app.roles|unflag|3"] = 10;
+
   // Exported overrides for: node
   $overrides["node.ding_eresource.name"] = 'Netmedie';
 

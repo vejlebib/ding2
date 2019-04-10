@@ -617,6 +617,10 @@ projects[entityqueue][version] = "1.1"
 projects[features_override][subdir] = "contrib"
 projects[features_override][version] = 2.0-rc3
 
+; We're using features override to fix the roles on the flag export and it's not
+; working without this patch.
+projects[flag][patch][] = "https://www.drupal.org/files/flag-default-flags-alter-hook-2027091-03.patch"
+
 projects[gtranslate][subdir] = "contrib"
 projects[gtranslate][version] = "1.14"
 

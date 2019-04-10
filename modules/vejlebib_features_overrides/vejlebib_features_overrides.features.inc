@@ -17,6 +17,22 @@ function vejlebib_features_overrides_field_default_field_instances_alter(&$data)
 }
 
 /**
+ * Implements hook_flag_default_flags_alter().
+ */
+function vejlebib_features_overrides_flag_default_flags_alter(&$data) {
+  if (isset($data['mobile_app'])) {
+    $data['mobile_app']['roles']['flag'][0] = 4; /* WAS: 3 */
+    $data['mobile_app']['roles']['flag'][1] = 6; /* WAS: 4 */
+    $data['mobile_app']['roles']['flag'][2] = 9; /* WAS: 6 */
+    $data['mobile_app']['roles']['flag'][3] = 10; /* WAS: 7 */
+    $data['mobile_app']['roles']['unflag'][0] = 4; /* WAS: 3 */
+    $data['mobile_app']['roles']['unflag'][1] = 6; /* WAS: 4 */
+    $data['mobile_app']['roles']['unflag'][2] = 9; /* WAS: 6 */
+    $data['mobile_app']['roles']['unflag'][3] = 10; /* WAS: 7 */
+  }
+}
+
+/**
  * Implements hook_node_info_alter().
  */
 function vejlebib_features_overrides_node_info_alter(&$data) {

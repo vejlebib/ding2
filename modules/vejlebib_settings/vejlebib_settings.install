@@ -527,3 +527,69 @@ function vejlebib_settings_update_7050() {
     'https://ortograf.dbc.dk/ortograf/suggest'
   );
 }
+
+/**
+ * Set "Show in mobile" flag for the latest 25 ding_news nodes.
+ */
+function vejlebib_settings_update_7051(&$sandbox) {
+  $query = db_select('node', 'n')
+    ->fields('n', ['nid'])
+    ->orderBy('n.created', 'DESC')
+    ->condition('n.status', 1)
+    ->condition('n.type', 'ding_news');
+
+  // Fetch the nodes for this run.
+  $query->range(0, 25);
+  $nids = $query->execute()->fetchCol();
+
+  $flag = flag_get_flag('mobile_app');
+  foreach ($nids as $nid) {
+    try {
+      $flag->flag('flag', intval($nid), NULL, TRUE); // Skip permission check.
+    }
+    catch (Exception $e) {}
+  }
+}
+
+/**
+ * Set "Show in mobile" flag for all published ding_event nodes.
+ */
+function vejlebib_settings_update_7052(&$sandbox) {
+  $query = db_select('node', 'n')
+    ->fields('n', ['nid'])
+    ->condition('n.status', 1)
+    ->condition('n.type', 'ding_event');
+
+  if (!isset($sandbox['processed'])) {
+    $sandbox['total'] = $query->countQuery()->execute()->fetchField();
+    $sandbox['processed'] = 0;
+  }
+
+  // Number of ding_news nodes to process each run.
+  $limit = 20;
+
+  // Fetch the nodes for this run.
+  $query->range($sandbox['processed'], $limit);
+  $nids = $query->execute()->fetchCol();
+
+  $flag = flag_get_flag('mobile_app');
+  foreach ($nids as $nid) {
+    try {
+      $flag->flag('flag', intval($nid), NULL, TRUE); // Skip permission check.
+    }
+    catch (Exception $e) {}
+    $sandbox['processed']++;
+  }
+
+  // Update bacth progress.
+  $sandbox['#finished'] = $sandbox['processed'] / $sandbox['total'];
+
+  if (empty($nids)) {
+    $sandbox['#finished'] = TRUE;
+  }
+
+  return t('Status: !processed / !total', [
+    '!processed' => $sandbox['processed'],
+    '!total' => $sandbox['total'],
+  ]);
+}
