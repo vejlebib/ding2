@@ -517,3 +517,13 @@ function vejlebib_settings_update_7049() {
 
   return t('Update !count opening hours instances', ['!count' => $num_updated]);
 }
+
+/**
+ * Updates autocomplete URL to the new Ortograf service.
+ */
+function vejlebib_settings_update_7050() {
+  variable_set(
+    'opensearch_search_autocomplete_suggestion_url',
+    'https://ortograf.dbc.dk/ortograf/suggest'
+  );
+}
