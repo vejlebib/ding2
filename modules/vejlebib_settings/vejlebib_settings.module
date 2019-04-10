@@ -389,3 +389,16 @@ function vejlebib_settings_form_user_login_block_alter(&$form, &$form_state, $fo
     )),
   );
 }
+
+/**
+ * Implements hook_preprocess_ding_ddbasic_opening_hours_week().
+ */
+function vejlebib_settings_preprocess_ding_ddbasic_opening_hours_week(&$variables) {
+  // Use a special translatable string for the normal uncategorized opening
+  // hours. Otherwise it's impossible to translate this without affecting other
+  // places where the string "Opening hours" is displayed.
+  $key = array_search(t('Opening hours'), $variables['table']['#header']);
+  if ($key !== FALSE) {
+    $variables['table']['#header'][$key] = t('Normal opening hours');
+  }
+}

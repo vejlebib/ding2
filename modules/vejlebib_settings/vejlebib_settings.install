@@ -494,3 +494,26 @@ function vejlebib_settings_update_7047() {
 function vejlebib_settings_update_7048() {
   module_enable(['ding_social_links']);
 }
+
+/**
+ * Ensure all opening hours instances have the correct categories.
+ */
+function vejlebib_settings_update_7049() {
+  $category_vocabulary = taxonomy_vocabulary_machine_name_load('category');
+
+  $term = new stdClass();
+  $term->vid = $category_vocabulary->vid;
+  $term->name = 'Betjent åbningstid';
+  taxonomy_term_save($term);
+
+  $update_query = db_update('opening_hours')
+    ->fields([
+        'category_tid' => $term->tid,
+        'notice' => '', // Remember to reset the old notices.
+      ])
+    ->condition('notice', 'Betjent åbningstid');
+
+  $num_updated = $update_query->execute();
+
+  return t('Update !count opening hours instances', ['!count' => $num_updated]);
+}
