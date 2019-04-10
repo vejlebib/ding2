@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ *
+ * Install file for the vejlebib_views_panels module.
+ */
+
+/**
+ * Lock vejlebib ding_frontpage feature component.
+ */
+function vejlebib_views_panels_update_7001() {
+  // Ensure that any changes to the page_manager_pages component is reverted
+  // before we lock the feature. We do this to not override changes to the
+  // frontpage, but it also includes ding_staff pages.
+  // TODO: Move to separate ding_vejlebib_frontpage module to avoid locking
+  // ding_staff also.
+  features_revert(['vejlebib_views_panels' => ['page_manager_pages']]);
+
+  // Lock the feature component preventing it from being reverted.
+  features_feature_lock('vejlebib_views_panels', 'page_manager_pages');
+}

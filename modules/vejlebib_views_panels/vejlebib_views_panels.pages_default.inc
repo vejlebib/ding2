@@ -561,22 +561,7 @@ function vejlebib_views_panels_default_page_manager_pages() {
     $pane->shown = TRUE;
     $pane->access = array();
     $pane->configuration = array(
-      'searches' => array(
-        0 => array(
-          'title' => 'Film',
-          'subtitle' => 'Film',
-          'query' => '870970-basis:50713873 OR 870970-basis:53719872 OR 870970-basis:55137196 OR 870970-basis:52097126 OR 870970-basis:54131496 OR 870970-basis:55115087 OR 870970-basis:54533187 OR 870970-basis:53461816 OR 870970-basis:53735894 ',
-          'sort' => '',
-          'available' => 0,
-        ),
-        1 => array(
-          'title' => 'Musik',
-          'subtitle' => '',
-          'query' => '55109680 OR 55156409 OR 55110514 OR 55110239 OR 55110352 OR 55128545 OR 55127816 OR 55110727 OR 55139172 OR 55147752 OR 55134332 OR 55110336 OR 55110603 OR 54977921 OR 55109281 OR 54977840 OR 54977840 OR 54978111 OR 55132496',
-          'sort' => '',
-          'available' => 0,
-        ),
-      ),
+      'searches' => array(),
       'settings' => array(
         'transition' => 'fade',
       ),
