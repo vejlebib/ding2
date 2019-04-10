@@ -18,6 +18,38 @@ function vejlebib_views_panels_ctools_plugin_directory($module, $plugin) {
 }
 
 /**
+ * Implements hook_menu_alter().
+ */
+function vejlebib_views_panels_menu_alter(&$items) {
+  // Overrid the page callback from ding_app_variables to instead return
+  // carouesels from our own frontpage.
+  $items['ding/variables']['page callback'] = 'vejlebib_variables_display';
+}
+
+/**
+ * Page callback for ding/variables.
+ */
+function vejlebib_variables_display() {
+  // Let ding_app_variables handle everything other than carousels.
+  $configs = ding_app_variables_display();
+
+  $ding_frontpage = page_manager_get_page_cache('page-vejlebib_frontpage');
+  $handler = reset($ding_frontpage->handlers);
+  $display = panels_panel_context_get_display($handler);
+  $carousels = [];
+  foreach ($display->content as &$pane) {
+    if ($pane->type == 'carousel' && $pane->subtype == 'carousel') {
+      $carousels[] = [$carousel => $pane->configuration];
+    }
+  }
+
+  // Override the carousels from ding_app_variables.
+  $configs['carousels'] = $carousels;
+
+  return $configs;
+}
+
+/**
  * Implements hook_block_info().
  */
 function vejlebib_views_panels_block_info() {

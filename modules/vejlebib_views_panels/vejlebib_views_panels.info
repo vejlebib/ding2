@@ -5,6 +5,7 @@ package = Ding!
 version = 7.x-0.2
 project = vejlebib_views_panels
 dependencies[] = ctools
+dependencies[] = ding_app_variables
 dependencies[] = features
 dependencies[] = menu
 dependencies[] = menu_block
