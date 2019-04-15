@@ -593,3 +593,10 @@ function vejlebib_settings_update_7052(&$sandbox) {
     '!total' => $sandbox['total'],
   ]);
 }
+
+/**
+ * Uninstall openlayers and taxonomy_menu modules.
+ */
+function vejlebib_settings_update_7053() {
+  drupal_uninstall_modules(array('openlayers', 'taxonomy_menu'), TRUE);
+}
