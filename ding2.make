@@ -711,6 +711,3 @@ projects[openlayers][patch][] = "patches/openlayers-7.x-2.0-beta7-remove-make-fi
 
 projects[taxonomy_menu][subdir] = "contrib"
 projects[taxonomy_menu][version] = "1.4"
-
-projects[chr][subdir] = "contrib"
-projects[chr][version] = "1.8"
