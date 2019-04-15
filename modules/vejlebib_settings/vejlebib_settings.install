@@ -600,3 +600,10 @@ function vejlebib_settings_update_7052(&$sandbox) {
 function vejlebib_settings_update_7053() {
   drupal_uninstall_modules(array('openlayers', 'taxonomy_menu'), TRUE);
 }
+
+/**
+ * Remove all traces of ding_list_installer module.
+ */
+function vejlebib_settings_update_7054() {
+  ding2_remove_module('ding_list_installer');
+}
