@@ -39,7 +39,7 @@ function vejlebib_variables_display() {
   $carousels = [];
   foreach ($display->content as &$pane) {
     if ($pane->type == 'carousel' && $pane->subtype == 'carousel') {
-      $carousels[] = [$carousel => $pane->configuration];
+      $carousels[] = ['carousel' => $pane->configuration];
     }
   }
 
