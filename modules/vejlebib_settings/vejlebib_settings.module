@@ -402,3 +402,14 @@ function vejlebib_settings_preprocess_ding_ddbasic_opening_hours_week(&$variable
     $variables['table']['#header'][$key] = t('Normal opening hours');
   }
 }
+
+/**
+ * Implements hook_ding_entity_view().
+ */
+function vejlebib_settings_ding_entity_view($entity, $view_mode) {
+  $entity_path = entity_uri('ting_object', $entity)['path'];
+
+  if ($view_mode == 'full' && current_path() == $entity_path) {
+    drupal_add_js('https://cdn.bibspire.dk/recommend-widget.min.js', 'external');
+  }
+}
