@@ -44,7 +44,7 @@ function vejlebib_variables_display() {
   }
 
   // Override the carousels from ding_app_variables.
-  $configs['carousels'] = $carousels;
+  $configs['carousels'] = [$carousels];
 
   return $configs;
 }
