@@ -2,34 +2,49 @@ default:
   suites:
     default:
       contexts:
+        - CampaignPlusContext
+        - CreateNewsContext
         - FeatureContext
-        - LibContext:
-            NoScreenDump: "false"
+        - Ding2Context
+        # - Ding2MessagesContext
+        - P2Context
+        - LibContext
         - StepsContext
+        - LoginContext
+        - ScreenshotsContext:
+            NoScreenDump: false
         - Drupal\DrupalExtension\Context\DrupalContext
         - Drupal\DrupalExtension\Context\MinkContext
         - Drupal\DrupalExtension\Context\MarkupContext
         - Drupal\DrupalExtension\Context\DrushContext
+  formatters:
+    pretty:
+      output_styles:
+        # Make comments (which contains the location of steps) visible
+        # on terminals with black backgrounds.
+        comment: [ ~, ~ ]
+
   extensions:
-    SensioLabs\Behat\PageObjectExtension: ~
+    SensioLabs\Behat\PageObjectExtension:
+      namespaces:
+        page: [Page, Page\CampaignPlus, Page\Common]
     emuse\BehatHTMLFormatter\BehatHTMLFormatterExtension:
-     name: html
-     renderer: Behat2
-     file_name: Index
-     print_args: true
-     print_outp: true
-     loop_break: true
+      name: html
+      renderer: Behat2
+      file_name: Index
+      print_args: true
+      print_outp: true
+      loop_break: true
     Drupal\DrupalExtension:
       blackbox: ~
-      api_driver: 'drush'
-      drush:
-        root: '../../../../../web'
+      api_driver: 'drupal'
+      drupal:
+        drupal_root: '../../../..'
       text:
         log_out: 'Log ud'
         username_field: 'Låner- eller CPR-nummer'
-        password_field: 'Pinkode'
+        password_field: 'Pinkode (4 cifre)'
     Liuggio\Fastest\Behat\ListFeaturesExtension\Extension: ~
-
 
 chrome:
   extensions:
@@ -39,5 +54,4 @@ chrome:
       sessions:
         default:
           chrome:
-            api_url: "http://localhost:9222"
             socket_timeout: 600

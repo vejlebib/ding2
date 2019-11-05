@@ -48,6 +48,8 @@ projects[ctools][patch][] = "https://www.drupal.org/files/issues/ctools-readd_ac
 projects[ctools][patch][] = "https://www.drupal.org/files/issues/deprecating_php4_style-2528736-23.patch"
 ; PHP7 - Uniform Variable Syntax updates are causing exported pages to not have names.
 projects[ctools][patch][] = "https://www.drupal.org/files/issues/ctools-uniform-variable-syntax-2635876-6.patch"
+; Check for jQuery differences regarding prop() vs attr().
+projects[ctools][patch][] = "https://git.drupalcode.org/project/ctools/commit/18385421a277097d8a92672808f656cc7470b69d.patch"
 
 projects[customerror][subdir] = "contrib"
 projects[customerror][version] = "1.4"
@@ -96,7 +98,7 @@ projects[entityreference_filter][subdir] = "contrib"
 projects[entityreference_filter][version] = "1.7"
 
 projects[eu_cookie_compliance][subdir] = "contrib"
-projects[eu_cookie_compliance][version] = "1.14"
+projects[eu_cookie_compliance][version] = "1.28"
 
 projects[environment_indicator][subdir] = "contrib"
 projects[environment_indicator][version] = "2.8"
@@ -344,6 +346,9 @@ projects[proj4js][version] = "1.2"
 projects[profile2][subdir] = "contrib"
 projects[profile2][version] = "1.3"
 
+projects[paragraphs][subdir] = "contrib"
+projects[paragraphs][version] = "1.0-rc5"
+
 projects[realname][subdir] = "contrib"
 projects[realname][version] = "1.2"
 
@@ -371,7 +376,7 @@ projects[secure_permissions][download][revision] = "ef5eec5"
 projects[secure_permissions][patch][] = "http://drupal.org/files/issues/2188491-features-multilingual-2.patch"
 
 projects[services][subdir] = "contrib"
-projects[services][version] = "3.22"
+projects[services][version] = "3.24"
 
 projects[services_views][subdir] = "contrib"
 projects[services_views][version] = "1.1"
@@ -427,7 +432,7 @@ projects[virtual_field][subdir] = "contrib"
 projects[virtual_field][version] = "1.2"
 
 projects[views][subdir] = "contrib"
-projects[views][version] = "3.20"
+projects[views][version] = "3.23"
 
 projects[views_bulk_operations][subdir] = "contrib"
 projects[views_bulk_operations][version] = "3.3"
@@ -501,6 +506,18 @@ libraries[ckeditor][destination] = "libraries"
 libraries[chosen][download][type] = "get"
 libraries[chosen][download][url] = "https://github.com/harvesthq/chosen/releases/download/1.4.2/chosen_v1.4.2.zip"
 libraries[chosen][destination] = "libraries"
+
+; For ding_adgangsplatformen.
+libraries[random_compat][download][type] = "git"
+libraries[random_compat][download][url] = "https://github.com/paragonie/random_compat.git"
+libraries[random_compat][download][tag] = "v2.0.17"
+libraries[random_compat][destination] = "libraries"
+
+; For ding_adgangsplatformen.
+libraries[oauth2-client][download][type] = "git"
+libraries[oauth2-client][download][url] = "https://github.com/thephpleague/oauth2-client.git"
+libraries[oauth2-client][download][tag] = "2.3.0"
+libraries[oauth2-client][destination] = "libraries"
 
 ; For ding_libs.
 libraries[guzzle][download][type] = "git"
