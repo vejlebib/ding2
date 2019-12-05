@@ -162,6 +162,8 @@ projects[google_analytics][version] = "1.3"
 
 projects[htmlmail][subdir] = "contrib"
 projects[htmlmail][version] = "2.65"
+; PHP 7 - Functions inspecting arguments, like debug_backtrace(), no longer report the original value as passed to a parameter, but will instead provide the current value.
+projects[htmlmail][patch][] = "https://www.drupal.org/files/issues/2019-03-11/3038330-5.patch"
 
 projects[honeypot][subdir] = "contrib"
 projects[honeypot][version] = "1.25"
