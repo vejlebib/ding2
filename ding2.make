@@ -124,6 +124,8 @@ projects[field_group][subdir] = "contrib"
 projects[field_group][version] = "1.5"
 ; PHP7 - Uniform Variable Syntax updates are causing exported field_groups to not have names.
 projects[field_group][patch][] = "https://www.drupal.org/files/issues/php7_uniform_variable-2649648-5.patch"
+; PHP7 - Relocate calls to func_get_args() to beginning of functions
+projects[field_group][patch][] = "https://www.drupal.org/files/issues/2019-10-03/3085340-2.patch"
 
 projects[file_entity][subdir] = "contrib"
 projects[file_entity][version] = "2.0-beta3"
