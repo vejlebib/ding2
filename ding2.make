@@ -132,6 +132,8 @@ projects[file_entity][version] = "2.0-beta3"
 
 projects[flag][subdir] = "contrib"
 projects[flag][version] = "2.2"
+; PHP 7; Indirect access to variables, properties and methods will be evaluated strictly in left-to-right order since PHP 7.0.
+projects[flag][patch][] = "https://www.drupal.org/files/issues/2019-08-05/3067479-2.patch"
 
 projects[fontyourface][subdir] = "contrib"
 projects[fontyourface][version] = "2.7"
