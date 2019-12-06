@@ -369,6 +369,7 @@ projects[role_delegation][version] = "1.1"
 
 projects[rules][subdir] = "contrib"
 projects[rules][version] = "2.7"
+projects[rules][patch][] = "https://www.drupal.org/files/issues/php7_2_compatibility-2923477-5.patch"
 
 projects[scheduler][subdir] = "contrib"
 projects[scheduler][version] = "1.5"
