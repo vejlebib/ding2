@@ -360,6 +360,8 @@ projects[realname][version] = "1.2"
 
 projects[redirect][subdir] = "contrib"
 projects[redirect][version] = "1.0-rc3"
+; PHP 7 - Relocate calls to func_get_args() to beginning of functions.
+projects[redirect][patch][] = "https://www.drupal.org/files/issues/2019-12-02/redirect-relocate_calls_to_func_get_args-3085342-3-D7.patch"
 
 projects[relation][subdir] = "contrib"
 projects[relation][version] = "1.0"
