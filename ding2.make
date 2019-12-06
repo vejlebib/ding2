@@ -124,12 +124,16 @@ projects[field_group][subdir] = "contrib"
 projects[field_group][version] = "1.5"
 ; PHP7 - Uniform Variable Syntax updates are causing exported field_groups to not have names.
 projects[field_group][patch][] = "https://www.drupal.org/files/issues/php7_uniform_variable-2649648-5.patch"
+; PHP7 - Relocate calls to func_get_args() to beginning of functions
+projects[field_group][patch][] = "https://www.drupal.org/files/issues/2019-10-03/3085340-2.patch"
 
 projects[file_entity][subdir] = "contrib"
 projects[file_entity][version] = "2.0-beta3"
 
 projects[flag][subdir] = "contrib"
 projects[flag][version] = "2.2"
+; PHP 7; Indirect access to variables, properties and methods will be evaluated strictly in left-to-right order since PHP 7.0.
+projects[flag][patch][] = "https://www.drupal.org/files/issues/2019-08-05/3067479-2.patch"
 
 projects[fontyourface][subdir] = "contrib"
 projects[fontyourface][version] = "2.7"
@@ -158,6 +162,8 @@ projects[google_analytics][version] = "1.3"
 
 projects[htmlmail][subdir] = "contrib"
 projects[htmlmail][version] = "2.65"
+; PHP 7 - Functions inspecting arguments, like debug_backtrace(), no longer report the original value as passed to a parameter, but will instead provide the current value.
+projects[htmlmail][patch][] = "https://www.drupal.org/files/issues/2019-03-11/3038330-5.patch"
 
 projects[honeypot][subdir] = "contrib"
 projects[honeypot][version] = "1.25"
@@ -354,6 +360,8 @@ projects[realname][version] = "1.2"
 
 projects[redirect][subdir] = "contrib"
 projects[redirect][version] = "1.0-rc3"
+; PHP 7 - Relocate calls to func_get_args() to beginning of functions.
+projects[redirect][patch][] = "https://www.drupal.org/files/issues/2019-12-02/redirect-relocate_calls_to_func_get_args-3085342-3-D7.patch"
 
 projects[relation][subdir] = "contrib"
 projects[relation][version] = "1.0"
@@ -465,6 +473,8 @@ projects[watchdog_filtering][version] = "1.3"
 
 projects[webform][subdir] = "contrib"
 projects[webform][version] = "4.10"
+; PHP 7 - Cannot use lexical variable $value as a parameter name in components/select.inc.
+projects[webform][patch][] = "https://www.drupal.org/files/issues/webform-2811063-43.patch"
 
 projects[workbench][subdir] = "contrib"
 projects[workbench][version] = "1.2"
