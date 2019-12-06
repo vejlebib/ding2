@@ -473,6 +473,8 @@ projects[watchdog_filtering][version] = "1.3"
 
 projects[webform][subdir] = "contrib"
 projects[webform][version] = "4.10"
+; PHP 7 - Cannot use lexical variable $value as a parameter name in components/select.inc.
+projects[webform][patch][] = "https://www.drupal.org/files/issues/webform-2811063-43.patch"
 
 projects[workbench][subdir] = "contrib"
 projects[workbench][version] = "1.2"
