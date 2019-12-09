@@ -728,3 +728,12 @@ projects[ding_wayf_dk][download][type] = "git"
 projects[ding_wayf_dk][download][url] = "https://github.com/vejlebib/ding_wayf_dk.git"
 projects[ding_wayf_dk][download][branch] = "vejlebib"
 projects[ding_wayf_dk][subdir] = "vejlebib_modules"
+
+; Modules included for easy deployment of removal. Should be removed after
+; disable and uninstall hooks have been run properly.
+projects[openlayers][subdir] = "contrib"
+projects[openlayers][version] = "2.0-beta7"
+projects[openlayers][patch][] = "patches/openlayers-7.x-2.0-beta7-remove-make-file.ding2.patch"
+
+projects[taxonomy_menu][subdir] = "contrib"
+projects[taxonomy_menu][version] = "1.4"
