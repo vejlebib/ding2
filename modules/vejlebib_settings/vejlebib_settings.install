@@ -607,3 +607,21 @@ function vejlebib_settings_update_7053() {
 function vejlebib_settings_update_7054() {
   ding2_remove_module('ding_list_installer');
 }
+
+/**
+ * Uninstall/remove openlayers, taxonomy_menu and ding_wayf modules completely
+ * from the system.
+ */
+function vejlebib_settings_update_7055() {
+  // Apparently this didn't happen last time since openlayers_views was
+  // installed and is dependant on openlayers.
+  drupal_uninstall_modules(array(
+    'openlayers',
+    'openlayers_views',
+    'taxonomy_menu',
+  ), TRUE);
+
+  // This module has been completely removed from the database, but it has no
+  // uninstall procedures so just remove it completely from the system.
+  ding2_remove_module('ding_wayf');
+}
