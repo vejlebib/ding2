@@ -756,14 +756,14 @@ function ding2_update_7064() {
   * Update translations.
  */
 function ding2_update_7065() {
-  ding2_translation_update();
+  // ding2_translation_update(); (skip in vejlebib)
 }
 
 /**
  * Update translations.
  */
 function ding2_update_7066() {
-  ding2_translation_update();
+  // ding2_translation_update(); (skip in vejlebib)
 }
 
 /**
@@ -805,14 +805,14 @@ function ding2_update_7069() {
  * Update translations.
  */
 function ding2_update_7070() {
-  ding2_translation_update();
+  // ding2_translation_update(); (skip in vejlebib)
 }
 
 /**
  * Update translations.
  */
 function ding2_update_7071() {
-  ding2_translation_update();
+  // ding2_translation_update(); (skip in vejlebib)
 }
 
 /**
@@ -835,7 +835,7 @@ function ding2_update_7072() {
  * Update translations.
  */
 function ding2_update_7073() {
-  ding2_translation_update();
+  // ding2_translation_update(); (skip in vejlebib)
 }
 
 /**
