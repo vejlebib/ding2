@@ -625,3 +625,84 @@ function vejlebib_settings_update_7055() {
   // uninstall procedures so just remove it completely from the system.
   ding2_remove_module('ding_wayf');
 }
+
+/**
+ * Revert vejlebib ding_group modifications.
+ */
+function vejlebib_settings_update_7056() {
+  // We require some of our feature components to be reverted with some of our
+  // new changes in this update, so we revert here to be safe.
+  features_revert(array('ding_groups' => array('page_manager_pages', 'variable')));
+  $nodes = node_load_multiple(array(), array('type' => 'ding_group'));
+  foreach ($nodes as $node) {
+    // First, update the default menu-links for each ding_group OG Menu.
+    _og_menu_default_links_set_default_links('menu-og-' . $node->nid, 'update');
+
+    // Then we go ahead and update aliases for each group and every sub-page in
+    // that group.
+    module_load_include('inc', 'pathauto');
+    // We could have used pathauto_pattern_load_by_entity(), but this is safer
+    // if the feature that sets up the new pattern hasn't been rebuild.
+    $pattern = 'temaer/[node:title]';
+    $group_alias = token_replace($pattern, array('node' => $node), array(
+      'sanitize' => FALSE,
+      'clear' => TRUE,
+      'callback' => 'pathauto_clean_token_values',
+      'language' => (object) array('language' => LANGUAGE_NONE),
+      'pathauto' => TRUE,
+    ));
+    $group_source = 'node/' . $node->nid;
+    $existing_group_alias = _pathauto_existing_alias_data($group_source, LANGUAGE_NONE);
+    $path = array(
+      'source' => $group_source,
+      'alias' => $group_alias,
+      'language' => LANGUAGE_NONE,
+    );
+    // By passing the existing group alias it will be removed by pathauto, which
+    // provides a handy wrapper around core path_save() for that purpose.
+    _pathauto_set_alias($path, $existing_group_alias);
+
+    foreach (array('nyheder', 'arrangementer') as $slug) {
+      if (!path_load(array('alias' => $group_alias . '/' . $slug))) {
+        $existing_alias = _pathauto_existing_alias_data('inspiration/' . $node->nid . '/' . $slug, LANGUAGE_NONE);
+        $path = array(
+          'source' => 'temaer/' . $node->nid . '/' . $slug,
+          'alias' => $group_alias . '/' . $slug,
+          'language' => LANGUAGE_NONE,
+        );
+
+        // Set the alias or update it.
+        _pathauto_set_alias($path, $existing_alias);
+      }
+
+      // Create alias for news and event terms.
+      if ($slug == 'nyheder') {
+        $vocabulary = taxonomy_vocabulary_machine_name_load('news_category');
+      }
+      else {
+        $vocabulary = taxonomy_vocabulary_machine_name_load('event_category');
+      }
+      $terms = taxonomy_term_load_multiple(array(), array('vid' => $vocabulary->vid));
+
+      foreach ($terms as $term) {
+        $existing_alias = _pathauto_existing_alias_data('inspiration/' . $node->nid . '/' . $slug . '/' . $term->tid, LANGUAGE_NONE);
+        $alias = $group_alias . '/' . $slug . '/' . $term->name;
+        $alias = pathauto_cleanstring($alias);
+        $alias = pathauto_clean_alias($alias);
+
+        if ($alias != $existing_alias['alias']) {
+          $source = 'taxonomy/term/' . $term->tid;
+          pathauto_alias_uniquify($alias, $source, LANGUAGE_NONE);
+          $path = array(
+            'source' => 'temaer/' . $node->nid . '/' . $slug . '/' . $term->tid,
+            'alias' => $alias,
+            'language' => LANGUAGE_NONE,
+          );
+
+          // Set the alias or update it.
+          _pathauto_set_alias($path, $existing_alias);
+        }
+      }
+    }
+  }
+}

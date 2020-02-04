@@ -92,7 +92,7 @@ function ding_groups_node_update($node) {
     // Update/create alias for the current ding groups news and events.
     foreach (array('nyheder', 'arrangementer') as $slug) {
       if (!path_load(array('alias' => $alias . '/' . $slug))) {
-        $source = 'inspiration/' . $node->nid . '/' . $slug;
+        $source = 'temaer/' . $node->nid . '/' . $slug;
         $existing_alias = _pathauto_existing_alias_data($source, LANGUAGE_NONE);
         $path = array(
           'source' => $source,
@@ -112,7 +112,7 @@ function ding_groups_node_update($node) {
         $vocabulary = taxonomy_vocabulary_machine_name_load('event_category');
       }
       $terms = taxonomy_term_load_multiple(array(), array('vid' => $vocabulary->vid));
-      ding_base_updated_taxonomy_aliases($node, 'inspiration', $terms, array($slug));
+      ding_base_updated_taxonomy_aliases($node, 'temaer', $terms, array($slug));
     }
 
     // Update OG_menu title if group title is changed.
@@ -162,7 +162,7 @@ function ding_groups_taxonomy_term_update($term) {
     }
 
     foreach ($nodes as $node) {
-      ding_base_updated_taxonomy_aliases($node, 'inspiration', array($term), array($type));
+      ding_base_updated_taxonomy_aliases($node, 'temaer', array($term), array($type));
     }
   }
 }
@@ -184,7 +184,7 @@ function ding_groups_taxonomy_term_delete($term) {
     module_load_include('inc', 'pathauto');
 
     foreach ($nodes as $node) {
-      pathauto_path_delete_all('inspiration/' . $node->nid . '/' . $type . '/' . $term->tid);
+      pathauto_path_delete_all('temaer/' . $node->nid . '/' . $type . '/' . $term->tid);
     }
   }
 }
@@ -235,15 +235,17 @@ function ding_groups_install_menu_position($op = 'install') {
   if (!$exists && ($op == 'install' || $op == 'revert')) {
     // Define conditions.
     $conditions = array(
-      'pages' => array(
-        'pages' => 'inspiration/*',
+      'content_type' => array(
+        'content_type' => array(
+          'ding_group' => 'ding_group',
+        ),
       ),
     );
 
     // Find the parent element.
     $plid = db_select('menu_links', 'ml')
       ->fields('ml', array('mlid'))
-      ->condition('link_path', drupal_get_normal_path('inspiration'), '=')
+      ->condition('link_path', 'temaer', '=')
       ->execute()->fetchField();
 
     // Add the rule.
@@ -309,7 +311,7 @@ function ding_groups_preprocess_views_view_responsive_grid(&$vars) {
       // Add column classes to the current row.
       $column_id = 0;
       foreach ($row as $column_id => $column) {
-        $vars['rows'][$row_number][$column_id]['classes'] .= $columns_classes[$column_id] . ' group-block';
+        $vars['rows'][$row_number][$column_id]['classes'] .= $columns_classes[$column_id];
       }
 
       // Add last class to last column.
@@ -329,7 +331,7 @@ function ding_groups_preprocess_views_view_responsive_grid(&$vars) {
  * optimized in relation to the number of promoted groups.
  */
 function ding_groups_preprocess_views_view_fields(&$vars) {
-  if ($vars['view']->name == 'ding_groups' && ($vars['view']->current_display == 'panel_pane_2' || $vars['view']->current_display == 'panel_pane_1')) {
+  if ($vars['view']->name == 'ding_groups' && $vars['view']->current_display == 'panel_pane_1') {
     $total = (int) $vars['view']->total_rows;
     $rows = ceil($total / 4);
     $current = $vars['id'];

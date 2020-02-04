@@ -31,19 +31,7 @@ function ding_groups_views_default_views() {
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
-  $handler->display->display_options['exposed_form']['options']['submit_button'] = 'Udfør';
-  $handler->display->display_options['exposed_form']['options']['reset_button_label'] = 'Gendan';
-  $handler->display->display_options['exposed_form']['options']['exposed_sorts_label'] = 'Sortér efter';
-  $handler->display->display_options['exposed_form']['options']['sort_asc_label'] = 'Stigende';
-  $handler->display->display_options['exposed_form']['options']['sort_desc_label'] = 'Faldende';
   $handler->display->display_options['pager']['type'] = 'full';
-  $handler->display->display_options['pager']['options']['expose']['items_per_page_label'] = 'Antal elementer';
-  $handler->display->display_options['pager']['options']['expose']['items_per_page_options_all_label'] = '- Alle -';
-  $handler->display->display_options['pager']['options']['expose']['offset_label'] = 'Forskydning';
-  $handler->display->display_options['pager']['options']['tags']['first'] = '« første';
-  $handler->display->display_options['pager']['options']['tags']['previous'] = '‹ forrige';
-  $handler->display->display_options['pager']['options']['tags']['next'] = 'næste ›';
-  $handler->display->display_options['pager']['options']['tags']['last'] = 'sidste »';
   $handler->display->display_options['style_plugin'] = 'list';
   $handler->display->display_options['style_options']['grouping'] = array(
     0 => array(
@@ -57,7 +45,7 @@ function ding_groups_views_default_views() {
   $handler->display->display_options['style_options']['wrapper_class'] = '';
   $handler->display->display_options['row_plugin'] = 'fields';
   $handler->display->display_options['row_options']['default_field_elements'] = FALSE;
-  /* Forbindelse: Nodekø: Kø */
+  /* Relationship: Nodequeue: Queue */
   $handler->display->display_options['relationships']['nodequeue_rel']['id'] = 'nodequeue_rel';
   $handler->display->display_options['relationships']['nodequeue_rel']['table'] = 'node';
   $handler->display->display_options['relationships']['nodequeue_rel']['field'] = 'nodequeue_rel';
@@ -67,7 +55,7 @@ function ding_groups_views_default_views() {
     'ding_tabroll' => 0,
     'ding_tabroll_for_libraries' => 0,
   );
-  /* Felt: Category (groups rows) */
+  /* Field: Category (groups rows) */
   $handler->display->display_options['fields']['field_ding_group_category']['id'] = 'field_ding_group_category';
   $handler->display->display_options['fields']['field_ding_group_category']['table'] = 'field_data_field_ding_group_category';
   $handler->display->display_options['fields']['field_ding_group_category']['field'] = 'field_ding_group_category';
@@ -79,7 +67,7 @@ function ding_groups_views_default_views() {
   $handler->display->display_options['fields']['field_ding_group_category']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['field_ding_group_category']['element_default_classes'] = FALSE;
   $handler->display->display_options['fields']['field_ding_group_category']['type'] = 'taxonomy_term_reference_plain';
-  /* Felt: Indhold: List image */
+  /* Field: Content: List image */
   $handler->display->display_options['fields']['field_ding_group_list_image']['id'] = 'field_ding_group_list_image';
   $handler->display->display_options['fields']['field_ding_group_list_image']['table'] = 'field_data_field_ding_group_list_image';
   $handler->display->display_options['fields']['field_ding_group_list_image']['field'] = 'field_ding_group_list_image';
@@ -101,7 +89,7 @@ function ding_groups_views_default_views() {
       'fallback_style' => 'ding_list_medium',
     ),
   );
-  /* Felt: Indhold: Titel */
+  /* Field: Content: Title */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'node';
   $handler->display->display_options['fields']['title']['field'] = 'title';
@@ -112,7 +100,7 @@ function ding_groups_views_default_views() {
   $handler->display->display_options['fields']['title']['element_class'] = 'groups-heading';
   $handler->display->display_options['fields']['title']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['title']['element_default_classes'] = FALSE;
-  /* Felt: Indhold: Lead */
+  /* Field: Content: Lead */
   $handler->display->display_options['fields']['field_ding_group_lead']['id'] = 'field_ding_group_lead';
   $handler->display->display_options['fields']['field_ding_group_lead']['table'] = 'field_data_field_ding_group_lead';
   $handler->display->display_options['fields']['field_ding_group_lead']['field'] = 'field_ding_group_lead';
@@ -121,7 +109,7 @@ function ding_groups_views_default_views() {
   $handler->display->display_options['fields']['field_ding_group_lead']['element_class'] = 'groups-list-content';
   $handler->display->display_options['fields']['field_ding_group_lead']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['field_ding_group_lead']['element_default_classes'] = FALSE;
-  /* Felt: Link (arrow) */
+  /* Field: Link (arrow) */
   $handler->display->display_options['fields']['view_node']['id'] = 'view_node';
   $handler->display->display_options['fields']['view_node']['table'] = 'views_entity_node';
   $handler->display->display_options['fields']['view_node']['field'] = 'view_node';
@@ -133,19 +121,19 @@ function ding_groups_views_default_views() {
   $handler->display->display_options['fields']['view_node']['element_class'] = 'groups-arrow-link';
   $handler->display->display_options['fields']['view_node']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['view_node']['element_default_classes'] = FALSE;
-  /* Sorteringskriterie: Nodekø: Placering */
+  /* Sort criterion: Nodequeue: Position */
   $handler->display->display_options['sorts']['position']['id'] = 'position';
   $handler->display->display_options['sorts']['position']['table'] = 'nodequeue_nodes';
   $handler->display->display_options['sorts']['position']['field'] = 'position';
   $handler->display->display_options['sorts']['position']['relationship'] = 'nodequeue_rel';
-  /* Filterkriterie: Indhold: Udgivet */
+  /* Filter criterion: Content: Published */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'node';
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['value'] = 1;
   $handler->display->display_options['filters']['status']['group'] = 1;
   $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
-  /* Filterkriterie: Indhold: Type */
+  /* Filter criterion: Content: Type */
   $handler->display->display_options['filters']['type']['id'] = 'type';
   $handler->display->display_options['filters']['type']['table'] = 'node';
   $handler->display->display_options['filters']['type']['field'] = 'type';
@@ -184,7 +172,7 @@ function ding_groups_views_default_views() {
   $handler->display->display_options['row_options']['links'] = FALSE;
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['fields'] = FALSE;
-  /* Felt: Category (groups rows) */
+  /* Field: Category (groups rows) */
   $handler->display->display_options['fields']['field_ding_group_category']['id'] = 'field_ding_group_category';
   $handler->display->display_options['fields']['field_ding_group_category']['table'] = 'field_data_field_ding_group_category';
   $handler->display->display_options['fields']['field_ding_group_category']['field'] = 'field_ding_group_category';
@@ -196,7 +184,7 @@ function ding_groups_views_default_views() {
   $handler->display->display_options['fields']['field_ding_group_category']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['field_ding_group_category']['element_default_classes'] = FALSE;
   $handler->display->display_options['fields']['field_ding_group_category']['type'] = 'taxonomy_term_reference_plain';
-  /* Felt: Indhold: List image */
+  /* Field: Content: List image */
   $handler->display->display_options['fields']['field_ding_group_list_image']['id'] = 'field_ding_group_list_image';
   $handler->display->display_options['fields']['field_ding_group_list_image']['table'] = 'field_data_field_ding_group_list_image';
   $handler->display->display_options['fields']['field_ding_group_list_image']['field'] = 'field_ding_group_list_image';
@@ -218,7 +206,7 @@ function ding_groups_views_default_views() {
       'fallback_style' => 'ding_list_medium',
     ),
   );
-  /* Felt: Indhold: Titel */
+  /* Field: Content: Title */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'node';
   $handler->display->display_options['fields']['title']['field'] = 'title';
@@ -229,7 +217,7 @@ function ding_groups_views_default_views() {
   $handler->display->display_options['fields']['title']['element_class'] = 'groups-heading';
   $handler->display->display_options['fields']['title']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['title']['element_default_classes'] = FALSE;
-  /* Felt: Indhold: Lead */
+  /* Field: Content: Lead */
   $handler->display->display_options['fields']['field_ding_group_lead']['id'] = 'field_ding_group_lead';
   $handler->display->display_options['fields']['field_ding_group_lead']['table'] = 'field_data_field_ding_group_lead';
   $handler->display->display_options['fields']['field_ding_group_lead']['field'] = 'field_ding_group_lead';
@@ -238,7 +226,7 @@ function ding_groups_views_default_views() {
   $handler->display->display_options['fields']['field_ding_group_lead']['element_class'] = 'groups-list-content';
   $handler->display->display_options['fields']['field_ding_group_lead']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['field_ding_group_lead']['element_default_classes'] = FALSE;
-  /* Felt: Link (arrow) */
+  /* Field: Link (arrow) */
   $handler->display->display_options['fields']['view_node']['id'] = 'view_node';
   $handler->display->display_options['fields']['view_node']['table'] = 'views_entity_node';
   $handler->display->display_options['fields']['view_node']['field'] = 'view_node';
@@ -309,7 +297,7 @@ function ding_groups_views_default_views() {
     'ding_tabroll_frontpage' => 0,
   );
   $handler->display->display_options['defaults']['fields'] = FALSE;
-  /* Felt: Indhold: Titel */
+  /* Field: Content: Title */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'node';
   $handler->display->display_options['fields']['title']['field'] = 'title';
@@ -340,7 +328,7 @@ function ding_groups_views_default_views() {
       'fallback_style' => 'ding_panorama_primary_small',
     ),
   );
-  /* Felt: Indhold: Lead */
+  /* Field: Content: Lead */
   $handler->display->display_options['fields']['field_ding_group_lead']['id'] = 'field_ding_group_lead';
   $handler->display->display_options['fields']['field_ding_group_lead']['table'] = 'field_data_field_ding_group_lead';
   $handler->display->display_options['fields']['field_ding_group_lead']['field'] = 'field_ding_group_lead';
@@ -348,7 +336,7 @@ function ding_groups_views_default_views() {
   $handler->display->display_options['fields']['field_ding_group_lead']['element_type'] = 'p';
   $handler->display->display_options['fields']['field_ding_group_lead']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['field_ding_group_lead']['element_default_classes'] = FALSE;
-  /* Felt: Link to group */
+  /* Field: Link to group */
   $handler->display->display_options['fields']['title_1']['id'] = 'title_1';
   $handler->display->display_options['fields']['title_1']['table'] = 'node';
   $handler->display->display_options['fields']['title_1']['field'] = 'title';
@@ -359,115 +347,21 @@ function ding_groups_views_default_views() {
   $handler->display->display_options['fields']['title_1']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['title_1']['element_default_classes'] = FALSE;
   $handler->display->display_options['defaults']['sorts'] = FALSE;
-  /* Sorteringskriterie: Nodekø: Placering */
-  $handler->display->display_options['sorts']['position']['id'] = 'position';
-  $handler->display->display_options['sorts']['position']['table'] = 'nodequeue_nodes';
-  $handler->display->display_options['sorts']['position']['field'] = 'position';
-  $handler->display->display_options['sorts']['position']['relationship'] = 'nodequeue_rel';
-  $handler->display->display_options['sorts']['position']['order'] = 'DESC';
-  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
-  $handler->display->display_options['defaults']['filters'] = FALSE;
-  /* Filterkriterie: Indhold: Udgivet */
-  $handler->display->display_options['filters']['status']['id'] = 'status';
-  $handler->display->display_options['filters']['status']['table'] = 'node';
-  $handler->display->display_options['filters']['status']['field'] = 'status';
-  $handler->display->display_options['filters']['status']['value'] = 1;
-  $handler->display->display_options['filters']['status']['group'] = 1;
-  $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
-  /* Filterkriterie: Indhold: Type */
-  $handler->display->display_options['filters']['type']['id'] = 'type';
-  $handler->display->display_options['filters']['type']['table'] = 'node';
-  $handler->display->display_options['filters']['type']['field'] = 'type';
-  $handler->display->display_options['filters']['type']['value'] = array(
-    'ding_group' => 'ding_group',
-  );
-  $handler->display->display_options['pane_category']['name'] = 'Groups panes';
-  $handler->display->display_options['pane_category']['weight'] = '0';
-
-  /* Display: Inspiration page groups listing */
-  $handler = $view->new_display('panel_pane', 'Inspiration page groups listing', 'panel_pane_2');
-  $handler->display->display_options['defaults']['title'] = FALSE;
-  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
-  $handler->display->display_options['style_plugin'] = 'responsive_grid';
-  $handler->display->display_options['style_options']['wrapper_classes'] = 'group-blocks--wrapper';
-  $handler->display->display_options['style_options']['column_classes'] = '';
-  $handler->display->display_options['style_options']['first_column_classes'] = '';
-  $handler->display->display_options['style_options']['last_column_classes'] = '';
-  $handler->display->display_options['style_options']['row_classes'] = 'group-blocks--inner';
-  $handler->display->display_options['style_options']['first_row_classes'] = '';
-  $handler->display->display_options['style_options']['last_row_classes'] = '';
-  $handler->display->display_options['style_options']['default_classes'] = 1;
-  $handler->display->display_options['defaults']['style_options'] = FALSE;
-  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
-  $handler->display->display_options['row_plugin'] = 'fields';
-  $handler->display->display_options['row_options']['default_field_elements'] = FALSE;
-  $handler->display->display_options['defaults']['row_options'] = FALSE;
-  $handler->display->display_options['defaults']['fields'] = FALSE;
-  /* Felt: Indhold: Titel */
-  $handler->display->display_options['fields']['title']['id'] = 'title';
-  $handler->display->display_options['fields']['title']['table'] = 'node';
-  $handler->display->display_options['fields']['title']['field'] = 'title';
-  $handler->display->display_options['fields']['title']['label'] = '';
-  $handler->display->display_options['fields']['title']['alter']['word_boundary'] = FALSE;
-  $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
-  $handler->display->display_options['fields']['title']['element_type'] = 'h2';
-  $handler->display->display_options['fields']['title']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['title']['element_default_classes'] = FALSE;
-  /* Field: Content: Title image */
-  $handler->display->display_options['fields']['field_ding_group_title_image']['id'] = 'field_ding_group_title_image';
-  $handler->display->display_options['fields']['field_ding_group_title_image']['table'] = 'field_data_field_ding_group_title_image';
-  $handler->display->display_options['fields']['field_ding_group_title_image']['field'] = 'field_ding_group_title_image';
-  $handler->display->display_options['fields']['field_ding_group_title_image']['label'] = '';
-  $handler->display->display_options['fields']['field_ding_group_title_image']['element_type'] = '0';
-  $handler->display->display_options['fields']['field_ding_group_title_image']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['field_ding_group_title_image']['element_default_classes'] = FALSE;
-  $handler->display->display_options['fields']['field_ding_group_title_image']['click_sort_column'] = 'fid';
-  $handler->display->display_options['fields']['field_ding_group_title_image']['type'] = 'cs_adaptive_image';
-  $handler->display->display_options['fields']['field_ding_group_title_image']['settings'] = array(
-    'image_link' => 'content',
-    'styles' => array(
-      'breakpoint_1' => '768',
-      'style_1' => 'ding_panorama_primary_small',
-      'breakpoint_2' => '500',
-      'style_2' => 'ding_panorama_primary_small',
-      'max_style' => 'ding_panorama_primary_small',
-      'fallback_style' => 'ding_panorama_primary_small',
-    ),
-  );
-  /* Felt: Indhold: Lead */
-  $handler->display->display_options['fields']['field_ding_group_lead']['id'] = 'field_ding_group_lead';
-  $handler->display->display_options['fields']['field_ding_group_lead']['table'] = 'field_data_field_ding_group_lead';
-  $handler->display->display_options['fields']['field_ding_group_lead']['field'] = 'field_ding_group_lead';
-  $handler->display->display_options['fields']['field_ding_group_lead']['label'] = '';
-  $handler->display->display_options['fields']['field_ding_group_lead']['element_type'] = 'p';
-  $handler->display->display_options['fields']['field_ding_group_lead']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['field_ding_group_lead']['element_default_classes'] = FALSE;
-  /* Felt: Link to group */
-  $handler->display->display_options['fields']['title_1']['id'] = 'title_1';
-  $handler->display->display_options['fields']['title_1']['table'] = 'node';
-  $handler->display->display_options['fields']['title_1']['field'] = 'title';
-  $handler->display->display_options['fields']['title_1']['ui_name'] = 'Link to group';
-  $handler->display->display_options['fields']['title_1']['label'] = '';
-  $handler->display->display_options['fields']['title_1']['element_type'] = 'span';
-  $handler->display->display_options['fields']['title_1']['element_class'] = 'group-link';
-  $handler->display->display_options['fields']['title_1']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['title_1']['element_default_classes'] = FALSE;
-  $handler->display->display_options['defaults']['sorts'] = FALSE;
-  /* Sorteringskriterie: Nodekø: Placering */
+  /* Sort criterion: Nodequeue: Position */
   $handler->display->display_options['sorts']['position']['id'] = 'position';
   $handler->display->display_options['sorts']['position']['table'] = 'nodequeue_nodes';
   $handler->display->display_options['sorts']['position']['field'] = 'position';
   $handler->display->display_options['sorts']['position']['relationship'] = 'nodequeue_rel';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
-  /* Filterkriterie: Indhold: Udgivet */
+  /* Filter criterion: Content: Published */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'node';
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['value'] = 1;
   $handler->display->display_options['filters']['status']['group'] = 1;
   $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
-  /* Filterkriterie: Indhold: Type */
+  /* Filter criterion: Content: Type */
   $handler->display->display_options['filters']['type']['id'] = 'type';
   $handler->display->display_options['filters']['type']['table'] = 'node';
   $handler->display->display_options['filters']['type']['field'] = 'type';
@@ -507,7 +401,6 @@ function ding_groups_views_default_views() {
     t('Simply list all groups'),
     t('Groups panes'),
     t('Front page groups listing'),
-    t('Inspiration page groups listing'),
     t('Queue'),
   );
   $export['ding_groups'] = $view;

@@ -261,7 +261,7 @@ function ding_groups_default_page_manager_pages() {
   $page->task = 'page';
   $page->admin_title = 'Groups news';
   $page->admin_description = '';
-  $page->path = 'inspiration/%gid/nyheder/!tid';
+  $page->path = 'temaer/%gid/nyheder/!tid';
   $page->access = array(
     'type' => 'none',
     'settings' => NULL,
@@ -413,7 +413,7 @@ function ding_groups_default_page_manager_pages() {
       ),
       'override_title' => 0,
       'override_title_text' => '',
-      'base' => 'inspiration',
+      'base' => 'temaer',
       'vocabulary' => 'news_category',
     );
     $pane->cache = array();
@@ -469,7 +469,7 @@ function ding_groups_default_page_manager_pages() {
   $page->task = 'page';
   $page->admin_title = 'Groups events';
   $page->admin_description = '';
-  $page->path = 'inspiration/%gid/arrangementer/!tid';
+  $page->path = 'temaer/%gid/arrangementer/!tid';
   $page->access = array(
     'type' => 'none',
     'settings' => NULL,
@@ -621,7 +621,7 @@ function ding_groups_default_page_manager_pages() {
       ),
       'override_title' => 0,
       'override_title_text' => '',
-      'base' => 'inspiration',
+      'base' => 'temaer',
       'vocabulary' => 'event_category',
     );
     $pane->cache = array();
@@ -677,14 +677,14 @@ function ding_groups_default_page_manager_pages() {
   $page->task = 'page';
   $page->admin_title = 'Groups listing';
   $page->admin_description = '';
-  $page->path = 'inspiration';
+  $page->path = 'temaer';
   $page->access = array(
     'type' => 'none',
     'settings' => NULL,
   );
   $page->menu = array(
     'type' => 'normal',
-    'title' => 'Inspiration',
+    'title' => 'Themes',
     'name' => 'main-menu',
     'weight' => '-46',
     'parent' => array(
@@ -721,7 +721,7 @@ function ding_groups_default_page_manager_pages() {
       'enabled' => 1,
       'metatags' => array(
         'title' => array(
-          'value' => 'Inspiration | [current-page:pager][site:name]',
+          'value' => 'Themes | [current-page:pager][site:name]',
         ),
       ),
     ),
@@ -760,8 +760,6 @@ function ding_groups_default_page_manager_pages() {
     $pane->shown = TRUE;
     $pane->access = array();
     $pane->configuration = array(
-      'override_title' => 1,
-      'override_title_text' => 'Inspiration',
       'ding_campaign_count' => 3,
       'ding_campaign_offset' => 0,
       'ding_campaign_image_style' => 'medium',
@@ -771,6 +769,8 @@ function ding_groups_default_page_manager_pages() {
         2 => 'empty',
         3 => 'empty',
       ),
+      'override_title' => 0,
+      'override_title_text' => '',
     );
     $pane->cache = array();
     $pane->style = array(
