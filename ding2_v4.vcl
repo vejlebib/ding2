@@ -142,6 +142,21 @@ sub vcl_deliver {
   # Remove server information
   set resp.http.X-Powered-By = "Ding T!NG";
 
+  # If our no-browser-cache marker is present, we rewrite the Cache-Control to
+  # avoid browser caching. As of Varnish 4 we can not set the no-cache or
+  # no-store directive in backend since this will cause Varnish to not cache.
+  # See: https://github.com/varnishcache/varnish-cache/commit/81006eafd6d4cd6f9481740a1d172e316a184d05
+  # See: https://www.section.io/blog/varnish-caching-pages-and-ignoring-cache-control-no-cache-header/
+  if (resp.http.ding2-no-browser-cache) {
+    # Note that we also add the no-store directive to ensure no client will ever
+    # store a copy in cache. The no-cache directive itself does not guruantee
+    # this. We could then probably only send no-store header and still get the
+    # same result, but we add the other no-cache and must-revalidate to be sure.
+    set resp.http.Cache-Control = "no-store, no-cache, must-revalidate";
+    # This is only an internal marker so no need to send this to the client.
+    unset resp.http.ding2-no-browser-cache;
+  }
+
   # Debug
   if (obj.hits > 0 ) {
     set resp.http.X-Varnish-Cache = "HIT";
@@ -168,6 +183,14 @@ sub vcl_backend_response {
   # make sure you edit both and keep them equal.
   if (bereq.url ~ "(?i)\.(pdf|asc|dat|txt|doc|xls|ppt|tgz|csv|png|gif|jpeg|jpg|ico|swf|css|js)(\?[\w\d=\.\-]+)?$") {
     unset beresp.http.set-cookie;
+  }
+  # For all page requests that are not static files we want full control from
+  # backend and do not want the browser to cache. We therefore set a special
+  # marker here and then in vcl_deliver we add the no-store and no-cache
+  # directives to the Cache-Control header in the response right before it is
+  # send to the client based on the precense of this marker.
+  else {
+    set beresp.http.ding2-no-browser-cache = "1";
   }
 
   # If ding_varnish has marked the page as cachable simeply deliver is to make
