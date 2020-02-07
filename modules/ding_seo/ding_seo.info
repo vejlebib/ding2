@@ -2,3 +2,7 @@ name = Ding SEO
 description = Provides various SEO functionality to ding2
 package = Ding!
 core = "7.x"
+dependencies[] = features
+dependencies[] = metatag:metatag_verification
+features[features_api][] = api:2
+features[user_permission][] = configure seo
