@@ -4,5 +4,6 @@ package = Ding!
 core = "7.x"
 dependencies[] = features
 dependencies[] = metatag:metatag_verification
+dependencies[] = ding_permissions
 features[features_api][] = api:2
 features[user_permission][] = configure seo
