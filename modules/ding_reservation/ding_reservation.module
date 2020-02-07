@@ -968,7 +968,7 @@ function ding_reservation_delete_reservations_form($form, $form_state, $account,
 /**
  * Delete reservation ajax callback.
  */
-function ding_reservation_delete_reservations_form_ajax_submit($reservation_ids, $form_state) {
+function ding_reservation_delete_reservations_form_ajax_submit($reservation_ids) {
   global $user;
   if (!empty($form_state['triggering_element']['#reservation_id'])) {
     $reservations = array($form_state['triggering_element']['#reservation_id']);
