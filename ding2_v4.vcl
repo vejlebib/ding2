@@ -225,7 +225,6 @@ sub vcl_backend_error {
     <h1 class="title">Page Unavailable</h1>
     <p>The page you requested is temporarily unavailable.</p>
     <p>We're redirecting you to the <a href="/">homepage</a> in 5 seconds.</p>
-    <div class="error">(Error "} + beresp.status + " " + beresp.response + {")</div>
   </div>
 </body>
 </html>
