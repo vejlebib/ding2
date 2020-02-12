@@ -9,6 +9,7 @@
  define('DING_SEO_COMMA_PIVOT_VALUE', '|COMMA|');
 
 /**
+ /**
  * Implements hook_menu().
  */
 function ding_seo_menu() {
