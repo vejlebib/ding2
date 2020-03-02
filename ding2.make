@@ -330,6 +330,8 @@ projects[panels][subdir] = "contrib"
 projects[panels][version] = "3.4"
 ; Fix PHP7 errors - PHP 4 style constructors - (https://www.drupal.org/node/2557061)
 projects[panels][patch][] = "https://www.drupal.org/files/issues/deprecated-constructor-in-php-7-2557061-3.patch"
+; Fix PHP 7.1 Warning: Illegal string offset
+projects[panels][patch][] = "https://www.drupal.org/files/issues/illegal_string_offset-2833861-1.patch"
 
 projects[panels_breadcrumbs][subdir] = "contrib"
 projects[panels_breadcrumbs][version] = "2.1"
