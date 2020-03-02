@@ -30,6 +30,13 @@ function ting_search_carousel_menu() {
 }
 
 /**
+ * Flush carousel cache.
+ */
+function ting_search_carousel_flush_cache() {
+  cache_clear_all('*', 'cache_ting_search_carousel', TRUE);
+}
+
+/**
  * Get ajax path for search.
  *
  * @param TingSearchCarouselQuery $query
