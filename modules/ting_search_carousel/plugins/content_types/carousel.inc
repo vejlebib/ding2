@@ -227,6 +227,16 @@ function ting_search_carousel_query_form(array $item = array(), $index = 0) {
     '#default_value' => isset($item['available']) ? $item['available'] : '',
   );
 
+  // Store original query id for existing carousels.
+  if (!empty($item['title'])) {
+    $query = new TingSearchCarouselQuery($item['query'], $item['sort'], $item['available']);
+    $query_id = sha1((string) $query);
+    $form['orig_query_id'] = array(
+      '#type' => 'value',
+      '#value' => $query_id,
+    );
+  }
+
   $form['remove'] = array(
     '#type' => 'submit',
     '#value' => t('Remove'),
