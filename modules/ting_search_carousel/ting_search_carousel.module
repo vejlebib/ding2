@@ -96,7 +96,7 @@ function ting_search_carousel_get_entities(TingSearchCarouselQuery $query, $star
     'search_page_size' => TING_SEARCH_CAROUSEL_SEARCH_SIZE,
   );
 
-  if ($cache = cache_get("ting_search_carousel_search_" . $query_id)) {
+  if ($cache = cache_get("ting_search_carousel_search_" . $query_id, 'cache_ting_search_carousel')) {
     $cache_data = $cache->data;
   }
 
@@ -111,7 +111,7 @@ function ting_search_carousel_get_entities(TingSearchCarouselQuery $query, $star
     // We don't care if the lock is available or not, we'll just check if the
     // desired chunk has appeared or return an empty result.
     lock_wait($lock_name, 5);
-    if ($cache = cache_get("ting_search_carousel_search_" . $query_id)) {
+    if ($cache = cache_get("ting_search_carousel_search_" . $query_id, 'cache_ting_search_carousel')) {
       if (isset($cache->data)) {
         $cache_data = $cache->data;
         return _ting_search_carousel_filter_available(_ting_search_carousel_get_slice($cache_data, $start, $count), $query);
@@ -141,7 +141,7 @@ function ting_search_carousel_get_entities(TingSearchCarouselQuery $query, $star
     }
   }
 
-  cache_set("ting_search_carousel_search_" . $query_id, $cache_data);
+  cache_set("ting_search_carousel_search_" . $query_id, $cache_data, 'cache_ting_search_carousel');
   lock_release($lock_name);
 
   return _ting_search_carousel_filter_available(_ting_search_carousel_get_slice($cache_data, $start, $count), $query);
