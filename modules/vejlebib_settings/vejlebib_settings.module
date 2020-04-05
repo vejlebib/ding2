@@ -34,14 +34,6 @@ function vejlebib_settings_menu() {
     'access arguments' => array('administer site configuration'),
     'file' => 'vejlebib_settings.admin.inc',
   );
-  $items['admin/config/vejlebib-settings/webtrends'] = array(
-    'title' => 'Vejlebib Webtrends',
-    'description' => 'Manage Vejlebib settings for the Webtrends analytics tool.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('vejlebib_settings_webtrends_settings_form'),
-    'access arguments' => array('administer site configuration'),
-    'file' => 'vejlebib_settings.admin.inc',
-  );
 
   return $items;
 }
@@ -134,47 +126,6 @@ function vejlebib_settings_opening_hours_crud_api_page() {
  * Implements hook_preprocess_html().
  */
 function vejlebib_settings_preprocess_html(&$vars) {
-  // Insert Webtrends onsite search parameter if webtrends is congigured.
-  if (variable_get('vejlebib_webtrends_domain', FALSE) && variable_get('vejlebib_webtrends_onsitedoms', FALSE)) {
-    $args = explode('/', current_path());
-
-    // If this is a search page: Add meta-tags for webtrends on-site search.
-    if (!empty($args) && $args[0] == 'search' && count($args) > 2) {
-      $search_engine = $args[1];
-      $search_query = $args[2];
-
-      // Find out which backend is used in the search, so we can get the results
-      switch ($search_engine) {
-        case 'ting':
-          $search_result = drupal_static('ting_search_results');
-          $search_count = $search_result->numTotalObjects;
-          break;
-        case 'tingextra':
-          $search_result = drupal_static('ting_extrasearch_results');
-          $search_count = $search_result->numTotalObjects;
-          break;
-        case 'node':
-          // Take a sneak-peak at the pager to get the search count
-          $search_count = $GLOBALS['pager_total_items'][0];
-          break;
-      }
-
-      // Add the meta-tags
-      $meta_tag['#tag'] = 'meta';
-      $meta_tag['#attributes'] = array(
-        'name' => 'WT.oss',
-        'content' => $search_query,
-      );
-      drupal_add_html_head($meta_tag, 'search_query_meta_tag');
-      $meta_tag['#attributes'] = array(
-        'name' => 'WT.oss_r',
-        'content' => $search_count,
-      );
-      drupal_add_html_head($meta_tag, 'search_count_meta_tag');
-    }
-
-  }
-
   // Google site verification. TODO: Is this needed anymore?
   if (drupal_is_front_page()) {
     $enable = variable_get('google_site_verification_enable', FALSE);
@@ -190,73 +141,6 @@ function vejlebib_settings_preprocess_html(&$vars) {
       drupal_add_html_head($meta_tag, 'google-site-verification-meta-tag');
     }
   }
-}
-
-/**
- * Implements hook_page_build()
- *
- * Load the webtrends script if configured proberly.
- */
-function vejlebib_settings_page_build(&$page) {
-  // Get configuration variables set in the administration interface.
-  $domain = variable_get('vejlebib_webtrends_domain', FALSE);
-  $dcs_id = variable_get('vejlebib_webtrends_dcs_id', FALSE);
-  $onsitedoms = variable_get('vejlebib_webtrends_onsitedoms', NULL);
-
-  // Check that webtrends have been configured.
-  if (!$domain || !$dcs_id) {
-    watchdog('vejlebib_settings', 'Vejlebib Webtrends not configured.', array(), WATCHDOG_NOTICE);
-    return;
-  }
-
-  // Create custom inline script.
-  $script = <<<EOT
-window.webtrendsAsyncInit=function(){
-  var dcs=new Webtrends.dcs().init({
-    dcsid:"$dcs_id",
-    domain:"statse.webtrendslive.com",
-    timezone:1,
-    i18n:true,
-    adimpressions:true,
-    adsparam:"WT.ac",
-    offsite:true,
-    download:true,
-    downloadtypes:"avi,csv,doc,docx,exe,gzip,mp3,mp4,pdf,ppt,pptx,rar,txt,wav,xls,xlsx,zip",
-    onsitedoms:"$onsitedoms",
-    fpcdom:".$domain",
-    plugins:{
-      hm:{src:"//s.webtrends.com/js/webtrends.hm.js"},
-      facebook:{src:"//s.webtrends.com/js/webtrends.fb.js"},
-      yt:{src:"//s.webtrends.com/js/webtrends.yt.js"}
-    }
-  });
-
-  var count = jQuery('.js-count');
-  if(count.length > 0) {
-    dcs.WT.oss = jQuery('.form-type-textfield input').val();  // search query
-    dcs.WT.oss_r = count.attr('data-js-count'); // search hits
-  }
-
-  dcs.track();
-};
-EOT;
-
-  drupal_add_js($script, array(
-    'type' => 'inline',
-    'scope' => 'footer',
-  ));
-
-  // Load webtrend script after inline configuration with a higher weight.
-  drupal_add_js(drupal_get_path('module', 'vejlebib_settings') . '/js/webtrends.min.js', array(
-    'scope' => 'footer',
-  ));
-
-  $html = '<img alt="dcsimg" id="dcsimg" width="1" height="1" src="//statse.webtrendslive.com/dcs2223b10932ca7afu0mksma_6t5f/njs.gif?dcsuri=/nojavascript&amp;WT.js=No&amp;WT.tv=10.4.1&amp;dcssip=vejlebib.dk"/>';
-  $page['page_bottom']['webtrends'] = array(
-    '#prefix' => '<noscript><div>',
-    '#suffix' => '</div></noscript>',
-    '#markup' => $html,
-  );
 }
 
 /**
