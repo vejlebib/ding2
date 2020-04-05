@@ -6,6 +6,15 @@
  */
 
 /**
+ * Implements hook_schema().
+ */
+function ting_search_carousel_schema() {
+  $schema = array();
+  $schema['cache_ting_search_carousel'] = drupal_get_schema_unprocessed('system', 'cache');
+  return $schema;
+}
+
+/**
  * Implements hook_install().
  */
 function ting_search_carousel_install() {
@@ -89,4 +98,15 @@ function ting_search_carousel_update_7101() {
 
   // Ensure that the pane can be selected in IPE.
   ting_search_carousel_enable();
+}
+
+/**
+ * Migrate to new separate cache bin.
+ */
+function ting_search_carousel_update_7102() {
+  if (!db_table_exists('cache_ting_search_carousel')) {
+    db_create_table('cache_ting_search_carousel', drupal_get_schema_unprocessed('system', 'cache'));
+  }
+  // Ensure no left over cache data in the general cache table.
+  cache_clear_all('ting_search_carousel_search_', 'cache', TRUE);
 }

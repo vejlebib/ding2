@@ -59,6 +59,139 @@ function ting_search_carousel_ctools_plugin_directory($module, $plugin) {
 }
 
 /**
+ * Returns all the configured carousel searches in the system.
+ *
+ * Each carousel consists of one or more searches, which are displayed as tabs
+ * in the carousel. This function finds all search configurations on all ting
+ * search carousel panel panes in the system.
+ *
+ * @return array $searches
+ *   An array of arrays with the search configuration from the pane, the name
+ *   and title of the page variant it is placed on, and its activation status.
+ */
+function ting_search_carousel_get_carousel_searches() {
+  $searches = [];
+  ctools_get_plugins('page_manager', 'task_handlers', 'panel_context');
+
+  // Loop through all page manager pages and variants collection any configured
+  // carousel pane.
+  foreach (page_manager_get_tasks() as $task_name => $task) {
+    // Get the full loaded page object with variant handlers and pane configs.
+    $page = page_manager_get_page_cache($task_name);
+    foreach ($page->handlers as $handler) {
+      $display = panels_panel_context_get_display($handler);
+      foreach ($display->content as $pane) {
+        if ($pane->type == 'carousel' && $pane->subtype == 'carousel') {
+          foreach ($pane->configuration['searches'] as $search) {
+            // Add some extra info from the context to the carousel array.
+            $search['variant_name'] = $handler->name;
+            $search['variant_title'] = $handler->conf['title'];
+            // This shows up as activated/deactivated in the admin UI.
+            $search['activated'] = $pane->shown;
+            $searches[] = $search;
+          }
+        }
+      }
+    }
+  }
+
+  return $searches;
+}
+
+/**
+ * Constructs a TingSearchCarouselQuery object from a search config.
+ *
+ * @param $search_config.
+ *   The search config.
+ *
+ * @return TingSearchCarouselQuery $query
+ *   The TingSearchCarouselQuery object.
+ */
+function ting_search_carousel_get_query_object($search_config) {
+  $search_config += [
+    'query' => '',
+    'sort' => '',
+    'available' => '',
+  ];
+
+  return new TingSearchCarouselQuery(
+    $search_config['query'],
+    $search_config['sort'],
+    $search_config['available']
+  );
+}
+
+/**
+ * Get the search cache data for a carousel query.
+ *
+ * @param $query
+ *   The query to get cache for.
+ *
+ * @return array
+ *   The cached data for the carousel query. False if cache was empty.
+ *   The cache array has the following keys:
+ *   - 'pool': The found entities with cover.
+ *   - 'all_ids': IDs of all found entities.
+ *   - 'finished': A boolean indication whether the query has reach the end
+ *      or the results.
+ */
+function ting_search_carousel_get_search_cache(TingSearchCarouselQuery $query) {
+  $query_id = sha1((string) $query);
+
+  if ($cache = cache_get("ting_search_carousel_search_" . $query_id, 'cache_ting_search_carousel')) {
+    $cached_data = $cache->data;
+
+    // Remove internal stuff that is used in ting_search_carousel_get_entities()
+    // to control the paging of the search query. It is not relevant here. The
+    // cache should only be set through ting_search_carousel_get_entities().
+    unset($cached_data['search_page']);
+    unset($cached_data['search_page_size']);
+
+    return $cached_data;
+  }
+  return FALSE;
+}
+
+/**
+ * Warmup the search cache for a ting search carousel query.
+ *
+ * This function assumes that the cache for the carousel have been cleared
+ * beforehand. Otherwise it may just read the cache and never consult the search
+ * provider for new entities.
+ *
+ * @param TingSearchCarouselQuery $query
+ *   The $query object resprenting the carousel cache to warmup.
+ * @param int $chunk_size
+ *   The number of entities to attempt to load in cache. Defaults to
+ *   TING_SEARCH_CAROUSEL_CHUNK_SIZE, which is the number the carousel attempts
+ *   to load in each request. Hence, using the default will ensure that the
+ *
+ * @return array
+ *   The result from ting_search_carousel_get_entities().
+ */
+function ting_search_carousel_warmup_cache(TingSearchCarouselQuery $query, $chunk_size = TING_SEARCH_CAROUSEL_CHUNK_SIZE) {
+  return ting_search_carousel_get_entities($query, 0, $chunk_size);
+}
+
+/**
+ * Clears all data in carousel cache.
+ */
+function ting_search_carousel_cache_clear_all() {
+  cache_clear_all('*', 'cache_ting_search_carousel', TRUE);
+}
+
+/**
+ * Clear the search cache for a specific ting search carousel query.
+ *
+ * @param TingSearchCarouselQuery $query
+ *   The $query object resprenting the carousel cache to clear.
+ */
+function ting_search_carousel_cache_clear(TingSearchCarouselQuery $query) {
+  $query_id = sha1((string) $query);
+  cache_clear_all('ting_search_carousel_search_' . $query_id, 'cache_ting_search_carousel');
+}
+
+/**
  * Get ting entities that has covers.
  *
  * Returns sets of entities by looping through search result and collecting
@@ -96,7 +229,7 @@ function ting_search_carousel_get_entities(TingSearchCarouselQuery $query, $star
     'search_page_size' => TING_SEARCH_CAROUSEL_SEARCH_SIZE,
   );
 
-  if ($cache = cache_get("ting_search_carousel_search_" . $query_id)) {
+  if ($cache = cache_get("ting_search_carousel_search_" . $query_id, 'cache_ting_search_carousel')) {
     $cache_data = $cache->data;
   }
 
@@ -111,7 +244,7 @@ function ting_search_carousel_get_entities(TingSearchCarouselQuery $query, $star
     // We don't care if the lock is available or not, we'll just check if the
     // desired chunk has appeared or return an empty result.
     lock_wait($lock_name, 5);
-    if ($cache = cache_get("ting_search_carousel_search_" . $query_id)) {
+    if ($cache = cache_get("ting_search_carousel_search_" . $query_id, 'cache_ting_search_carousel')) {
       if (isset($cache->data)) {
         $cache_data = $cache->data;
         return _ting_search_carousel_filter_available(_ting_search_carousel_get_slice($cache_data, $start, $count), $query);
@@ -141,7 +274,7 @@ function ting_search_carousel_get_entities(TingSearchCarouselQuery $query, $star
     }
   }
 
-  cache_set("ting_search_carousel_search_" . $query_id, $cache_data);
+  cache_set("ting_search_carousel_search_" . $query_id, $cache_data, 'cache_ting_search_carousel');
   lock_release($lock_name);
 
   return _ting_search_carousel_filter_available(_ting_search_carousel_get_slice($cache_data, $start, $count), $query);

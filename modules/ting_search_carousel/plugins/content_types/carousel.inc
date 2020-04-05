@@ -34,6 +34,15 @@ function ting_search_carousel_carousel_content_type_render($subtype, $conf, $pan
       );
       $query = new TingSearchCarouselQuery($search['query'], $search['sort'], $search['available']);
 
+      $chunk = ting_search_carousel_get_entities($query, 0, TING_SEARCH_CAROUSEL_CHUNK_SIZE, TRUE);
+      $items = array();
+      foreach ($chunk['entities'] as $entity) {
+        $items[] = ting_object_view($entity, 'teaser');
+      }
+
+      $placeholders = count($items) ? count($items) : TING_SEARCH_CAROUSEL_CHUNK_SIZE;
+      $placeholders = $chunk['next_offset'] > -1 ? ($placeholders) + 1 : 0;
+
       $carousels[] = array(
         '#type' => 'ding_carousel',
         '#title' => $search['title'],
@@ -41,10 +50,10 @@ function ting_search_carousel_carousel_content_type_render($subtype, $conf, $pan
         // Start without any covers, but load them all via AJAX. This eliminates
         // rendering covers and hitting the availability service, which slows
         // down page rendering.
-        '#items' => [],
-        '#offset' => 0,
+        '#items' => $items,
+        '#offset' => $chunk['next_offset'],
         // Add placeholders instead.
-        '#placeholders' => TING_SEARCH_CAROUSEL_CHUNK_SIZE,
+        '#placeholders' => $placeholders,
       );
     }
 
@@ -217,6 +226,16 @@ function ting_search_carousel_query_form(array $item = array(), $index = 0) {
     '#description' => t('Filter out unavailable materials when rendering carousel.'),
     '#default_value' => isset($item['available']) ? $item['available'] : '',
   );
+
+  // Store original query id for existing carousels.
+  if (!empty($item['title'])) {
+    $query = new TingSearchCarouselQuery($item['query'], $item['sort'], $item['available']);
+    $query_id = sha1((string) $query);
+    $form['orig_query_id'] = array(
+      '#type' => 'value',
+      '#value' => $query_id,
+    );
+  }
 
   $form['remove'] = array(
     '#type' => 'submit',
