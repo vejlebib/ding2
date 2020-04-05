@@ -77,18 +77,6 @@ function vejlebib_settings_menu_alter(&$items) {
 }
 
 /**
- * Improve performance of search block form redirect by posting to a blank page
- * and doing nothing but form related stuff.
- */
-function _vejlebib_blank_page() {
-  // This will call the submit handlers if a valid form build id was posted.
-  drupal_get_form('search_block_form');
-
-  // If no form; redirect to front to ensure no blank pages.
-  drupal_goto();
-}
-
-/**
  * Wrapper function for the opening hours page callback.
  */
 function vejlebib_settings_opening_hours_crud_api_page() {
