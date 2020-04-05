@@ -722,3 +722,22 @@ function vejlebib_settings_update_7058() {
   variable_del('vejlebib_webtrends_dcs_id');
   variable_del('vejlebib_webtrends_onsitedoms');
 }
+
+/**
+ * Disable and uninstall wayf related modules.
+ */
+function vejlebib_settings_update_7059() {
+  module_disable([
+    'ding_wayf_dk_create_user',
+    'ding_wayf_dk_login',
+    'ding_wayf_dk',
+    'wayf_dk_login',
+  ], FALSE);
+
+  drupal_uninstall_modules(array(
+    'ding_wayf_dk_create_user',
+    'ding_wayf_dk_login',
+    'ding_wayf_dk',
+    'wayf_dk_login',
+  ), FALSE);
+}

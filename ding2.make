@@ -664,13 +664,6 @@ projects[save_redirect_on_delete][version] = "1.0"
 projects[unpublished_nodes_redirect][subdir] = "contrib"
 projects[unpublished_nodes_redirect][version] = "1.0-alpha1"
 
-projects[wayf_dk_login][subdir] = "contrib"
-projects[wayf_dk_login][version] = "1.2-beta1"
-; Add scoping support (https://www.drupal.org/node/2428847).
-projects[wayf_dk_login][patch][] = "https://www.drupal.org/files/issues/wayf_dk_scoping_support-2428847-2.patch"
-; Change in metadata end-point and struture (https://www.drupal.org/node/2734715).
-projects[wayf_dk_login][patch][] = "https://www.drupal.org/files/issues/metdata_endpoint_2728389-1.diff"
-
 ; Libraries
 libraries[d3][download][type] = "get"
 libraries[d3][download][url] = "https://github.com/d3/d3/releases/download/v3.5.17/d3.zip"
@@ -725,12 +718,6 @@ projects[ting_marc][download][url] = "https://github.com/vejlebib/ting_marc.git"
 projects[ting_marc][download][branch] = "vejlebib"
 projects[ting_marc][subdir] = "vejlebib_modules"
 
-projects[ding_wayf_dk][type] = "module"
-projects[ding_wayf_dk][download][type] = "git"
-projects[ding_wayf_dk][download][url] = "https://github.com/vejlebib/ding_wayf_dk.git"
-projects[ding_wayf_dk][download][branch] = "vejlebib"
-projects[ding_wayf_dk][subdir] = "vejlebib_modules"
-
 ; Modules included for easy deployment of removal. Should be removed after
 ; disable and uninstall hooks have been run properly.
 projects[openlayers][subdir] = "contrib"
@@ -739,3 +726,16 @@ projects[openlayers][patch][] = "patches/openlayers-7.x-2.0-beta7-remove-make-fi
 
 projects[taxonomy_menu][subdir] = "contrib"
 projects[taxonomy_menu][version] = "1.4"
+
+projects[ding_wayf_dk][type] = "module"
+projects[ding_wayf_dk][download][type] = "git"
+projects[ding_wayf_dk][download][url] = "https://github.com/vejlebib/ding_wayf_dk.git"
+projects[ding_wayf_dk][download][branch] = "vejlebib"
+projects[ding_wayf_dk][subdir] = "vejlebib_modules"
+
+projects[wayf_dk_login][subdir] = "contrib"
+projects[wayf_dk_login][version] = "1.2-beta1"
+; Add scoping support (https://www.drupal.org/node/2428847).
+projects[wayf_dk_login][patch][] = "https://www.drupal.org/files/issues/wayf_dk_scoping_support-2428847-2.patch"
+; Change in metadata end-point and struture (https://www.drupal.org/node/2734715).
+projects[wayf_dk_login][patch][] = "https://www.drupal.org/files/issues/metdata_endpoint_2728389-1.diff"

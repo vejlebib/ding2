@@ -214,52 +214,10 @@ function vejlebib_settings_form_ding_library_node_form_alter(&$form, &$form_stat
 }
 
 /**
- * Implements hook_form_FORM_ID_alter().
- */
-function vejlebib_settings_form_ding_wayf_dk_create_user_form_alter(&$form, &$form_state) {
-  // We would like vejle branch to be default choice, for self created patrons.
-  // We have to do it here, since there's no user at this point. And since it
-  // is vejlebib specific it's placed in this module.
-  if (isset($form['branch'])) {
-    $form['branch']['#default_value'] = 'DK-763000';
-  }
-}
-
-/**
  * Implements hook_shortcut_default_set().
  */
 function vejlebib_settings_shortcut_default_set($account) {
   return variable_get('vejlebib_default_shortcut_set', FALSE);
-}
-
-/**
- * Implements hook_form_FORM_ID_alter().
- */
-function vejlebib_settings_form_user_login_block_alter(&$form, &$form_state, $form_id) {
-  $form['user_login_container']['actions']['wayf_dk_login'] = array(
-    '#theme' => 'wayf_dk_login',
-    '#login_url' => array(
-      '#theme' => 'link',
-      // Let ding_wayf_dk_login module take care of this.
-      '#text' => '',
-      '#path' => 'wayf/consume',
-      '#options' => array(
-        'attributes' => array(
-          'class' => array('wayf-login-link button'),
-        ),
-        'query' => array(
-          drupal_get_destination(),
-        ),
-        'html' => TRUE,
-      ),
-    ),
-  );
-  $form['user_login_container']['actions']['create-user-link'] = array(
-    '#theme' => 'ding_wayf_dk_create_user_link',
-    '#link' => l(t('Create user'), 'wayf/create-user/before-page', array(
-      'attributes' => array('class' => array('create-user-link button')),
-    )),
-  );
 }
 
 /**
