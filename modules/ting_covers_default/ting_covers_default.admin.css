@@ -1,0 +1,12 @@
+.ting-covers-default-fieldset input[type=submit] {
+  margin-top: 20px;
+  margin-right: 10px;
+}
+
+.ting-covers-default-fieldset img.preview {
+  margin-bottom: 10px;
+}
+
+.ting-covers-default-fieldset .fieldset-wrapper {
+  padding-bottom: 0;
+}

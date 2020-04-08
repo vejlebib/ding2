@@ -1,0 +1,5 @@
+name = Ting covers default
+description = Last resort ting_covers provider
+package = Ding!
+core = "7.x"
+dependencies[] = ting_covers

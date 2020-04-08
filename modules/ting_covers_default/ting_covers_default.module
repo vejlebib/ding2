@@ -1,0 +1,55 @@
+<?php
+
+/**
+ * @file
+ * Ting covers default module file.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function ting_covers_default_menu() {
+  $items = array();
+
+  $items['admin/config/ting/covers/default-covers'] = [
+    'title' => 'Default covers',
+    'description' => 'Configure default covers.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ting_covers_default_default_covers_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'ting_covers_default.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+  ];
+  $items['admin/config/ting/covers/default-covers-mapping'] = [
+    'title' => 'Default covers mapping',
+    'description' => 'Configure default covers mapping.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ting_covers_default_mapping_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'ting_covers_default.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 11,
+  ];
+
+  return $items;
+}
+
+/**
+ * Gets the mapped default cover for a material type.
+ *
+ * @param string $material_type
+ *   The material type.
+ *
+ * @return mixed
+ *   The FID of default cover if found. FALSE otherwise.
+ */
+function ting_covers_default_get_default_cover($material_type) {
+  $mappings = variable_get('ting_covers_default_default_covers_mappings', []);
+  foreach ($mappings as $default_cover => $material_types) {
+    if (in_array($material_type, $material_types)) {
+      return $default_cover;
+    }
+  }
+  return FALSE;
+}

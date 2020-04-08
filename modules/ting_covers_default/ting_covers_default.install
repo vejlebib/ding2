@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * Install file for Ting covers default.
+ */
+
+/**
+ * Implements hook_uinstall().
+ */
+function ting_covers_default_uninstall() {
+  $default_covers = variable_get('ting_covers_default_default_covers', []);
+  foreach ($default_covers as $fid => $default_cover) {
+    $image = file_load($fid);
+    file_usage_delete($image, 'ting_covers_default', 'default_cover', 1);
+    file_delete($image);
+  }
+  variable_del('ting_covers_default_default_covers');
+  variable_del('ting_covers_default_default_covers_mappings');
+}
