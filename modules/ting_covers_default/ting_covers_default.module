@@ -36,6 +36,44 @@ function ting_covers_default_menu() {
 }
 
 /**
+ * Implements hook_module_implements_alter().
+ */
+function ting_covers_default_module_implements_alter(&$implementations, $hook) {
+  if ($hook == 'ting_covers') {
+    // Move our implementation to the end to give every other cover provide a
+    // chance before we potentially provide a default cover.
+    $group = $implementations['ting_covers_default'];
+    unset($implementations['ting_covers_default']);
+    $implementations['ting_covers_default'] = $group;
+  }
+}
+
+/**
+ * Implements hook_ting_covers().
+ */
+function ting_covers_default_ting_covers($entities) {
+  // The collection of default covers we return an make ting_covers use.
+  $default_covers = [];
+  foreach ($entities as $pid => $entity) {
+    // Check if any cover provider was able to produce a file. If so, we skip
+    // this one.
+    $path = ting_covers_object_path($pid);
+    if (file_exists($path)) {
+      continue;
+    }
+
+    $material_type = drupal_strtolower($entity->getType());
+    if ($default_cover = ting_covers_default_get_default_cover($material_type)) {
+      $image = file_load($default_cover);
+      $test = $image->uri;
+      $default_covers[$pid] = $image->uri;
+    }
+  }
+
+  return $default_covers;
+}
+
+/**
  * Gets the mapped default cover for a material type.
  *
  * @param string $material_type
