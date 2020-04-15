@@ -6,6 +6,62 @@
  */
 
 /**
+ * Implements hook_schema().
+ */
+function ting_covers_default_schema() {
+  $schema = [];
+
+  $schema['ting_covers_default_usage'] = [
+    'description' => 'Records usage of default covers on ting objects.',
+    'fields' => [
+      'default_cover' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'description' => 'The fid of default cover image file.',
+        'default' => 0,
+      ],
+      'ting_object_id' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'ID of the ting object the default cover is used on.',
+      ],
+      'in_use' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'size' => 'tiny',
+        'default' => 1,
+        'description' => 'Boolean indication whether the default cover is currently in use on the ting object.'
+      ],
+      'last_use' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Timestamp of the last use.'
+      ],
+      'count' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 1,
+        'description' => 'The number of times the default cover has been used on the ting object.',
+      ],
+    ],
+    'primary key' => ['default_cover', 'ting_object_id'],
+    'indexes' => [
+      'in_use' => ['in_use'],
+      'last_use' => ['last_use'],
+    ],
+  ];
+
+  return $schema;
+}
+
+/**
  * Implements hook_uinstall().
  */
 function ting_covers_default_uninstall() {

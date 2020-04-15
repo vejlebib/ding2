@@ -5,6 +5,9 @@
  * Ting covers default module file.
  */
 
+define('TING_COVERS_DEFAULT_IN_USE', 1);
+define('TING_COVERS_DEFAULT_NOT_IN_USE', 0);
+
 /**
  * Implements hook_menu().
  */
@@ -54,23 +57,75 @@ function ting_covers_default_module_implements_alter(&$implementations, $hook) {
 function ting_covers_default_ting_covers($entities) {
   // The collection of default covers we return an make ting_covers use.
   $default_covers = [];
-  foreach ($entities as $pid => $entity) {
+  foreach ($entities as $ting_object_id => $entity) {
     // Check if any cover provider was able to produce a file. If so, we skip
     // this one.
-    $path = ting_covers_object_path($pid);
+    $path = ting_covers_object_path($ting_object_id);
     if (file_exists($path)) {
       continue;
     }
 
     $material_type = drupal_strtolower($entity->getType());
     if ($default_cover = ting_covers_default_get_default_cover($material_type)) {
-      $image = file_load($default_cover);
-      $test = $image->uri;
-      $default_covers[$pid] = $image->uri;
+      // Ensure we were able to record usage before using default cover.
+      if (ting_covers_default_record_usage($default_cover, $ting_object_id)) {
+        $image = file_load($default_cover);
+        $test = $image->uri;
+        $default_covers[$ting_object_id] = $image->uri;
+      }
     }
   }
 
   return $default_covers;
+}
+
+/**
+ * Implements hook_cron().
+ *
+ * Everytime cron runs, we clean up every default cover recorded in the db as
+ * actively in use. This is to ensure we give other cover providers every
+ * opportunity to provide a "real" cover.
+ */
+function ting_covers_default_cron() {
+  // Use a form of safe optimistic locking, where we first fetch all ting object
+  // ids, which has a default cover in use, and then immediately set them all as
+  // "not in use", before we begin to remove any cover.
+  // This way we avoid a situation where we remove a default cover, some other
+  // request adds the cover again and then we set it as not in use, potentially
+  // "locking" the default cover on the ting object for a long time. Then in
+  // some situations a cover may be removed after being recorded as "in use",
+  // but the only consequence will be that the usage will be counted twice,
+  // which is much prefferable to other way around.
+  // The alternative would be to lock the whole table during cover deletion,
+  // with ->forUpdate() on the select query, to ensure consistency, but that we
+  // would also like to avoid.
+  $transaction = db_transaction();
+
+  // Fetch ting object ids which has default covers in use.
+  $ting_object_ids = db_select('ting_covers_default_usage', 'u')
+    ->forUpdate()
+    ->fields('u', ['ting_object_id'])
+    ->condition('in_use', TING_COVERS_DEFAULT_IN_USE)
+    ->execute()
+    ->fetchAllKeyed(0, 0);
+
+  // Set all as "not in use".
+  db_update('ting_covers_default_usage')
+    ->fields(['in_use' => TING_COVERS_DEFAULT_NOT_IN_USE])
+    ->condition('in_use', TING_COVERS_DEFAULT_IN_USE)
+    ->execute();
+
+  // Commits the transaction.
+  unset($transaction);
+
+  // Perform the default cover clean up.
+  foreach ($ting_object_ids as $ting_object_id) {
+    $path = ting_covers_object_path($ting_object_id);
+    if (file_exists($path)) {
+      file_unmanaged_delete($path);
+      image_path_flush($path);
+    }
+  }
 }
 
 /**
@@ -90,4 +145,37 @@ function ting_covers_default_get_default_cover($material_type) {
     }
   }
   return FALSE;
+}
+
+/**
+ * Records usage of default cover on ting object.
+ *
+ * @param int $default_cover
+ *   The fid of the default cover.
+ * @param string $ting_object_id
+ *   The ID of the ting object.
+ *
+ * @return mixed
+ *   MergeQuery::STATUS_UPDATE | MergeQuery::STATUS_INSERT on success.
+ *   FALSE if something went wrong and the usage couldn't be recorded.
+ */
+function ting_covers_default_record_usage($default_cover, $ting_object_id) {
+  try {
+    return db_merge('ting_covers_default_usage')
+      ->key([
+        'default_cover' => $default_cover,
+        'ting_object_id' => $ting_object_id,
+      ])
+      ->fields([
+        'in_use' => TRUE,
+        'last_use' => REQUEST_TIME,
+      ])
+      ->expression('count', 'count + 1')
+      ->execute();
+  }
+  catch (Exception $e) {
+    // We really don't care what went wrong and don't wanna potentially spam
+    // log. Just ensure to comminucate we couldn't record usage.
+    return FALSE;
+  }
 }
