@@ -577,13 +577,18 @@ function opensearch_execute(TingClientRequest $request) {
         _opensearch_cache($request, $response);
       }
 
+      // If response is empty array it means there was no objects found for the
+      // passed ids. In this case we need to return NULL as expected by the
+      // caller.
+      if (empty($response)) {
+        $response = NULL;
+      }
     }
     else {
       // Update the cache with the raw response object from the data well for
       // faster processing. Also set the static cache.
       _opensearch_cache($request, $response);
     }
-
 
     // To speed up the entity module, which will trigger an search for each
     // collection. Try and predict the search request an warm up the cache.
