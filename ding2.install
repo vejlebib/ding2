@@ -842,7 +842,7 @@ function ding2_update_7073() {
  * Update translations.
  */
 function ding2_update_7074() {
-  ding2_translation_update();
+  // ding2_translation_update(); (skip in vejlebib)
 }
 
 /**
