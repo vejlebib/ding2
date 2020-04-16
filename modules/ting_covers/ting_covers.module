@@ -73,7 +73,9 @@ function ting_covers_theme() {
  * Implements hook_cron().
  */
 function ting_covers_cron() {
-  _ting_covers_delete_old_files($_SERVER['REQUEST_TIME'] - variable_get('ting_covers_cache_lifetime', TING_COVERS_DEFAULT_CACHE_LIFETIME));
+  // Temporarily disable deletion of covers on cron to preserve as much covers
+  // from the old service.
+  //_ting_covers_delete_old_files($_SERVER['REQUEST_TIME'] - variable_get('ting_covers_cache_lifetime', TING_COVERS_DEFAULT_CACHE_LIFETIME));
 }
 
 /**
