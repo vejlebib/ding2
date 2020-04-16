@@ -658,9 +658,6 @@ projects[mailchimp][version] = "2.12"
 projects[panelizer][subdir] = "contrib"
 projects[panelizer][version] = "3.4"
 
-projects[save_redirect_on_delete][subdir] = "contrib"
-projects[save_redirect_on_delete][version] = "1.0"
-
 projects[unpublished_nodes_redirect][subdir] = "contrib"
 projects[unpublished_nodes_redirect][version] = "1.0-alpha1"
 
@@ -739,3 +736,6 @@ projects[wayf_dk_login][version] = "1.2-beta1"
 projects[wayf_dk_login][patch][] = "https://www.drupal.org/files/issues/wayf_dk_scoping_support-2428847-2.patch"
 ; Change in metadata end-point and struture (https://www.drupal.org/node/2734715).
 projects[wayf_dk_login][patch][] = "https://www.drupal.org/files/issues/metdata_endpoint_2728389-1.diff"
+
+projects[save_redirect_on_delete][subdir] = "contrib"
+projects[save_redirect_on_delete][version] = "1.0"

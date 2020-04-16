@@ -741,3 +741,11 @@ function vejlebib_settings_update_7059() {
     'wayf_dk_login',
   ), FALSE);
 }
+
+/**
+ * Disable and uninstall save_redirect_on_delete module.
+ */
+function vejlebib_settings_update_7060() {
+  module_disable(['save_redirect_on_delete'], FALSE);
+  drupal_uninstall_modules(['save_redirect_on_delete'], FALSE);
+}
