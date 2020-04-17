@@ -767,3 +767,28 @@ function vejlebib_settings_update_7062() {
     variable_set('ding_ipe_filter_panes_selected', $selected);
   }
 }
+
+/**
+ * Enable ding_ipe on vejlebib frontpage.
+ */
+function vejlebib_settings_update_7063() {
+  $task = page_manager_get_task('page');
+  ctools_get_plugins('page_manager', 'task_handlers', 'panel_context');
+  $handlers = page_manager_load_sorted_handlers($task);
+
+  foreach ($handlers as &$handler) {
+    $save = FALSE;
+
+    $test = $handler->name;
+
+    if ($handler->name == 'page_vejlebib_frontpage__panel') {
+      $handler->conf['pipeline'] = 'ipe';
+      $save = TRUE;
+    }
+
+    // Only save the display if changes were actually made.
+    if ($save) {
+      page_manager_save_task_handler($handler);
+    }
+  }
+}
