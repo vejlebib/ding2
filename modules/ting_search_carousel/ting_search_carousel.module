@@ -71,6 +71,7 @@ function ting_search_carousel_ctools_plugin_directory($module, $plugin) {
  */
 function ting_search_carousel_get_carousel_searches() {
   $searches = [];
+  ctools_include('plugins');
   ctools_get_plugins('page_manager', 'task_handlers', 'panel_context');
 
   // Loop through all page manager pages and variants collection any configured
