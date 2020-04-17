@@ -243,6 +243,9 @@ projects[media][subdir] = "contrib"
 projects[media][version] = "2.0"
 ; Patch against SA-CONTRIB-2018-020
 projects[media][patch][] = "https://cgit.drupalcode.org/media/patch/?id=1cd77ffa9c2cf96d80b76d47318179a8a82f0d46"
+; Media dialog appears underneath the Ctools modal dialog when using jQuery UI
+; https://www.drupal.org/project/media/issues/2272567
+projects[media][patch][] = "https://www.drupal.org/files/issues/media_dialog_appears_2272567-32.patch"
 
 projects[media_vimeo][subdir] = "contrib"
 projects[media_vimeo][version] = "2.1"
