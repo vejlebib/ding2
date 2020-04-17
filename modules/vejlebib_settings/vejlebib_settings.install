@@ -749,3 +749,10 @@ function vejlebib_settings_update_7060() {
   module_disable(['save_redirect_on_delete'], FALSE);
   drupal_uninstall_modules(['save_redirect_on_delete'], FALSE);
 }
+
+/**
+ * Enable ting_covers_default module.
+ */
+function vejlebib_settings_update_7061() {
+  module_enable(['ting_covers_default']);
+}

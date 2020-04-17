@@ -19,6 +19,7 @@ dependencies[] = mailchimp_lists
 dependencies[] = menu
 dependencies[] = menu_block
 dependencies[] = strongarm
+dependencies[] = ting_covers_default
 dependencies[] = ting_marc
 dependencies[] = ting_material_details
 dependencies[] = virtual_field
