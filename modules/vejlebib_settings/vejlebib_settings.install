@@ -756,3 +756,14 @@ function vejlebib_settings_update_7060() {
 function vejlebib_settings_update_7061() {
   module_enable(['ting_covers_default']);
 }
+
+/**
+ * Enable custom panel pane for ding_ipe.
+ */
+function vejlebib_settings_update_7062() {
+  $selected = _ding_ipe_filter_selected_panes();
+  if (!isset($selected['root:custom'])) {
+    $selected['root:custom'] = 'root:custom';
+    variable_set('ding_ipe_filter_panes_selected', $selected);
+  }
+}
