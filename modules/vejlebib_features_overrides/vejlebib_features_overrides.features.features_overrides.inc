@@ -14,6 +14,10 @@ function vejlebib_features_overrides_features_override_default_overrides() {
   // Exported overrides for: field_instance
   $overrides["field_instance.node-ding_news-field_ding_news_list_image.required"] = 1;
   $overrides["field_instance.node-ding_news-field_ding_news_title_image.required"] = 1;
+  $overrides["field_instance.ting_object-ting_object-ting_cover.display|ting_reference_preview|module"]["DELETED"] = TRUE;
+  $overrides["field_instance.ting_object-ting_object-ting_cover.display|ting_reference_preview|settings|image_style"]["DELETED"] = TRUE;
+  $overrides["field_instance.ting_object-ting_object-ting_cover.display|ting_reference_preview|settings|link_type"]["DELETED"] = TRUE;
+  $overrides["field_instance.ting_object-ting_object-ting_cover.display|ting_reference_preview|type"] = 'hidden';
 
   // Exported overrides for: flag
   $overrides["flag.mobile_app.roles|flag|0"] = 4;

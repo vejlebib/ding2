@@ -14,6 +14,12 @@ function vejlebib_features_overrides_field_default_field_instances_alter(&$data)
   if (isset($data['node-ding_news-field_ding_news_title_image'])) {
     $data['node-ding_news-field_ding_news_title_image']['required'] = 1; /* WAS: 0 */
   }
+  if (isset($data['ting_object-ting_object-ting_cover'])) {
+    $data['ting_object-ting_object-ting_cover']['display']['ting_reference_preview']['type'] = 'hidden'; /* WAS: 'ting_cover_default' */
+    unset($data['ting_object-ting_object-ting_cover']['display']['ting_reference_preview']['module']);
+    unset($data['ting_object-ting_object-ting_cover']['display']['ting_reference_preview']['settings']['image_style']);
+    unset($data['ting_object-ting_object-ting_cover']['display']['ting_reference_preview']['settings']['link_type']);
+  }
 }
 
 /**
