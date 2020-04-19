@@ -651,6 +651,9 @@ libraries[ddb-react][destination] = "libraries"
 projects[d3][subdir] = "contrib"
 projects[d3][version] = "1.x-dev"
 
+projects[eck][subdir] = "contrib"
+projects[eck][version] = "2.0-rc9"
+
 projects[entityqueue][subdir] = "contrib"
 projects[entityqueue][version] = "1.1"
 

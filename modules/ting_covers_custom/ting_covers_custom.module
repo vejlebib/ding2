@@ -1,0 +1,145 @@
+<?php
+/**
+ * @file
+ * Code for the ting_covers_custom module.
+ */
+
+include_once 'ting_covers_custom.features.inc';
+
+/**
+ * Implements hook_ting_covers().
+ */
+function ting_covers_custom_ting_covers($entities) {
+  // Change an array of entities from id to Ting object to id to image uri.
+  array_walk($entities, function(TingEntity &$entity, $id) {
+    // Load related cover entities for each Ting object.
+    $relations = ting_reference_get_relations('ting_object', $entity, 'ting_covers_custom_cover');
+    $covers = array_map(function($relation) {
+      $endpoints = relation_get_endpoints($relation, 'ting_covers_custom');
+      // We could in theory have multiple cover endpoints. In practice there
+      // will be only one.
+      return reset($endpoints['ting_covers_custom']);
+    }, $relations);
+
+    if (!empty($covers)) {
+      // If we have a set of covers for the entity then extract a image uri.
+      /* @var \Entity $cover */
+      $cover = reset($covers);
+      $image_file = $cover->wrapper()->field_ting_covers_custom_image->value();
+      $entity = $image_file['uri'];
+    }
+    else {
+      $entity = NULL;
+    }
+  });
+
+  // Only return entities which actually have custom covers. Return NULL for
+  // an entity will prevent other sources from providing a cover for it.
+  return array_filter($entities);
+}
+
+/**
+ * Implements hook_menu_alter().
+ */
+function ting_covers_custom_menu_alter(&$items) {
+  // Change menu entry type and set title for the admin list.
+  // This will render it as a local task under Ting covers.
+  $items['admin/config/ting/covers/custom']['title'] = t('Custom covers');
+  $items['admin/config/ting/covers/custom']['type'] = MENU_LOCAL_TASK;
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function ting_covers_custom_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  if ($root_path == 'admin/config/ting/covers/custom') {
+    // Add link to create a new cover from the administrative cover list.
+    // Set a destination to ensure that the user returns to the list afterwards.
+    $data['actions']['output'][] = array(
+      '#theme' => 'menu_local_task',
+      '#link' => array(
+        'title' => t('Add new cover'),
+        'href' => 'admin/structure/entity-type/ting_covers_custom/cover/add',
+        'localized_options' => array(
+          'query' => array(
+            'destination' => $root_path,
+          ),
+          'attributes' => array(
+            'title' => t('Add new cover'),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function ting_covers_custom_entity_insert($entity, $type) {
+  if ($type === 'relation' && $entity->relation_type === 'ting_covers_custom_cover') {
+    // Remove existing cover information when uploading a new cover.
+    ting_covers_custom_reset_relation_cover($entity);
+  }
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function ting_covers_custom_entity_update($entity, $type) {
+  if ($type === 'relation' && $entity->relation_type === 'ting_covers_custom_cover') {
+    // Remove existing cover information when uploading a new cover.
+    ting_covers_custom_reset_relation_cover($entity);
+  }
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function ting_covers_custom_entity_delete($entity, $type) {
+  // Remove all cover information when deleting a cover.
+  if ($type === 'relation' && $entity->relation_type === 'ting_covers_custom_cover') {
+    ting_covers_custom_reset_relation_cover($entity);
+  }
+}
+
+/**
+ * Reset cover information for Ting entities that a custom cover relates to.
+ *
+ * We want to make sure that new cover information is propagated to the frontend
+ * as quickly as possible.
+ *
+ * @param object $relation
+ *   The relation between a Ting entity and a custom cover entity.
+ */
+function ting_covers_custom_reset_relation_cover($relation) {
+  $endpoints = relation_get_endpoints($relation, 'ting_object');
+  $ids = array_map(function(\TingEntity $entity) {
+    return $entity->getId();
+  }, $endpoints['ting_object']);
+  ting_covers_clean($ids);
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function ting_covers_custom_module_implements_alter(&$implementations, $hook) {
+  if ($hook == 'menu_alter') {
+    // Views inserts page displays using their own menu alter. We want to
+    // modify these so move our implementation to run after theirs.
+    $implementation = $implementations['ting_covers_custom'];
+    unset($implementations['ting_covers_custom']);
+    $implementations['ting_covers_custom'] = $implementation;
+  }
+  elseif ($hook == 'ting_covers') {
+    // Ting covers will show the first cover returned by a supplying module.
+    // Custom covers should take precedence over any other supplier to move
+    // it to the front.
+    $implementation = $implementations['ting_covers_custom'];
+    unset($implementations['ting_covers_custom']);
+    $implementations = array_merge(
+      array('ting_covers_custom' => $implementation),
+      $implementations
+    );
+  }
+}

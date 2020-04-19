@@ -22,6 +22,7 @@ filter:
         - '*.pages_default.inc'
         - '*.panels_default.inc'
         - '*.panelizer.inc'
+        - '*.relation_type_default.inc'
         - '*.strongarm.inc'
         - '*.ting_field_search_default_profiles.inc'
         - '*.views_default.inc'
