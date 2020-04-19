@@ -175,19 +175,3 @@ temaer\/*' */
     $data['ding_varnish_role']->value = 7; /* WAS: 2 */
   }
 }
-
-/**
- * Implements hook_views_default_views_alter().
- */
-function vejlebib_features_overrides_views_default_views_alter(&$data) {
-  if (isset($data['ding_event'])) {
-    $data['ding_event']->display['ding_event_groups_list']->display_options['link_url'] = 'inspiration/!1/arrangementer'; /* WAS: 'temaer/!1/arrangementer' */
-  }
-  if (isset($data['ding_groups'])) {
-    $data['ding_groups']->display['panel_pane_frontpage']->display_options['link_url'] = 'inspiration'; /* WAS: 'temaer' */
-    $data['ding_groups']->display['panel_pane_frontpage']->display_options['use_more_text'] = 'Mere inspiration'; /* WAS: 'See all themes' */
-  }
-  if (isset($data['ding_news'])) {
-    $data['ding_news']->display['ding_news_groups_list']->display_options['link_url'] = 'inspiration/!1/nyheder'; /* WAS: 'temaer/!1/nyheder' */
-  }
-}

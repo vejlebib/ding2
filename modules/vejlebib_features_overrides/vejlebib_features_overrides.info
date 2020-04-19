@@ -62,7 +62,3 @@ features[features_overrides][] = variable.ding_varnish_content_types.value|ding_
 features[features_overrides][] = variable.ding_varnish_content_types.value|webform
 features[features_overrides][] = variable.ding_varnish_paths.value
 features[features_overrides][] = variable.ding_varnish_role.value
-features[features_overrides][] = views_view.ding_event.display|ding_event_groups_list|display_options|link_url
-features[features_overrides][] = views_view.ding_groups.display|panel_pane_frontpage|display_options|link_url
-features[features_overrides][] = views_view.ding_groups.display|panel_pane_frontpage|display_options|use_more_text
-features[features_overrides][] = views_view.ding_news.display|ding_news_groups_list|display_options|link_url
