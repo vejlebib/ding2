@@ -10,6 +10,62 @@
 function vejlebib_settings_field_default_field_instances() {
   $field_instances = array();
 
+  // Exported field_instance:
+  // 'taxonomy_term-section-field_ding_section_paragraphs'.
+  $field_instances['taxonomy_term-section-field_ding_section_paragraphs'] = array(
+    'bundle' => 'section',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'hidden',
+        'module' => 'paragraphs',
+        'settings' => array(
+          'view_mode' => 'full',
+        ),
+        'type' => 'paragraphs_view',
+        'weight' => 1,
+      ),
+    ),
+    'entity_type' => 'taxonomy_term',
+    'field_name' => 'field_ding_section_paragraphs',
+    'label' => 'Paragraphs',
+    'required' => 0,
+    'settings' => array(
+      'add_mode' => 'select',
+      'allowed_bundles' => array(
+        'ding_paragraphs_carousel' => 'ding_paragraphs_carousel',
+        'ding_paragraphs_image' => 'ding_paragraphs_image',
+        'ding_paragraphs_image_and_text' => 'ding_paragraphs_image_and_text',
+        'ding_paragraphs_material_list' => 'ding_paragraphs_material_list',
+        'ding_paragraphs_single_material' => 'ding_paragraphs_single_material',
+        'ding_paragraphs_text' => 'ding_paragraphs_text',
+        'ding_paragraphs_text_box' => 'ding_paragraphs_text_box',
+      ),
+      'bundle_weights' => array(
+        'ding_paragraphs_carousel' => 2,
+        'ding_paragraphs_image' => 3,
+        'ding_paragraphs_image_and_text' => 4,
+        'ding_paragraphs_material_list' => 5,
+        'ding_paragraphs_single_material' => 6,
+        'ding_paragraphs_text' => 7,
+        'ding_paragraphs_text_box' => 8,
+      ),
+      'default_edit_mode' => 'preview',
+      'title' => 'Paragraph',
+      'title_multiple' => 'Paragraphs',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'paragraphs',
+      'settings' => array(),
+      'type' => 'paragraphs_embed',
+      'weight' => 2,
+    ),
+  );
+
   // Exported field_instance: 'ting_object-ting_object-all_anvendelighed'.
   $field_instances['ting_object-ting_object-all_anvendelighed'] = array(
     'bundle' => 'ting_object',
@@ -35,6 +91,12 @@ function vejlebib_settings_field_default_field_instances() {
         'settings' => array(),
         'type' => 'ting_marc_ajax_formatter',
         'weight' => 74,
+      ),
+      'paragraphs_teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'reference_teaser' => array(
         'label' => 'above',
@@ -123,6 +185,12 @@ function vejlebib_settings_field_default_field_instances() {
         'type' => 'ting_marc_ajax_formatter',
         'weight' => 75,
       ),
+      'paragraphs_teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'reference_teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -209,6 +277,12 @@ function vejlebib_settings_field_default_field_instances() {
         'settings' => array(),
         'type' => 'ting_marc_ajax_formatter',
         'weight' => 73,
+      ),
+      'paragraphs_teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'reference_teaser' => array(
         'label' => 'above',
@@ -297,6 +371,12 @@ function vejlebib_settings_field_default_field_instances() {
         'type' => 'ting_marc_ajax_formatter',
         'weight' => 72,
       ),
+      'paragraphs_teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'reference_teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -383,6 +463,12 @@ function vejlebib_settings_field_default_field_instances() {
         'settings' => array(),
         'type' => 'ting_marc_ajax_formatter',
         'weight' => 76,
+      ),
+      'paragraphs_teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
       ),
       'reference_teaser' => array(
         'label' => 'above',
@@ -471,6 +557,12 @@ function vejlebib_settings_field_default_field_instances() {
         'type' => 'ting_marc_ajax_formatter',
         'weight' => 77,
       ),
+      'paragraphs_teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
       'reference_teaser' => array(
         'label' => 'above',
         'settings' => array(),
@@ -540,6 +632,7 @@ function vejlebib_settings_field_default_field_instances() {
   t('Let-tal');
   t('Lix-tal');
   t('Note');
+  t('Paragraphs');
 
   return $field_instances;
 }

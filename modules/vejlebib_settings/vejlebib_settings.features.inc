@@ -17,13 +17,13 @@ function vejlebib_settings_entityqueue_api($module = NULL, $api = NULL) {
  * Implements hook_ctools_plugin_api().
  */
 function vejlebib_settings_ctools_plugin_api($module = NULL, $api = NULL) {
-  if ($module == "strongarm" && $api == "strongarm") {
-    return array("version" => "1");
-  }
   if ($module == "environment_indicator" && $api == "default_environment_indicator_environments") {
     return array("version" => "1");
   }
   if ($module == "menu_block" && $api == "menu_block") {
+    return array("version" => "1");
+  }
+  if ($module == "strongarm" && $api == "strongarm") {
     return array("version" => "1");
   }
 }
