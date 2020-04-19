@@ -792,3 +792,14 @@ function vejlebib_settings_update_7063() {
     }
   }
 }
+
+/**
+ * Ensure that 'user_my_library' page manager page is removed from db.
+ */
+function vejlebib_settings_update_7064() {
+  module_load_include('inc', 'page_manager', 'plugins/tasks/page');
+  $page = page_manager_page_load('user_my_library');
+  if (isset($page)) {
+    page_manager_page_delete($page);
+  }
+}
