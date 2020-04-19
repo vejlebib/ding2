@@ -143,23 +143,36 @@ function vejlebib_features_overrides_default_search_api_index_alter(&$data) {
 function vejlebib_features_overrides_strongarm_alter(&$data) {
   if (isset($data['ding_varnish_content_types'])) {
     $data['ding_varnish_content_types']->value['ding_campaign_plus'] = 0; /* WAS: '' */
-    $data['ding_varnish_content_types']->value['ding_eresource'] = 0; /* WAS: '' */
-    $data['ding_varnish_content_types']->value['ding_event'] = 0; /* WAS: 'ding_event' */
-    $data['ding_varnish_content_types']->value['ding_group'] = 0; /* WAS: 'ding_group' */
-    $data['ding_varnish_content_types']->value['ding_library'] = 0; /* WAS: 'ding_library' */
-    $data['ding_varnish_content_types']->value['ding_news'] = 0; /* WAS: 'ding_news' */
-    $data['ding_varnish_content_types']->value['ding_page'] = 0; /* WAS: 'ding_page' */
+    $data['ding_varnish_content_types']->value['ding_eresource'] = 'ding_eresource'; /* WAS: '' */
     $data['ding_varnish_content_types']->value['ding_search_context_link'] = 0; /* WAS: '' */
     $data['ding_varnish_content_types']->value['webform'] = 0; /* WAS: '' */
   }
   if (isset($data['ding_varnish_paths'])) {
-    $data['ding_varnish_paths']->value = ''; /* WAS: '<front>
-    arrangementer\/*
-    biblioteker\/*
-    nyematerialer\/*
-    nyheder\/*
-    search\/*
-    temaer\/*' */
+    $data['ding_varnish_paths']->value = '<front>
+arrangementer
+arrangementer/*
+biblioteker
+biblioteker/*
+nyheder
+nyheder/*
+search/*
+temaer
+temaer/*
+inspiration
+inspiration/*
+netmedier
+netmedier/*
+ting/object/*
+ting/collection/*'; /* WAS: '<front>
+arrangementer\/*
+biblioteker\/*
+nyematerialer\/*
+nyheder\/*
+search\/*
+temaer\/*' */
+  }
+  if (isset($data['ding_varnish_role'])) {
+    $data['ding_varnish_role']->value = 7; /* WAS: 2 */
   }
 }
 

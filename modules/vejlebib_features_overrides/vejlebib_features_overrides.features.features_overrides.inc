@@ -104,15 +104,26 @@ function vejlebib_features_overrides_features_override_default_overrides() {
 
   // Exported overrides for: variable
   $overrides["variable.ding_varnish_content_types.value|ding_campaign_plus"] = 0;
-  $overrides["variable.ding_varnish_content_types.value|ding_eresource"] = 0;
-  $overrides["variable.ding_varnish_content_types.value|ding_event"] = 0;
-  $overrides["variable.ding_varnish_content_types.value|ding_group"] = 0;
-  $overrides["variable.ding_varnish_content_types.value|ding_library"] = 0;
-  $overrides["variable.ding_varnish_content_types.value|ding_news"] = 0;
-  $overrides["variable.ding_varnish_content_types.value|ding_page"] = 0;
+  $overrides["variable.ding_varnish_content_types.value|ding_eresource"] = 'ding_eresource';
   $overrides["variable.ding_varnish_content_types.value|ding_search_context_link"] = 0;
   $overrides["variable.ding_varnish_content_types.value|webform"] = 0;
-  $overrides["variable.ding_varnish_paths.value"] = '';
+  $overrides["variable.ding_varnish_paths.value"] = '<front>
+  arrangementer
+  arrangementer/*
+  biblioteker
+  biblioteker/*
+  nyheder
+  nyheder/*
+  search/*
+  temaer
+  temaer/*
+  inspiration
+  inspiration/*
+  netmedier
+  netmedier/*
+  ting/object/*
+  ting/collection/*';
+  $overrides["variable.ding_varnish_role.value"] = 7;
 
   // Exported overrides for: views_view
   $overrides["views_view.ding_event.display|ding_event_groups_list|display_options|link_url"] = 'inspiration/!1/arrangementer';
