@@ -100,6 +100,17 @@ function _vejlebib_settings_install_default_shortcut_set() {
 }
 
 /**
+ * Implements hook_update_dependencies().
+ */
+function vejlebib_settings_update_dependencies() {
+  // Ensure ding2 update 7076, which disables and uninstalls eck, is run before
+  // our 7065 update hook, which re-enables eck.
+  $dependencies['vejlebib_settings'][7065] = array(
+    'ding2' => 7076,
+  );
+}
+
+/**
  * Add the provider role to all provider users.
  */
 function vejlebib_settings_update_7001(&$sandbox) {
@@ -802,4 +813,11 @@ function vejlebib_settings_update_7064() {
   if (isset($page)) {
     page_manager_page_delete($page);
   }
+}
+
+/**
+ * Re-activate eck and enable ting_covers_custom.
+ */
+function vejlebib_settings_update_7065() {
+  module_enable(['eck', 'ting_covers_custom']);
 }
