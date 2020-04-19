@@ -94,11 +94,11 @@ function ting_covers_custom_field_default_field_instances() {
       ),
       'teaser' => array(
         'label' => 'above',
-        'module' => 'ting_carousel',
+        'module' => 'ting_reference',
         'settings' => array(
-          'view_mode' => 'reference_teaser',
+          'view_mode' => 'teaser',
         ),
-        'type' => 'ting_carousel',
+        'type' => 'ting_reference_carousel',
         'weight' => 0,
       ),
     ),

@@ -6,7 +6,6 @@ dependencies[] = eck
 dependencies[] = features
 dependencies[] = image
 dependencies[] = relation
-dependencies[] = ting_carousel
 dependencies[] = ting_reference
 dependencies[] = views
 features[ctools][] = relation:relation_type_default:1
