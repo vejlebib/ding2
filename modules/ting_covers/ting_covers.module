@@ -145,7 +145,7 @@ function ting_covers_get(array $requested_covers) {
     }
 
     // Determine if the local id is a known negative.
-    if (cache_get('ting_covers:' . $id)) {
+    if (cache_get(_ting_covers_cid($id))) {
       continue;
     }
 
@@ -173,10 +173,44 @@ function ting_covers_get(array $requested_covers) {
 
   // Mark all remaining as not found in cache.
   foreach ($entities as $id => $entity) {
-    cache_set('ting_covers:' . $id, 1, 'cache', $_SERVER['REQUEST_TIME'] + TING_COVERS_DEFAULT_CACHE_LIFETIME);
+    cache_set(_ting_covers_cid($id), 1, 'cache', $_SERVER['REQUEST_TIME'] + TING_COVERS_DEFAULT_CACHE_LIFETIME);
   }
 
   return $covers;
+}
+
+/**
+ * Remove all cover information about one or more ting entites.
+ *
+ * @param string|string[] $ids
+ *   One or more ting entity ids.
+ */
+function ting_covers_clean($ids) {
+  if (!is_array($ids)) {
+    $ids = array($ids);
+  }
+
+  array_walk($ids, function($id) {
+    $path = ting_covers_object_path($id);
+    // Delete current file and derivatives if any.
+    file_unmanaged_delete($path);
+    image_path_flush($path);
+    // Delete cache information about the cover not being available.
+    cache_clear_all(_ting_covers_cid($id), 'cache');
+  });
+}
+
+/**
+ * Generate a cache id for a ting entity id.
+ *
+ * @param string $id
+ *   The ting entity id.
+ *
+ * @return string
+ *   A cache id for the cover of the entity.
+ */
+function _ting_covers_cid($id) {
+  return 'ting_covers:' . $id;
 }
 
 /**
@@ -244,12 +278,7 @@ function ting_covers_fetch_image($filename, $image_url) {
     return FALSE;
   }
 
-  // Get the folder for the final location of this preset.
-  $directory = dirname($filename);
-
-  // Build the destination folder tree if it doesn't already exist.
-  if (!file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-    watchdog('ting_covers', 'Failed to create directory: %directory', array('%directory' => $directory), WATCHDOG_ERROR);
+  if (!ting_covers_prepare_directory($filename)) {
     return FALSE;
   }
 
