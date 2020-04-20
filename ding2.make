@@ -667,6 +667,9 @@ projects[flag][patch][] = "https://www.drupal.org/files/flag-default-flags-alter
 projects[gtranslate][subdir] = "contrib"
 projects[gtranslate][version] = "1.14"
 
+projects[mailchimp][subdir] = "contrib"
+projects[mailchimp][version] = "5.6"
+
 projects[panelizer][subdir] = "contrib"
 projects[panelizer][version] = "3.4"
 
@@ -678,6 +681,11 @@ libraries[d3][download][type] = "get"
 libraries[d3][download][url] = "https://github.com/d3/d3/releases/download/v3.5.17/d3.zip"
 libraries[d3][directory_name] = "d3"
 libraries[d3][destination] = "libraries"
+
+libraries[mailchimp][download][type] = "get"
+libraries[mailchimp][download][url] = "https://github.com/thinkshout/mailchimp-api-php/releases/download/v1.0.10/v1.0.10-package.zip"
+libraries[mailchimp][directory_name] = "mailchimp"
+libraries[mailchimp][destination] = "libraries"
 
 ; External modules that we still have to keep separate from the main repo
 projects[ding_zerohit_form][type] = "module"
