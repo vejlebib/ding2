@@ -828,3 +828,10 @@ function vejlebib_settings_update_7065() {
 function vejlebib_settings_update_7066() {
   module_enable(['mailchimp', 'mailchimp_lists', 'mailchimp_signup']);
 }
+
+/**
+ * Enable ting_recommender.
+ */
+function vejlebib_settings_update_7067() {
+  module_enable(['ting_recommender']);
+}

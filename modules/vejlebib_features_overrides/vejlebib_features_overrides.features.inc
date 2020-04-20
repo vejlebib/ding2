@@ -82,6 +82,48 @@ function vejlebib_features_overrides_default_page_manager_handlers_alter(&$data)
         ); /* WAS: '' */
     $data['site_template_panel_context']->conf['display']->panels['footer'][6] = 'new-f720f7d6-6151-4704-8ed5-6f3b59a3bfc8'; /* WAS: '' */
   }
+  if (isset($data['ting_collection_panel_context'])) {
+    $data['ting_collection_panel_context']->conf['display']->content['new-e09e561c-9e65-40aa-a905-4f8c3b6800ac'] = (object) array(
+          'pid' => 'new-e09e561c-9e65-40aa-a905-4f8c3b6800ac',
+          'panel' => 'left_sidebar',
+          'type' => 'recommender',
+          'subtype' => 'recommender',
+          'shown' => TRUE,
+          'access' => array(),
+          'configuration' => array(),
+          'cache' => array(),
+          'style' => array(
+            'settings' => NULL,
+          ),
+          'css' => array(),
+          'extras' => array(),
+          'position' => 2,
+          'locks' => array(),
+          'uuid' => 'e09e561c-9e65-40aa-a905-4f8c3b6800ac',
+        ); /* WAS: '' */
+    $data['ting_collection_panel_context']->conf['display']->panels['left_sidebar'][2] = 'new-e09e561c-9e65-40aa-a905-4f8c3b6800ac'; /* WAS: '' */
+  }
+  if (isset($data['ting_object_panel_context'])) {
+    $data['ting_object_panel_context']->conf['display']->content['new-0cef4d86-25a3-4d0f-93d2-9607e99a69e9'] = (object) array(
+          'pid' => 'new-0cef4d86-25a3-4d0f-93d2-9607e99a69e9',
+          'panel' => 'attachment_1_1',
+          'type' => 'recommender',
+          'subtype' => 'recommender',
+          'shown' => TRUE,
+          'access' => array(),
+          'configuration' => array(),
+          'cache' => array(),
+          'style' => array(
+            'settings' => NULL,
+          ),
+          'css' => array(),
+          'extras' => array(),
+          'position' => 4,
+          'locks' => array(),
+          'uuid' => '0cef4d86-25a3-4d0f-93d2-9607e99a69e9',
+        ); /* WAS: '' */
+    $data['ting_object_panel_context']->conf['display']->panels['attachment_1_1'][4] = 'new-0cef4d86-25a3-4d0f-93d2-9607e99a69e9'; /* WAS: '' */
+  }
 }
 
 /**
@@ -130,6 +172,69 @@ function vejlebib_features_overrides_default_page_manager_pages_alter(&$data) {
     $data['ding_staff_library']->default_handlers['page_ding_staff_library_panel_context']->conf['display']->panels['main_content'][0] = 'new-0911dfbe-f34c-484a-b9e3-7a6c4ffa7192'; /* WAS: 'new-6171a17a-4789-4aac-86de-eb9c76dee003' */
     $data['ding_staff_library']->default_handlers['page_ding_staff_library_panel_context']->conf['display']->title_pane = 'new-0911dfbe-f34c-484a-b9e3-7a6c4ffa7192'; /* WAS: 'new-6171a17a-4789-4aac-86de-eb9c76dee003' */
     unset($data['ding_staff_library']->default_handlers['page_ding_staff_library_panel_context']->conf['display']->content['new-6171a17a-4789-4aac-86de-eb9c76dee003']);
+  }
+  if (isset($data['user_loans'])) {
+    $data['user_loans']->default_handlers['page_user_loans_panel_context']->conf['display']->content['new-f2de0f40-065a-4b6f-b737-f9c3a7603ed3'] = (object) array(
+          'pid' => 'new-f2de0f40-065a-4b6f-b737-f9c3a7603ed3',
+          'panel' => 'left_sidebar',
+          'type' => 'recommender',
+          'subtype' => 'recommender',
+          'shown' => TRUE,
+          'access' => array(),
+          'configuration' => array(),
+          'cache' => array(),
+          'style' => array(
+            'settings' => NULL,
+          ),
+          'css' => array(),
+          'extras' => array(),
+          'position' => 1,
+          'locks' => array(),
+          'uuid' => 'f2de0f40-065a-4b6f-b737-f9c3a7603ed3',
+        ); /* WAS: '' */
+    $data['user_loans']->default_handlers['page_user_loans_panel_context']->conf['display']->panels['left_sidebar'][1] = 'new-f2de0f40-065a-4b6f-b737-f9c3a7603ed3'; /* WAS: '' */
+  }
+  if (isset($data['user_reservations'])) {
+    $data['user_reservations']->default_handlers['page_user_reservations_panel_context']->conf['display']->content['new-409ab200-4429-4646-9eeb-b7ea1aedb86f'] = (object) array(
+          'pid' => 'new-409ab200-4429-4646-9eeb-b7ea1aedb86f',
+          'panel' => 'left_sidebar',
+          'type' => 'recommender',
+          'subtype' => 'recommender',
+          'shown' => TRUE,
+          'access' => array(),
+          'configuration' => array(),
+          'cache' => array(),
+          'style' => array(
+            'settings' => NULL,
+          ),
+          'css' => array(),
+          'extras' => array(),
+          'position' => 1,
+          'locks' => array(),
+          'uuid' => '409ab200-4429-4646-9eeb-b7ea1aedb86f',
+        ); /* WAS: '' */
+    $data['user_reservations']->default_handlers['page_user_reservations_panel_context']->conf['display']->panels['left_sidebar'][1] = 'new-409ab200-4429-4646-9eeb-b7ea1aedb86f'; /* WAS: '' */
+  }
+  if (isset($data['user_reservations_ready'])) {
+    $data['user_reservations_ready']->default_handlers['page_user_reservations_ready__panel_context_f0f7c0f4-630a-4389-a7b5-2537a3654bc1']->conf['display']->content['new-48c67daf-527b-487d-b2c2-71089d66620c'] = (object) array(
+          'pid' => 'new-48c67daf-527b-487d-b2c2-71089d66620c',
+          'panel' => 'left_sidebar',
+          'type' => 'recommender',
+          'subtype' => 'recommender',
+          'shown' => TRUE,
+          'access' => array(),
+          'configuration' => array(),
+          'cache' => array(),
+          'style' => array(
+            'settings' => NULL,
+          ),
+          'css' => array(),
+          'extras' => array(),
+          'position' => 1,
+          'locks' => array(),
+          'uuid' => '48c67daf-527b-487d-b2c2-71089d66620c',
+        ); /* WAS: '' */
+    $data['user_reservations_ready']->default_handlers['page_user_reservations_ready__panel_context_f0f7c0f4-630a-4389-a7b5-2537a3654bc1']->conf['display']->panels['left_sidebar'][1] = 'new-48c67daf-527b-487d-b2c2-71089d66620c'; /* WAS: '' */
   }
 }
 
