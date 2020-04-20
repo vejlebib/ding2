@@ -392,7 +392,14 @@ function ding_stats_preprocess_html() {
     // Need to know whether we're dealing with an object or collection to get
     // to the opensearch object abstraction.
     $object = NULL;
+
+    // Try get the loaded entity. It might not be there if it fails to load the
+    // given id. Just return early if that's the case.
+    if (!isset(menu_get_item()['map'][2])) {
+      return;
+    }
     $entity = menu_get_item()['map'][2];
+
     if ($entity instanceof TingCollection) {
       $object = $entity->getTingObjectCollection()->getPrimaryObject();
       // Instead of using the type of the primary object, flag that this is a
