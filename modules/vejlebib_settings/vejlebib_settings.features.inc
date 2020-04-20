@@ -95,3 +95,34 @@ function vejlebib_settings_image_default_styles() {
 
   return $styles;
 }
+
+/**
+ * Implements hook_default_mailchimp_signup().
+ */
+function vejlebib_settings_default_mailchimp_signup() {
+  $items = array();
+  $items['vejle_bibliotekernes_nyhedsbrev'] = entity_import('mailchimp_signup', '{
+    "name" : "vejle_bibliotekernes_nyhedsbrev",
+    "mc_lists" : { "3a8f96e687" : "3a8f96e687" },
+    "mode" : "2",
+    "title" : "Vejle Bibliotekernes nyhedsbrev",
+    "settings" : {
+      "path" : "nyhedsbrev\\/tilmeld",
+      "submit_button" : "Tilmeld",
+      "confirmation_message" : "Du er blevet tilmeldt Vejle Bibliotekernes nyhedsbrev!",
+      "destination" : "",
+      "mergefields" : {
+        "EMAIL" : {"tag":"EMAIL","name":"E-mail-adresse","type":"email","required":true,"default_value":"","public":true,"display_order":1,"options":{"size":25}},
+        "FNAME" : {"merge_id":1,"tag":"FNAME","name":"Fornavn","type":"text","required":false,"default_value":"","public":true,"display_order":2,"options":{"size":25},"help_text":"","list_id":"3a8f96e687","_links":[{"rel":"self","href":"https:\\/\\/us2.api.mailchimp.com\\/3.0\\/lists\\/3a8f96e687\\/merge-fields\\/1","method":"GET","targetSchema":"https:\\/\\/us2.api.mailchimp.com\\/schema\\/3.0\\/Definitions\\/Lists\\/MergeFields\\/Response.json"},{"rel":"parent","href":"https:\\/\\/us2.api.mailchimp.com\\/3.0\\/lists\\/3a8f96e687\\/merge-fields","method":"GET","targetSchema":"https:\\/\\/us2.api.mailchimp.com\\/schema\\/3.0\\/Definitions\\/Lists\\/MergeFields\\/CollectionResponse.json","schema":"https:\\/\\/us2.api.mailchimp.com\\/schema\\/3.0\\/CollectionLinks\\/Lists\\/MergeFields.json"},{"rel":"update","href":"https:\\/\\/us2.api.mailchimp.com\\/3.0\\/lists\\/3a8f96e687\\/merge-fields\\/1","method":"PATCH","targetSchema":"https:\\/\\/us2.api.mailchimp.com\\/schema\\/3.0\\/Definitions\\/Lists\\/MergeFields\\/Response.json","schema":"https:\\/\\/us2.api.mailchimp.com\\/schema\\/3.0\\/Definitions\\/Lists\\/MergeFields\\/PATCH.json"},{"rel":"delete","href":"https:\\/\\/us2.api.mailchimp.com\\/3.0\\/lists\\/3a8f96e687\\/merge-fields\\/1","method":"DELETE"}]}
+      },
+      "description" : "Tilmeld dig Vejle Bibliotekernes nyhedsbrev her.",
+      "doublein" : 0,
+      "include_interest_groups" : 0,
+      "placeholder" : 1,
+      "gdpr_consent" : 1,
+      "gdpr_checkbox_label" : "Jeg accepterer betingelserne",
+      "gdpr_consent_required" : 1
+    }
+  }');
+  return $items;
+}

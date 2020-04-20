@@ -177,5 +177,25 @@ function vejlebib_settings_field_default_field_bases() {
     'type' => 'paragraphs',
   );
 
+  // Exported field_base: 'field_fbs_mailchimp'.
+  $field_bases['field_fbs_mailchimp'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_fbs_mailchimp',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'mailchimp_lists',
+    'settings' => array(
+      'double_opt_in' => 0,
+      'mc_list_id' => '3a8f96e687',
+      'profile2_private' => 0,
+      'unsubscribe_action' => 'unsubscribe',
+    ),
+    'translatable' => 0,
+    'type' => 'mailchimp_lists_subscription',
+  );
+
   return $field_bases;
 }

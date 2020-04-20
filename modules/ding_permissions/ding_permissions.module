@@ -142,6 +142,7 @@ function ding_permissions_secure_permissions($role) {
     'anonymous user' => array(
       'access comments',
       'access content',
+      'access mailchimp signup pages',
       'access site-wide contact form',
       'access user profiles',
       'display EU Cookie Compliance popup',
@@ -153,6 +154,7 @@ function ding_permissions_secure_permissions($role) {
     'authenticated user' => array(
       'access comments',
       'access content',
+      'access mailchimp signup pages',
       'access site-wide contact form',
       'access user profiles',
       'display EU Cookie Compliance popup',

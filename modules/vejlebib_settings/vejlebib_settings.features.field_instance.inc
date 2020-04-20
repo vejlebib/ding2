@@ -10,6 +10,68 @@
 function vejlebib_settings_field_default_field_instances() {
   $field_instances = array();
 
+  // Exported field_instance: 'profile2-provider_fbs-field_fbs_mailchimp'.
+  $field_instances['profile2-provider_fbs-field_fbs_mailchimp'] = array(
+    'bundle' => 'provider_fbs',
+    'default_value' => array(
+      0 => array(
+        'subscribe' => 0,
+        'interest_groups' => array(
+          'c1ddb76b13' => array(
+            '3678c036cd' => 0,
+            '57677c3112' => 0,
+            'c215611168' => 0,
+            'd51a32b428' => 0,
+          ),
+        ),
+        'is_default' => TRUE,
+      ),
+    ),
+    'deleted' => 0,
+    'description' => 'Vælg "Tilmeld" nedenunder og tryk "Gem". Du kan afmelde dig igen ved at fjerne valget.',
+    'display' => array(
+      'default' => array(
+        'label' => 'hidden',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 3,
+      ),
+      'search_result' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'profile2',
+    'field_name' => 'field_fbs_mailchimp',
+    'label' => 'Tilmeld dig Vejle Bibliotekernes nyhedsbrev',
+    'required' => 0,
+    'settings' => array(
+      'hide_subscribe_checkbox' => 0,
+      'interest_groups_title' => 'Interest Groups',
+      'mergefields' => array(
+        'EMAIL' => '[profile2:field-fbs-mail]',
+        'FNAME' => '[profile2:field-fbs-name]',
+        'advanced' => 0,
+      ),
+      'options' => array(
+        'interest_groups' => array(),
+        'subscribe' => FALSE,
+      ),
+      'show_interest_groups' => 0,
+      'unsubscribe_on_delete' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'mailchimp_lists',
+      'settings' => array(),
+      'type' => 'mailchimp_lists_select',
+      'weight' => 0,
+    ),
+  );
+
   // Exported field_instance:
   // 'taxonomy_term-section-field_ding_section_paragraphs'.
   $field_instances['taxonomy_term-section-field_ding_section_paragraphs'] = array(
