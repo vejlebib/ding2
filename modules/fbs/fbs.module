@@ -217,17 +217,41 @@ function fbs_settings_form() {
     '#default_value' => variable_get('fbs_password', ''),
   );
 
-  // Add the option to select default interest period, which default as default
-  // to 180 days.
-  $periods = fbs_interest_periods();
-  $default = variable_get('fbs_default_interest_period', 180);
-  $form['fbs'] += ding_reservation_interest_period_selector('fbs_default_interest_period', $default, $periods);
+  $form['reservation'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Reservation settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
 
-  $form['fbs']['fbs_enable_reservation_deletion'] = array(
+  $form['reservation']['fbs_enable_reservation_deletion'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable reservation deletion'),
     '#default_value' => variable_get('fbs_enable_reservation_deletion', FALSE),
     '#description' => t('Allow users to delete their reservations as well as ready for pickup ones.'),
+  );
+
+  // Add the option to select default interest period, which default as default
+  // to 180 days.
+  $periods = fbs_interest_periods();
+  $default = variable_get('fbs_default_interest_period', 180);
+  $form['reservation'] += ding_reservation_interest_period_selector('fbs_default_interest_period', $default, $periods);
+  $form['reservation']['fbs_default_interest_period']['#title'] = t('Select default interest period');
+  $form['reservation']['fbs_default_interest_period']['#description'] = t("If the user hasn't selected an interest period in their user profile, this value will be used.");
+
+  $periods_string = '';
+  foreach ($periods as $key => $value) {
+    $periods_string[] = "$key|$value";
+  }
+  $periods_string = implode("\n", $periods_string);
+
+  $form['reservation']['fbs_interest_periods'] = array(
+    '#type' => 'textarea',
+    '#title' => t('FBS interest periods'),
+    '#description' => t('Adjust which interest periods can be selected by the user in their profile. The format is "days"|"label". Insert one interest period pr. line.'),
+    '#default_value' => $periods_string,
+    '#element_validate' => array('fbs_interest_periods_validate'),
+    '#required' => TRUE,
   );
 
   // Branches and blacklisted branches.
@@ -276,32 +300,47 @@ function fbs_settings_form() {
     '#default_value' => variable_get('fbs_holdings_branches_blacklist', array()),
   );
 
-  $form['holdings_suffix'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Holdings suffix'),
-    '#description' => t('Select which type of suffix to use for holdings'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-
-  $form['holdings_suffix']['fbs_show_material_group'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Show material group description'),
-    '#default_value' => variable_get('fbs_show_material_group', 0),
-  );
-
-  $form['holdings_suffix']['fbs_holdings_suffix_type'] = array(
-    '#type' => 'radios',
-    '#title' => t('Holdings suffix'),
-    '#description' => t('Simple shows a mix between DK5 and inverted creator, while Shelf mark simulates the shelf mark from ALMA using marc-data from the well.'),
-    '#default_value' => variable_get('fbs_holdings_suffix_type', 'shelf_mark'),
-    '#options' => array(
-      'simple' => t('Simple'),
-      'shelf_mark' => t('Shelf mark'),
-    ),
-  );
+  $form['#validate'][] = 'fbs_settings_form_validate';
 
   return system_settings_form($form);
+}
+
+/**
+ * Validate handler for fbs_settings_form.
+ */
+function fbs_settings_form_validate($form, &$form_state) {
+  $default_period = $form_state['values']['fbs_default_interest_period'];
+  $periods = $form_state['values']['fbs_interest_periods'];
+  if (empty($periods[$default_period])) {
+    form_set_error('fbs_default_interest_period', t('The default interest period must be amongst the defined interets periods'));
+  }
+}
+
+/**
+ * Element validate callback for interest periods.
+ */
+function fbs_interest_periods_validate($element, &$form_state) {
+  $periods = explode("\n", $element['#value']);
+  $periods = array_map('trim', $periods);
+  $periods = array_filter($periods);
+
+  $values = [];
+  foreach ($periods as $period) {
+    $matches = [];
+    if (!preg_match('/(.*)\|(.*)/', $period, $matches)) {
+      form_error($element, t('Each line must be a key-value pair separated by "|"'));
+    }
+
+    $key = $matches[1];
+    $value = $matches[2];
+    if (!preg_match('/^-?\d+$/', $key)) {
+      form_error($element, t('Each key must be an integer denoting the number of days of the interest period'));
+    }
+
+    $values[$key] = $value;
+  }
+
+  form_set_value($element, $values, $form_state);
 }
 
 /**
@@ -494,12 +533,12 @@ function fbs_user_branches($account) {
 }
 
 /**
- * Get interest periods.
+ * Get default interest periods.
  *
  * @return array
  *   Array of days => human readable string.
  */
-function fbs_interest_periods() {
+function fbs_default_interest_periods() {
   $periods = array(
     1 => 30,
     2 => 60,
@@ -512,6 +551,17 @@ function fbs_interest_periods() {
     $options[$days] = format_plural($months, '1 month', '@count months');
   }
   return $options;
+}
+
+
+/**
+ * Get interest periods.
+ *
+ * @return array
+ *   Array of days => human readable string.
+ */
+function fbs_interest_periods() {
+  return variable_get('fbs_interest_periods', fbs_default_interest_periods());
 }
 
 /**

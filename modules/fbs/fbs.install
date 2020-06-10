@@ -55,3 +55,27 @@ function fbs_update_7001() {
 function fbs_update_7002() {
   variable_set('fbs_holdings_suffix_type', 'shelf_mark');
 }
+
+/**
+ * Update fbs interest period field to use allowed values function.
+ */
+function fbs_update_7003() {
+  $query = db_select('field_config', 'fc')
+  ->condition('fc.field_name', 'field_fbs_interest_period');
+  $query->addField('fc', 'data');
+  $data = $query->execute()->fetchAssoc()['data'];
+
+  $data = unserialize($data);
+  $data['settings']['allowed_values'] = [];
+  $data['settings']['allowed_values_function'] = 'fbs_interest_periods';
+  $data = serialize($data);
+
+  $result = db_update('field_config')
+    ->fields(array('data' => $data))
+    ->condition('field_name', 'field_fbs_interest_period')
+    ->execute();
+
+  if ($result) {
+    return t('fbs interest period field was updated succesfully');
+  }
+}

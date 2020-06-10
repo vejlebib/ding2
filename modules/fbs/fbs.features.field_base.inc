@@ -50,14 +50,8 @@ function fbs_field_default_field_bases() {
     'locked' => 0,
     'module' => 'list',
     'settings' => array(
-      'allowed_values' => array(
-        30 => '1 Month',
-        60 => '2 Months',
-        90 => '3 Months',
-        180 => '6 Months',
-        360 => '12 Months',
-      ),
-      'allowed_values_function' => '',
+      'allowed_values' => array(),
+      'allowed_values_function' => 'fbs_interest_periods',
       'profile2_private' => 0,
     ),
     'translatable' => 0,
