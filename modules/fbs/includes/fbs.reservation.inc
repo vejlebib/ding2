@@ -329,15 +329,19 @@ function fbs_reservation_branch_name($branch_id) {
  *   The default options.
  */
 function fbs_reservation_default_options($account) {
-  // Get values.
+  // If custom reservation flow with selectable interest period is enabled, we
+  // return no default values, so that the reservation form will be shown.
+  if (variable_get('fbs_custom_reservation_flow', FALSE)) {
+    return [];
+  }
+
   $interest_period = fbs_reservation_default_interest_period($account);
-
-  $patron_info = fbs_get_patron_info($account);
-
-  return array(
-    'fbs_preferred_branch' => $patron_info['preferred_branch'],
-    'interest_period' => $interest_period,
-  );
+  // No need to return preffered branch here as default option, as the parameter
+  // is optional in FBS API and LMS will just use the preffered branch for the
+  // patron. So if using default options there's no need to bother with it.
+  return [
+    'interest_period' => $interest_period
+  ];
 }
 
 /**
@@ -352,23 +356,12 @@ function fbs_reservation_default_options($account) {
  *   The reservation options.
  */
 function fbs_reservation_options($account, $default_branch = NULL) {
-  $preferred_branch = NULL;
-
-  if (ding_user_is_provider_user($account)) {
-    $patron_info = fbs_get_patron_info($account);
-
-    $preferred_branch = empty($default_branch) ? $patron_info['preferred_branch'] : $default_branch;
-  }
-
-  if ((!empty($default_branch))) {
-    $preferred_branch = $default_branch;
-  }
-
+  // For now we only support interest period on reservation form.
+  // TODO: Add support for pickup branch.
   $interest_period = fbs_reservation_default_interest_period($account);
   $periods = fbs_interest_periods();
 
-  $form = array();
-  $form += ding_reservation_default_options_branch('fbs_preferred_branch', $preferred_branch, fbs_user_branches($account));
+  $form = [];
   $form += ding_reservation_interest_period_selector('interest_period', $interest_period, $periods);
 
   return $form;

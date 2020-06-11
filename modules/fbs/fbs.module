@@ -254,6 +254,13 @@ function fbs_settings_form() {
     '#required' => TRUE,
   );
 
+  $form['reservation']['fbs_custom_reservation_flow'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use custom reservation flow with selectable interest period'),
+    '#description' => t("Normally reservations is auto submitted with default interest period or the one selected by the user in their profile. Enabling this option will change the flow, so that the user is able to select between the defined interest periods for each reservation."),
+    '#default_value' => variable_get('fbs_custom_reservation_flow', FALSE),
+  );
+
   // Branches and blacklisted branches.
   $form['branches'] = array(
     '#type' => 'fieldset',
