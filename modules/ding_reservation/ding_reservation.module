@@ -227,12 +227,12 @@ function ding_reservation_reserve_ajax($entity, $reservable = NULL) {
 
     // Try to make reservation.
     try {
-      // Check if user have preferred branch and interest period, if so
-      // submit the reservation form. If not display another form for with
-      // the options to select branch and period.
+      // Check if the provider users default reservation options and want
+      // ding_reservation to auto submit the reservation. If no defaults we'll
+      // show the reservation form and the provider will be asked to supply
+      // reservation options for the form.
       $defaults = ding_provider_invoke('reservation', 'default_options', $user);
-      $matches = preg_grep("/preferred_branch$/", array_keys($defaults));
-      if (empty($defaults[array_shift($matches)])) {
+      if (empty($defaults)) {
         $form = ding_provider_get_form('ding_reservation_reserve_form', $reservable, FALSE);
         $commands[] = ajax_command_ding_popup('ding_reservation', t('Reservation'), render($form));
       }
@@ -376,6 +376,13 @@ function ding_reservation_reserve_form_validate($form, &$form_state) {
   if (user_is_logged_in() && ding_user_is_provider_user($user)) {
     if (ding_provider_implements('reservation', 'default_options')) {
       $defaults = ding_provider_invoke('reservation', 'default_options', $user);
+
+      // Only apply default values if provider is using auto submit reservation
+      // flow (by returning non-empty default options). Otherwise we will
+      // override the values set by user on form.
+      if (empty($defaults)) {
+        return;
+      }
 
       $provider_options = array();
       foreach ($defaults as $key => $default) {
