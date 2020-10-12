@@ -1,0 +1,41 @@
+/**
+ * Vejlebib notifications styling.
+ */
+
+.panel-pane.vejlebib-notification {
+  // The base theme has stupidly specific selectors, so the cleanest option here
+  // is to just use important.
+  background-image: none !important;
+  background-color: #f1f2f2 !important;
+  padding-top: 20px;
+
+  .primary-content & {
+    padding-top: 0;
+    padding-bottom: 20px;
+  }
+
+  .panel-pane-inner {
+    background-color: $color-primary;
+    padding: 20px !important;
+  }
+
+  .pane-content p:last-of-type {
+    margin: 0;
+  }
+
+  &, .pane-title {
+    color: $color-text-on-primary;
+  }
+
+  .pane-title {
+    font-size: 30px;
+    line-height: 30px;
+
+    span {
+      display: inline-block;
+      margin-right: 10px;
+      position: relative;
+      top: 2px;
+    }
+  }
+}

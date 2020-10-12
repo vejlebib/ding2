@@ -20,3 +20,13 @@ function vejlebib_preprocess_html(&$vars) {
     }
   }
 }
+
+/**
+ * Implements hook_preprocess_panels_pane().
+ */
+function vejlebib_preprocess_panels_pane(&$vars) {
+  // Add notice icon before title on vejlebib notification panel panes.
+  if (isset($vars['pane']->css['css_class']) && $vars['pane']->css['css_class'] === 'vejlebib-notification') {
+    $vars['title'] = '<span class="vejlebib-icon-exclamation-circle"></span>' . $vars['title'];
+  }
+}
