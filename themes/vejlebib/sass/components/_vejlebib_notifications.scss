@@ -14,6 +14,11 @@
     padding-bottom: 20px;
   }
 
+  .frontpage-layout & {
+    padding-top: 20px;
+    padding-bottom: 0;
+  }
+
   .panel-pane-inner {
     background-color: $color-primary;
     padding: 20px !important;
@@ -36,6 +41,15 @@
       margin-right: 10px;
       position: relative;
       top: 2px;
+    }
+  }
+
+  a {
+    @include transition(color 300ms $ease-out-quart);
+    color: $white;
+    text-decoration: underline;
+    &:hover {
+      color: $white-opacity-dark;
     }
   }
 }
