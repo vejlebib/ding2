@@ -83,6 +83,22 @@ function fbs_ding_provider() {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function fbs_menu() {
+  $items = [];
+
+  $items['fbs/%ting_object/reserve'] = array(
+    'page callback' => 'fbs_reserve_ajax',
+    'page arguments' => array(1),
+    'delivery callback' => 'ajax_deliver',
+    'access arguments' => array('perform reservation'),
+  );
+
+  return $items;
+}
+
+/**
  * Get info for patron.
  *
  * Wrapper around ding_user_get_creds() to facilitate testing.
@@ -261,6 +277,40 @@ function fbs_settings_form() {
     '#default_value' => variable_get('fbs_custom_reservation_flow', FALSE),
   );
 
+  $form['reservation']['fbs_secondary_reservation_button'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Secondary reservation button'),
+    '#description' => t('Show secondary reservation button with alternative fixed interestperiod.'),
+    '#default_value' => variable_get('fbs_secondary_reservation_button', FALSE),
+  );
+
+  $form['reservation']['fbs_secondary_reservation_button_interest_period'] = array(
+    '#type' => 'select',
+    '#title' => t('Secondary reservation button interest period'),
+    '#options' => $periods,
+    '#required' => TRUE,
+    '#default_value' => variable_get('fbs_secondary_reservation_button_interest_period', $default),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="fbs_secondary_reservation_button"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+
+  $form['reservation']['fbs_secondary_reservation_button_text'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Secondary reservation button text'),
+    '#default_value' => variable_get('fbs_secondary_reservation_button_text', ''),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="fbs_secondary_reservation_button"]' => array('checked' => TRUE),
+      ),
+      'required' => array(
+        ':input[name="fbs_secondary_reservation_button"]' => array('checked' => TRUE),
+      )
+    ),
+  );
+
   // Branches and blacklisted branches.
   $form['branches'] = array(
     '#type' => 'fieldset',
@@ -320,6 +370,12 @@ function fbs_settings_form_validate($form, &$form_state) {
   $periods = $form_state['values']['fbs_interest_periods'];
   if (empty($periods[$default_period])) {
     form_set_error('fbs_default_interest_period', t('The default interest period must be amongst the defined interets periods'));
+  }
+
+  if (!empty($form_state['values']['fbs_secondary_reservation_button'])) {
+    if (empty($form_state['values']['fbs_secondary_reservation_button_text'])) {
+      form_set_error('fbs_secondary_reservation_button_text', t('When using secondary reservation button a text for the button must be provided'));
+    }
   }
 }
 
@@ -979,4 +1035,101 @@ function fbs_opensearch_pre_execute($request) {
  */
 function _fbs_cql_quote_string($name) {
   return '"' . preg_replace('/"/', '\\"', $name) . '"';
+}
+
+/**
+ * Implements hook_ding_entity_buttons().
+ */
+function fbs_ding_entity_buttons($type, $entity, $view_mode, $widget = 'default') {
+  if (!variable_get('fbs_secondary_reservation_button', FALSE)) {
+    return '';
+  }
+  if ($type != 'ding_entity' || !$entity->is('library_material')) {
+    return '';
+  }
+
+  // TODO: Should we check the $widget value and support a non-ajax button?
+
+  return [
+    [
+      '#theme' => 'link',
+      '#text' => variable_get('fbs_secondary_reservation_button_text', ''),
+      '#weight' => 21,
+      '#path' => 'fbs/' . $entity->id . '/reserve',
+      '#options' => array(
+        'attributes' => array(
+          'class' => array(
+            'action-button',
+            'reserve-button',
+            'use-ajax',
+            'js-check-reservability',
+          ),
+          'data-local-id' => $entity->getLocalId(),
+        ),
+        'html' => FALSE,
+      ),
+      '#attached' => array(
+        'js' => array(
+          array(
+            'type' => 'file',
+            'data' => drupal_get_path('module', 'ding_reservation') . '/js/ding_reservation_reservability.js',
+          ),
+        ),
+      ),
+    ],
+  ];
+}
+
+function fbs_reserve_ajax($entity) {
+  $commands = [];
+  global $user;
+
+  if (!user_is_logged_in()) {
+    // Trigger log-in (the reservation link will be triggered on success).
+    $commands[] = ajax_command_ding_user_authenticate('');
+  }
+  elseif (!ding_user_is_provider_user($user)) {
+    // Error not library user.
+    $commands[] = ajax_command_ding_popup('ding_reservation', t('Error'), '<p>' . t('Only library user can make reservations.') . '</p>');
+  }
+  else {
+    // Set up secondary reservation button options.
+    $patron_info = fbs_get_patron_info($user);
+    $options = [
+      'interest_period' => variable_get('fbs_secondary_reservation_button_interest_period', variable_get('fbs_default_interest_period', 180)),
+      'fbs_preferred_branch' => $patron_info['preferred_branch'],
+    ];
+    // Just go provider even though it will call our own implementation. It
+    // takes care of setting everything up, including files, etc.
+    try {
+      $result = ding_provider_invoke('reservation', 'create', $user, $entity->getLocalId(), $options);
+
+      $message = '';
+
+      if (!empty($result['branch']) && ding_provider_implements('reservation', 'branch_name')) {
+        $branch_name = ding_provider_invoke('reservation', 'branch_name', $result['branch']);
+        $message = t('"!title" reserved and will be available for pickup at @branch.', array(
+          '!title' => $entity->getTitle(),
+          '@branch' => $branch_name,
+        ));
+      }
+      else {
+        $message = '<p>' . t('"!title" reserved.', array('!title' => $entity->getTitle())) . '</p>';
+      }
+
+      $message = '<p>' . $message . '</p>';
+
+      if (is_array($result) and !empty($result['queue_number'])) {
+        $message .= '<p>' . t('You are number @number in queue.', array('@number' => $result['queue_number'])) . '</p>';
+      }
+
+      $commands[] = ajax_command_ding_popup('ding_reservation', t('Reservation'), $message, array('refresh' => TRUE));
+    }
+    catch (Exception $e) {
+      watchdog('fbs', 'Error while reserving (secondary reserve button), message: @message', array('@message', $e->getMessage()), WATCHDOG_ERROR);
+      $commands[] = ajax_command_ding_popup('ding_reservation', t('Error'), '<p>' . t('Unknown error in reservation, please contact the library.') . '</p>');
+    }
+  }
+
+  return array('#type' => 'ajax', '#commands' => $commands);
 }

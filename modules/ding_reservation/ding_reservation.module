@@ -144,6 +144,7 @@ function ding_reservation_ding_entity_buttons($type, $entity, $view_mode, $widge
           array(
             '#theme' => 'link',
             '#text' => t('Reserve'),
+            '#weight' => 20,
             '#path' => 'ting/object/' . $entity->id . '/reserve',
             '#options' => array(
               'attributes' => array(
