@@ -718,11 +718,11 @@ projects[ting_covers_plus][download][url] = "https://github.com/vejlebib/ting_co
 projects[ting_covers_plus][download][branch] = "7.x-1.x"
 projects[ting_covers_plus][subdir] = "vejlebib_modules"
 
-projects[ting_visual_relation][type] = "module"
-projects[ting_visual_relation][download][type] = "git"
-projects[ting_visual_relation][download][url] = "https://github.com/vejlebib/ting_recommender.git"
-projects[ting_visual_relation][download][branch] = "master"
-projects[ting_visual_relation][subdir] = "vejlebib_modules"
+projects[ting_recommender][type] = "module"
+projects[ting_recommender][download][type] = "git"
+projects[ting_recommender][download][url] = "https://github.com/vejlebib/ting_recommender.git"
+projects[ting_recommender][download][branch] = "master"
+projects[ting_recommender][subdir] = "vejlebib_modules"
 
 projects[ting_visual_relation][type] = "module"
 projects[ting_visual_relation][download][type] = "git"
