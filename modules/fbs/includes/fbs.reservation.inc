@@ -155,6 +155,12 @@ function fbs_reservation_create($account, $record_id, array $options) {
   }
 
   $reservation->expiryDate = date('Y-m-d', REQUEST_TIME + ($options['interest_period'] * 24 * 60 * 60));
+
+  $branch_name = fbs_reservation_branch_name($options['fbs_preferred_branch']);
+  if ($branch_name === 'Biblioteksbussen' || substr($branch_name, 0, 3) === 'Bus') {
+    $options['fbs_preferred_branch'] = 'DK-763000';
+  }
+
   $reservation->pickupBranch = $options['fbs_preferred_branch'];
   $batch->reservations[] = $reservation;
 
