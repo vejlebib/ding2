@@ -216,6 +216,15 @@ function ding_stats_callback() {
 function ding_stats_popular_searches() {
   $time_constraint = strtotime('-28 days');
 
+  // Exclude empty and "*" searches.
+  // Attempt to exclude search codes be filtering out searches containing "=".
+  // Some users qoutes their search keys. We account for that in GROUP BY with
+  // TRIM(BOTH '\"' FROM se.search_key).
+  // We do not account for multiple spaces with REGEX_REPLACE since support is
+  // limited to MYSQL 8+.
+  // TODO: Normalize spaces before inserting to DB or decide to use
+  // REGEX_REPLACE anyway, since it will not be a problem at least on our own
+  // servers.
   $query = db_query(
     "SELECT TRIM(BOTH '\"' FROM se.search_key) AS search_key, COUNT(*) AS search_count
     FROM {ding_stats_event} e
@@ -250,7 +259,7 @@ function ding_stats_popular_materials() {
     GROUP BY cte.pid
     ORDER BY view_count DESC
     LIMIT 100", [
-      ':time_constraint' => $time_constraint
+      ':time_constraint' => $time_constraint,
     ]
   );
 
