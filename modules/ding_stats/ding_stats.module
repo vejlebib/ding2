@@ -16,6 +16,8 @@ function ding_stats_views_api($module = NULL, $api = NULL) {
  * Implements hook_menu().
  */
 function ding_stats_menu() {
+  $items = [];
+
   $items['admin/config/ding/ding-stats'] = [
     'title' => 'Ding stats',
     'description' => 'Settings for Ding stats.',
@@ -24,7 +26,28 @@ function ding_stats_menu() {
     'access arguments' => ['administer site configuration'],
     'file' => 'ding_stats.admin.inc',
   ];
+  $items['ding_stats/popular_searches'] = [
+    'title' => 'Popular searches',
+    'page callback' => 'ding_stats_popular_searches',
+    'access callback' => 'ding_stats_api_access',
+  ];
+
   return $items;
+}
+
+/**
+ * Ding stats API access callback.
+ */
+function ding_stats_api_access() {
+  // The stats API exposes stats and is read only. We therefore only accept GET
+  // request. This also means we can rely on Varnish caching the API queries
+  // in production, and we will not bother with implementing backend caching
+  // logic.
+  if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    return FALSE;
+  }
+
+  return user_access('access content');
 }
 
 /**
@@ -180,6 +203,45 @@ function ding_stats_callback() {
   }
 
   drupal_json_output($return);
+}
+
+/**
+ * Get most popular searches for the last 28 days.
+ */
+function ding_stats_popular_searches() {
+  $time_constraint = strtotime('-28 days');
+
+  $query = db_query(
+    "SELECT TRIM(BOTH '\"' FROM se.search_key) AS search_key, COUNT(*) AS search_count
+     FROM {ding_stats_event} e
+     JOIN {ding_stats_search_event} se
+     ON e.id = se.id
+     WHERE e.event_start >= :time_constraint
+     AND se.search_key != '' AND se.search_key != '*'  AND se.search_key NOT LIKE '%=%'
+     AND se.search_key NOT REGEXP '^[0-9]+$'
+     GROUP BY TRIM(BOTH '\"' FROM se.search_key)
+     ORDER BY search_count DESC
+     LIMIT 100", [
+      ':time_constraint' => $time_constraint,
+    ]
+  );
+
+  $popular_searches = $query->fetchAll();
+  ding_stats_json_output($popular_searches);
+}
+
+/**
+ * Ding stats wrapper around drupal_json_output().
+ *
+ * Ensure JSON output gets cached in external proxies, but end request early at
+ * the same time.
+ */
+function ding_stats_json_output(array $output) {
+  drupal_json_output($output);
+  // No drupal_exit() since we want to take advantage of Varnish caching, and
+  // it will bypass the logic in Drupal that sets the necesarry HTTP headers.
+  drupal_page_footer();
+  exit();
 }
 
 /**
