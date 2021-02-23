@@ -31,6 +31,11 @@ function ding_stats_menu() {
     'page callback' => 'ding_stats_popular_searches',
     'access callback' => 'ding_stats_api_access',
   ];
+  $items['ding_stats/popular_materials'] = [
+    'title' => 'Popular materials',
+    'page callback' => 'ding_stats_popular_materials',
+    'access callback' => 'ding_stats_api_access',
+  ];
 
   return $items;
 }
@@ -206,28 +211,73 @@ function ding_stats_callback() {
 }
 
 /**
- * Get most popular searches for the last 28 days.
+ * Returns JSON with the most popular searches for the last 28 days.
  */
 function ding_stats_popular_searches() {
   $time_constraint = strtotime('-28 days');
 
   $query = db_query(
     "SELECT TRIM(BOTH '\"' FROM se.search_key) AS search_key, COUNT(*) AS search_count
-     FROM {ding_stats_event} e
-     JOIN {ding_stats_search_event} se
-     ON e.id = se.id
-     WHERE e.event_start >= :time_constraint
-     AND se.search_key != '' AND se.search_key != '*'  AND se.search_key NOT LIKE '%=%'
-     AND se.search_key NOT REGEXP '^[0-9]+$'
-     GROUP BY TRIM(BOTH '\"' FROM se.search_key)
-     ORDER BY search_count DESC
-     LIMIT 100", [
+    FROM {ding_stats_event} e
+    JOIN {ding_stats_search_event} se
+    ON e.id = se.id
+    WHERE e.event_start >= :time_constraint
+    AND se.search_key != '' AND se.search_key != '*'  AND se.search_key NOT LIKE '%=%'
+    AND se.search_key NOT REGEXP '^[0-9]+$'
+    GROUP BY TRIM(BOTH '\"' FROM se.search_key)
+    ORDER BY search_count DESC
+    LIMIT 100", [
       ':time_constraint' => $time_constraint,
     ]
   );
 
   $popular_searches = $query->fetchAll();
   ding_stats_json_output($popular_searches);
+}
+
+/**
+ * Returns JSON with the most popular materials for the last 28 days.
+ */
+function ding_stats_popular_materials() {
+  $time_constraint = strtotime('-28 days');
+
+  $query = db_query(
+    "SELECT cte.pid as pid, COUNT(*) AS view_count
+    FROM {ding_stats_event} AS e
+    JOIN {ding_stats_ct_event} AS cte
+    ON e.id = cte.id
+    WHERE e.event_start >= :time_constraint
+    GROUP BY cte.pid
+    ORDER BY view_count DESC
+    LIMIT 100", [
+      ':time_constraint' => $time_constraint
+    ]
+  );
+
+  $popular_materials = $query->fetchAll();
+
+  $pids = array_map(function ($material) {
+    return $material->pid;
+  }, $popular_materials);
+
+  /** @var \Ting\TingObjectInterface[] */
+  $ting_objects = ding_provider_invoke('search', 'object_load', $pids);
+
+  $covers = ting_covers_get($pids);
+
+  // Output title, cover URL and view count of the popular materials. In the
+  // rare case that we're not able to fetch a ting_object for one of the
+  // materials, we fallback to using $pid as "title".
+  $output = array_map(function ($material) use ($ting_objects, $covers) {
+    $pid = $material->pid;
+    return [
+      'title' => !empty($ting_objects[$pid]) ? $ting_objects[$pid]->getTitle() : $pid,
+      'cover' => !empty($covers[$pid]) ? file_create_url($covers[$pid]) : NULL,
+      'view_count' => $material->view_count,
+    ];
+  }, $popular_materials);
+
+  ding_stats_json_output($output);
 }
 
 /**
