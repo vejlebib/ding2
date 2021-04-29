@@ -20,26 +20,6 @@ function ddbasic_body_class($class = array()) {
 }
 
 /**
- * Get the total amount of debts the user has.
- */
-function ddbasic_account_count_debts($account = NULL) {
-  // Prepare the static cache.
-  $debts = &drupal_static(__FUNCTION__, array());
-
-  // Default the $account to the currently logged in user.
-  if (empty($account)) {
-    $account = $GLOBALS['user'];
-  }
-
-  // If the user have no hits in the static cache, count the debts.
-  if (!isset($debts[$account->uid])) {
-    $debts[$account->uid] = count(ding_provider_invoke('debt', 'list', $account));
-  }
-
-  return $debts[$account->uid];
-}
-
-/**
  * Get the total amount of loans the user has.
  */
 function ddbasic_account_count_loans($account = NULL) {
@@ -131,9 +111,9 @@ function ddbasic_account_count_reservation_not_ready($account = NULL) {
  * Function to truncate strings
  */
 function add_ellipsis($string, $length = 200, $end = '...') {
-  if (mb_strlen($string) > $length) {
-    $length -= mb_strlen($end);
-    $string  = mb_substr($string, 0, $length);
+  if (drupal_strlen($string) > $length) {
+    $length -= drupal_strlen($end);
+    $string  = drupal_substr($string, 0, $length);
     $string .= '<span class="truncation">' . $end . '</span>';
   }
 

@@ -38,10 +38,22 @@
     }
   };
 
+  // Enables tracking without cookies. This method uses IP + user agent
+  // fingerprinting instead to keep sessions together. Cross session analysis
+  // will no longer be possible.
+  // TODO: Insert link to documentation when available. As of writing this is
+  // very new stuff.
+  var noCookieTracking = function noCookieTracking() {
+    if (typeof wts !== 'undefined') {
+      wts.push(['setIdentifierOptOut']);
+    }
+  }
+
   // Other modules dealing with client side webtrekk tracking might find these
   // functions useful, so make them available on the global Drupal object.
   Drupal.dingWebtrekkAppendQueryParameter = appendQueryParameter;
   Drupal.dingWebtrekkPushEvent = pushEvent;
+  Drupal.dingWebtrekkNoCookieTracking= noCookieTracking;
 
   Drupal.behaviors.ding_webtrekk = {
     attach: function(context) {
@@ -166,5 +178,17 @@
       });
     }
   };
+
+  // EU cookie compliance integration.
+  if (typeof Drupal.eu_cookie_compliance !== 'undefined') {
+    var method = Drupal.settings.eu_cookie_compliance.method;
+    // When using opt-in enable no-cookie tracking if user hasn't agreed.
+    // When using opt-out enable no-cookie tracking if user has disagreed. Since
+    // there's no method for that, we check for the value explicitly.
+    if ((method === 'opt_in' && !Drupal.eu_cookie_compliance.hasAgreed())
+        || (method === 'opt_out' && Drupal.eu_cookie_compliance.getCurrentStatus() === 0)) {
+      noCookieTracking();
+    }
+  }
 
 })(jQuery);

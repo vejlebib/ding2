@@ -11,7 +11,7 @@ projects[admin_menu][subdir] = "contrib"
 projects[admin_menu][version] = "3.0-rc5"
 
 projects[admin_views][subdir] = "contrib"
-projects[admin_views][version] = "1.6"
+projects[admin_views][version] = "1.7"
 
 projects[antibot][subdir] = "contrib"
 projects[antibot][version] = "1.2"
@@ -58,6 +58,7 @@ projects[customerror][patch][] = "patches/customerror-disable_auto_redirect.ding
 
 projects[date][subdir] = "contrib"
 projects[date][version] = "2.8"
+projects[date][patch][] = "https://www.drupal.org/files/issues/2019-01-16/2843367-php71-string-offset-47.patch"
 
 projects[dibs][subdir] = "contrib"
 projects[dibs][version] = "1.0"
@@ -77,9 +78,10 @@ projects[dynamic_background][subdir] = "contrib"
 projects[dynamic_background][version] = "2.0-rc4"
 projects[dynamic_background][patch][] = "https://www.drupal.org/files/issues/create_file_path-2410241-1.patch"
 
-; To be removed together with p2.
 projects[eck][subdir] = "contrib"
 projects[eck][version] = "2.0-rc9"
+; Avoid PDO exception after installation
+projects[eck][patch][] = "https://www.drupal.org/files/issues/eck-pdoexception-2109589-17.patch"
 
 projects[email][subdir] = "contrib"
 projects[email][version] = "1.3"
@@ -99,7 +101,9 @@ projects[entityreference_filter][subdir] = "contrib"
 projects[entityreference_filter][version] = "1.7"
 
 projects[eu_cookie_compliance][subdir] = "contrib"
-projects[eu_cookie_compliance][version] = "1.28"
+projects[eu_cookie_compliance][version] = "1.31"
+; Cookie-agreed data is not saved if the cookie has a non-default name.
+projects[eu_cookie_compliance][patch][] = "https://www.drupal.org/files/issues/2019-11-27/3097097-2.patch"
 
 projects[environment_indicator][subdir] = "contrib"
 projects[environment_indicator][version] = "2.8"
@@ -155,8 +159,7 @@ projects[geophp][subdir] = "contrib"
 projects[geophp][version] = "1.7"
 
 projects[globalredirect][subdir] = "contrib"
-projects[globalredirect][version] = "1.5"
-projects[globalredirect][patch][] = "http://drupal.org/files/language_redirect_view_node-1399506-2.patch"
+projects[globalredirect][version] = "1.6"
 
 projects[google_analytics][subdir] = "contrib"
 projects[google_analytics][version] = "1.3"
@@ -251,7 +254,7 @@ projects[media_vimeo][subdir] = "contrib"
 projects[media_vimeo][version] = "2.1"
 
 projects[media_youtube][subdir] = "contrib"
-projects[media_youtube][version] = "3.0"
+projects[media_youtube][version] = "3.10"
 
 projects[memcache][subdir] = "contrib"
 projects[memcache][version] = "1.6"
@@ -290,7 +293,7 @@ projects[nanosoap][version] = "1.0"
 projects[nanosoap][patch][] = "http://drupal.org/files/nanosoap-curloptions-1943732.patch"
 
 projects[nodequeue][subdir] = "contrib"
-projects[nodequeue][version] = "2.1"
+projects[nodequeue][version] = "2.2"
 
 projects[node_clone][subdir] = "contrib"
 projects[node_clone][version] = "1.0-rc2"
@@ -306,6 +309,9 @@ projects[oembed][version] = "1.0-rc2"
 projects[oembed][patch][] = "http://www.drupal.org/files/issues/oembed-remove_hook_sytem_info_alter-2502817-1.patch"
 ; Added a check to ensure that a menu item exists before trying to alter it in order to fix a PHP error.
 projects[oembed][patch][] = "https://www.drupal.org/files/oembed-2021015-1.patch"
+; Embedly scheme regex too long (back-port to rc1)
+projects[oembed][patch][] = "patches/split-up-regex-2739023-1.patch"
+
 
 projects[og][subdir] = "contrib"
 projects[og][version] = "2.9"
@@ -324,6 +330,9 @@ projects[opening_hours][patch][] = "https://www.drupal.org/files/issues/opening_
 ; Add "hide if empty" option to field settings.
 ; https://www.drupal.org/node/2820005
 projects[opening_hours][patch][] = "https://www.drupal.org/files/issues/opening-hours-2820005-hide-field-if-empty.patch"
+; Delete opening hours when node is deleted.
+; https://www.drupal.org/project/opening_hours/issues/3007293
+projects[opening_hours][patch][] = "https://www.drupal.org/files/issues/2018-10-17/3007293-2.patch"
 
 projects[override_node_options][subdir] = "contrib"
 projects[override_node_options][version] = "1.13"
@@ -483,6 +492,9 @@ projects[webform][version] = "4.10"
 ; PHP 7 - Cannot use lexical variable $value as a parameter name in components/select.inc.
 projects[webform][patch][] = "https://www.drupal.org/files/issues/webform-2811063-43.patch"
 
+projects[webform_purge][subdir] = "contrib"
+projects[webform_purge][version] = "1.3"
+
 projects[workbench][subdir] = "contrib"
 projects[workbench][version] = "1.2"
 
@@ -515,7 +527,7 @@ libraries[bpi-client][download][branch] = "master"
 
 ; For wysiwyg.
 libraries[ckeditor][download][type] = "get"
-libraries[ckeditor][download][url] = https://download.cksource.com/CKEditor/CKEditor/CKEditor%204.9.2/ckeditor_4.9.2_standard.zip
+libraries[ckeditor][download][url] = https://download.cksource.com/CKEditor/CKEditor/CKEditor%204.14.0/ckeditor_4.14.0_standard.zip
 libraries[ckeditor][directory_name] = "ckeditor"
 libraries[ckeditor][destination] = "libraries"
 
@@ -645,6 +657,47 @@ libraries[ddb-react][download][type] = "get"
 libraries[ddb-react][download][url] = https://github.com/danskernesdigitalebibliotek/ddb-react/releases/download/latest/dist.zip
 libraries[ddb-react][directory_name] = "ddb-react"
 libraries[ddb-react][destination] = "libraries"
+
+; CoverService client.
+libraries[ddb-cover-service-php-client][download][type] = "get"
+libraries[ddb-cover-service-php-client][download][url] = https://github.com/danskernesdigitalebibliotek/ddb-cover-service-php-client/archive/1.0.0.tar.gz
+libraries[ddb-cover-service-php-client][directory_name] = "ddb-cover-service-php-client"
+
+; CoverService upload client.
+libraries[ddb-cover-service-upload-php-client][download][type] = "get"
+libraries[ddb-cover-service-upload-php-client][download][url] = https://github.com/danskernesdigitalebibliotek/ddb-cover-service-upload-php-client/archive/1.0.1.tar.gz
+libraries[ddb-cover-service-upload-php-client][directory_name] = "ddb-cover-service-upload-php-client"
+libraries[ddb-cover-service-upload-php-client][destination] = "libraries"
+
+; Libraries used by CoverService upload.
+libraries[tui-color-picker][download][type] = "get"
+libraries[tui-color-picker][download][url] = https://github.com/nhn/tui.color-picker/archive/v2.2.6.tar.gz
+libraries[tui-color-picker][directory_name] = "tui-color-picker"
+libraries[tui-color-picker][destination] = "libraries"
+
+; Libraries used by CoverService upload.
+libraries[tui-code-snippet][download][type] = "get"
+libraries[tui-code-snippet][download][url] = https://github.com/nhn/tui.code-snippet/archive/v1.5.2.tar.gz
+libraries[tui-code-snippet][directory_name] = "tui-code-snippet"
+libraries[tui-code-snippet][destination] = "libraries"
+
+; Libraries used by CoverService upload.
+libraries[tui-image-editor][download][type] = "get"
+libraries[tui-image-editor][download][url] = https://github.com/nhn/tui.image-editor/archive/v3.9.0.tar.gz
+libraries[tui-image-editor][directory_name] = "tui-image-editor"
+libraries[tui-image-editor][destination] = "libraries"
+
+; Libraries used by CoverService upload.
+libraries[fabric][download][type] = "get"
+libraries[fabric][download][url] = https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.3.2/fabric.js
+libraries[fabric][directory_name] = "fabric"
+libraries[fabric][destination] = "libraries"
+
+; Library used by Configuration import (older version to be able to run on PHP 5.6).
+libraries[yaml][download][type] = "get"
+libraries[yaml][download][url] = https://github.com/symfony/yaml/archive/v3.4.47.tar.gz
+libraries[yaml][directory_name] = "yaml"
+libraries[yaml][destination] = "libraries"
 
 ; Vejlebib additions
 ; Contrib

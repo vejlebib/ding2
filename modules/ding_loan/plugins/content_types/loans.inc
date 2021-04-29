@@ -63,7 +63,7 @@ function ding_loan_loans_content_type_render($subtype, $conf, $panel_args, $cont
 
     // Store the loans into ding session cache.
     if (module_exists('ding_session_cache')) {
-      ding_session_cache_set('ding_loan', 'list', $cache_key);
+      ding_session_cache_set('ding_loan', $cache_key, $loans);
     }
   }
 
@@ -74,10 +74,14 @@ function ding_loan_loans_content_type_render($subtype, $conf, $panel_args, $cont
   // If we only show either regular or overdue loans, override the standard
   // empty message with a more specific one.
   elseif ($conf['overdue'] && !$conf['regular'])  {
-    $block->content = t('You do not currently have any overdue loans.');
+    $block->content = t('You have no overdue loans. Remember to check <a href="@url">active loans</a>', [
+      '@url' => url('user/me/status-loans'),
+    ]);
   }
   elseif ($conf['regular'] && !$conf['overdue'])  {
-    $block->content = t('You do not currently have any regular loans.');
+    $block->content = t('You have no active loans. Remember to check <a href="@url">overdue loans</a>', [
+      '@url' => url('user/me/status-loans-overdue'),
+    ]);
   }
   else {
     $block->content = t('You do not currently have any loans.');
@@ -443,10 +447,10 @@ function ding_loan_loans_form_submit($form, &$form_state) {
     }
   }
 
-  // If any loans was succesfully renewed; clear session cache and remember
+  // If any loans was successfully renewed; clear session cache and remember
   // these loans throughout the session.
   if ($clear_cache && module_exists('ding_session_cache')) {
-    ding_session_cache_clear('ding_loan', 'list');
+    ding_session_cache_clear('ding_loan', 'list-', TRUE);
     ding_session_cache_set('ding_loan', 'renewed_ids', $renewed_ids);
   }
 }
